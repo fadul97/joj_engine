@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(JojPlatform)
 
-add_library(JojPlatform window_win32.cpp)
+add_library(JojPlatform window_win32.cpp input_win32.cpp)
 
 if(CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET JojPlatform PROPERTY CXX_STANDARD 20)
