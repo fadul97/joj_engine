@@ -1,13 +1,13 @@
 # Joj - Jogue o jogo
 
-## Game Engine para aprender e se divertir
+## Game Engine to learn and have fun
 
-Versão: 0.0.0
+Version: 0.0.0
 
-### Descrição
+### Description
 
-Por enquanto, apenas um simples README.
-Irei adicionando mais informações.
+For now, just a simple README.
+I'll add more information.
 
 ### TODO
 
