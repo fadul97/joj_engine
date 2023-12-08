@@ -12,4 +12,5 @@ endif()
 project("Joj")
 
 # Include sub-projects.
-add_subdirectory("Joj")
+add_subdirectory(joj)
+add_subdirectory(platform)

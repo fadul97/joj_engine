@@ -8,3 +8,7 @@ Versão: 0.0.0
 
 Por enquanto, apenas um simples README.
 Irei adicionando mais informações.
+
+### TODO
+
+[ ] Refactor and configure CMake
