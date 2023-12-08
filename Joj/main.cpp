@@ -13,12 +13,12 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	window->set_title("Joj Engine");
 	window->create();
 	
-	std::string text = { "Hello, Joj Engine!!!" };
+	std::string text = { "Hello, Joj Engine!" };
 	u32 n = text.length();
 	window->print_on_window(text, window->get_xcenter() - n * 2, window->get_ycenter(), RGB(255, 255, 255));
 
 	// Handle messages destined for the application window
-	MSG msg;
+	MSG msg = { 0 };
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
 		TranslateMessage(&msg);

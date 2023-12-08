@@ -49,6 +49,9 @@ namespace JojPlatform
 		void set_on_focus(void(*func)());			// Set function to be executed when regaining focus
 		void set_lost_focus(void(*func)());			// Set function to be executed when losing focus
 
+		// Handle Window events
+		static LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 	private:
 		HDC			hdc;    						// Device context
 		RECT		rect;							// Window client area
@@ -68,9 +71,6 @@ namespace JojPlatform
 
 		static void (*on_focus)();					// Run when window regains focus
 		static void (*lost_focus)();				// Run when window loses focus
-
-		// Handle Window events
-		static LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	};
 
 	// Return window ID
