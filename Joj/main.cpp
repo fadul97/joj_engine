@@ -4,6 +4,7 @@
 #include "Joj.h"
 
 #include "window_win32.h"
+#include "defines.h"
  
 using namespace std;
 
@@ -59,6 +60,8 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
         DispatchMessage(&msg);
     }
 
+    u32 n = 32;
+    print_window_win32(n);
 
     return 0;
 }

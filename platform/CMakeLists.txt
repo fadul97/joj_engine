@@ -1,6 +1,6 @@
-﻿# CMakeList.txt : Top-level CMake project file, do global configuration
-# and include sub-projects here.
-#
+﻿# CMakeList.txt : CMake project for JojPlatform, include source and define
+# project specific logic here.
+
 cmake_minimum_required(VERSION 3.8)
 project(JojPlatform)
 
@@ -13,3 +13,6 @@ endif()
 if(WIN32)
 	target_link_libraries(JojPlatform PRIVATE User32.lib Gdi32.lib)
 endif()
+
+# Include engine folder
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../engine/)

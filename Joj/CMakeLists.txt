@@ -1,6 +1,5 @@
 ﻿# CMakeList.txt : CMake project for Joj, include source and define
 # project specific logic here.
-#
 
 # Add source to this project's executable.
 add_executable(${PROJECT_NAME} "main.cpp" "Joj.h")
@@ -16,6 +15,9 @@ endif()
 
 # Include platform folder
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../platform/)
+
+# Include engine folder
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../engine/)
 
 # Link JojPlatform to Joj
 target_link_libraries(${PROJECT_NAME} PRIVATE JojPlatform)
