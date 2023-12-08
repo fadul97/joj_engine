@@ -40,7 +40,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 
     // Creating a Window Based on the "AppWindow" Class
     hwnd = CreateWindow("AppWindow",	    // Window class
-        "Application",                      // Window title
+        "Joj Engine",                      // Window title
         WS_OVERLAPPEDWINDOW |
         WS_VISIBLE,                       // Window style
         CW_USEDEFAULT,                    // Initial x position

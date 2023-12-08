@@ -11,4 +11,4 @@ Irei adicionando mais informações.
 
 ### TODO
 
-[ ] Refactor and configure CMake
+[x] Refactor and configure CMake
