@@ -11,7 +11,7 @@ I'll add more information.
 
 ### TODO
 
-[x] Refactor and configure CMake
+[ ] Test error function "ThrowIfFailed(...)"
 
 ### Resources
 
