@@ -1,5 +1,7 @@
 #include "window_win32.h"
 
+#if PLATFORM_WINDOWS
+
 #include <iostream>
 
 #define DEBUG
@@ -200,3 +202,5 @@ LRESULT CALLBACK JojPlatform::Win32Window::WinProc(HWND hWnd, UINT msg, WPARAM w
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
+
+#endif	// PLATFORM_WINDOWS

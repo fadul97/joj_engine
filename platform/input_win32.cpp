@@ -1,5 +1,7 @@
 #include "input_win32.h"
 
+#if PLATFORM_WINDOWS
+
 // Static members
 b8 JojPlatform::Win32Input::keys[256] = { 0 };		// Keyboard/Mouse state
 b8 JojPlatform::Win32Input::ctrl[256] = { 0 };		// Key release control
@@ -57,3 +59,5 @@ LRESULT CALLBACK JojPlatform::Win32Input::InputProc(HWND hWnd, UINT msg, WPARAM 
 
 	return CallWindowProc(JojPlatform::Win32Window::WinProc, hWnd, msg, wParam, lParam);
 }
+
+#endif	// PLATFORM_WINDOWS

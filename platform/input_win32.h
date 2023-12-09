@@ -1,6 +1,9 @@
 #pragma once
 
 #include "defines.h"
+
+#if PLATFORM_WINDOWS
+
 #include "window_win32.h"
 
 namespace JojPlatform
@@ -31,3 +34,5 @@ namespace JojPlatform
 	{ return !(keys[vkcode]); }
 
 }   // JojPlatform
+
+#endif	// PLATFORM_WINDOWS

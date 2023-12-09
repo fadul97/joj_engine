@@ -2,6 +2,8 @@
 
 #include "defines.h"
 
+#ifdef PLATFORM_WINDOWS
+
 #include <windows.h>	// Include Win32 functions
 #include <windowsx.h>	// Include Win32 extensions
 #include <string>
@@ -142,3 +144,5 @@ namespace JojPlatform
 	{ lost_focus = func; }
 
 }	// namespace JojPlatform
+
+#endif	// PLATFORM_WINDOWS
