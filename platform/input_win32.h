@@ -15,21 +15,21 @@ namespace JojPlatform
 		~Win32Input();
 
 		b8 is_key_down(u32 vkcode);		// Checks if key is pressed
-		b8 is_key_up(u32 vkcode);			// Checks if key is released
-		b8 is_key_press(u32 vkcode);		// Register press only after release		
+		b8 is_key_up(u32 vkcode);		// Checks if key is released
+		b8 is_key_press(u32 vkcode);	// Register press only after release		
 
 		static LRESULT CALLBACK InputProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	
 	private:
-		static b8	keys[256];			// estado das teclas do teclado/mouse
-		static b8 ctrl[256];			// controle da liberação de teclas
+		static b8 keys[256];			// Keyboard/Mouse key states
+		static b8 ctrl[256];			// Keyrelease control
 	};
 
-	// retorna verdadeiro se a tecla está pressionada
+	// Returns true if key is pressed
 	inline b8 Win32Input::is_key_down(u32 vkcode)
 	{ return keys[vkcode]; }
 
-	// retorna verdadeiro se a tecla está liberada
+	//  Returns true if key is released
 	inline b8 Win32Input::is_key_up(u32 vkcode)
 	{ return !(keys[vkcode]); }
 
