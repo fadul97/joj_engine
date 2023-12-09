@@ -27,8 +27,9 @@ namespace JojEngine
 		 * to be redrawn.
 		 */
 
-		virtual void draw(){}		// Draw game (every cicle)
-		virtual void display(){}	// Display game (call manually when screen needs to be redrawn)
+		virtual void draw(){}					// Draw game (every cicle)
+		virtual void display(){}				// Display game (call manually when screen needs to be redrawn)
+		virtual void on_pause() { Sleep(10); }	// On pause
 
 	protected:
 		static JojPlatform::Win32Window* window;

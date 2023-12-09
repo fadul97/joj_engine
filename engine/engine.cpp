@@ -5,18 +5,22 @@
 // Static members
 JojPlatform::Win32Window* JojEngine::Engine::window = nullptr;		// Game window
 JojPlatform::Win32Input* JojEngine::Engine::input = nullptr;		// Input device
+JojGraphics::Dx12Graphics* JojEngine::Engine::graphics;				// Graphics device
 JojEngine::Game* JojEngine::Engine::game = nullptr;				    // Pointer to game
 f32 JojEngine::Engine::frametime = 0.0f;							// Current frametime
 JojPlatform::Win32Timer JojEngine::Engine::timer;					// Time counter
+b8 JojEngine::Engine::paused = false;								// Engine state
 
 JojEngine::Engine::Engine()
 {
 	window = new JojPlatform::Win32Window();
+	graphics = new JojGraphics::Dx12Graphics();
 }
 
 JojEngine::Engine::~Engine()
 {
 	delete game;
+	delete graphics;
 	delete input;
 	delete window;
 }
@@ -31,11 +35,23 @@ i32 JojEngine::Engine::start(JojEngine::Game* game)
 	// ATTENTION: input must be initialized after window creation
 	input = new JojPlatform::Win32Input();
 
+	// inicializa dispositivo gráfico
+	graphics->init(window);
+
 	// Change window procedure to EngineProc
 	SetWindowLongPtr(window->get_id(), GWLP_WNDPROC, (LONG_PTR)EngineProc);
 
-	// return execution result
-	return loop();
+	// Adjust sleep resolution to 1 millisecond
+	timer.time_begin_period();
+
+	// Run main loop
+	i32 exit_code = loop();
+
+	// Return sleep resolution to original value
+	timer.time_end_period();
+
+	// Close engine
+	return exit_code;
 }
 
 i32 JojEngine::Engine::loop()
@@ -60,17 +76,34 @@ i32 JojEngine::Engine::loop()
 		}
 		else
 		{
-			// Calculate frametime
-			frametime = get_frametime();
+			// -----------------------------------------------
+			// Pause/Resume Game
+			// -----------------------------------------------
+			// P key pauses engine
+			if (input->is_key_press('P'))
+			{
+				if (paused)
+					resume();
+				else
+					pause();
+			}
 
-			// Update game
-			game->update();
+			if (!paused)
+			{
+				// Calculate frametime
+				frametime = get_frametime();
 
-			// Game draw
-			game->draw();
+				// Update game
+				game->update();
 
-			// Waits 16 milliseconds or the next interaction with the window
-			//MsgWaitForMultipleObjects(0, NULL, FALSE, 10, QS_ALLINPUT);
+				// Game draw
+				game->draw();
+			}
+			else
+			{
+				// Game paused
+				game->on_pause();
+			}
 		}
 
 	} while (msg.message != WM_QUIT);

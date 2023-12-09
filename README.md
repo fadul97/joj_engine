@@ -11,7 +11,8 @@ I'll add more information.
 
 ### TODO
 
-[ ] Test error function "ThrowIfFailed(...)"
+[x] Test error function "ThrowIfFailed(...)"
+[ ] Remove try/catch and handle errors in a better way
 
 ### Resources
 

@@ -11,7 +11,7 @@ if(CMAKE_VERSION VERSION_GREATER 3.12)
 endif()
 
 if(WIN32)
-	target_link_libraries(JojPlatform PRIVATE User32.lib Gdi32.lib)
+	target_link_libraries(JojPlatform PRIVATE User32.lib Gdi32.lib winmm.lib)
 endif()
 
 # Include engine folder

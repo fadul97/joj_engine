@@ -177,12 +177,12 @@ void JojGraphics::Dx12Graphics::init(JojPlatform::Win32Window* window)
 
 	// Enable D3D12 debug layer
 	ID3D12Debug* debug_controller;
-	//ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debug_controller)));
+	ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debug_controller)));
 	debug_controller->EnableDebugLayer();
 #endif
 
 	// Create object for DirectX graphics infrastructure (DXGI)
-	//ThrowIfFailed(CreateDXGIFactory2(factory_flags, IID_PPV_ARGS(&factory)));
+	ThrowIfFailed(CreateDXGIFactory2(factory_flags, IID_PPV_ARGS(&factory)));
 
 	// Create object for graphics device
 	if FAILED(D3D12CreateDevice(
@@ -192,13 +192,13 @@ void JojGraphics::Dx12Graphics::init(JojPlatform::Win32Window* window)
 	{
 		// Try to create a WARP device
 		IDXGIAdapter* warp;
-		//ThrowIfFailed(factory->EnumWarpAdapter(IID_PPV_ARGS(&warp)));
+		ThrowIfFailed(factory->EnumWarpAdapter(IID_PPV_ARGS(&warp)));
 
 		// Create D3D object using WARP device
-		//ThrowIfFailed(D3D12CreateDevice(
-			//warp,                               // WARP video adapter (software)
-			//D3D_FEATURE_LEVEL_11_0,             // Minimum version of Direct3D features
-			//IID_PPV_ARGS(&device)));            // Save the created D3D device
+		ThrowIfFailed(D3D12CreateDevice(
+			warp,                               // WARP video adapter (software)
+			D3D_FEATURE_LEVEL_11_0,             // Minimum version of Direct3D features
+			IID_PPV_ARGS(&device)));            // Save the created D3D device
 
 		// Release object no longer needed
 		warp->Release();
@@ -221,27 +221,26 @@ void JojGraphics::Dx12Graphics::init(JojPlatform::Win32Window* window)
 	D3D12_COMMAND_QUEUE_DESC queue_desc = {};
 	queue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queue_desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	//ThrowIfFailed(device->CreateCommandQueue(&queue_desc, IID_PPV_ARGS(&command_queue)));
+	ThrowIfFailed(device->CreateCommandQueue(&queue_desc, IID_PPV_ARGS(&command_queue)));
 
 	// Create command allocator
-	//ThrowIfFailed(device->CreateCommandAllocator(
-		//D3D12_COMMAND_LIST_TYPE_DIRECT,
-		//IID_PPV_ARGS(&command_list_alloc)));
+	ThrowIfFailed(device->CreateCommandAllocator(
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		IID_PPV_ARGS(&command_list_alloc)));
 
 	// Create command list
-	//ThrowIfFailed(device->CreateCommandList(
-		//0,										// Using only one GPU
-		//D3D12_COMMAND_LIST_TYPE_DIRECT,			// Does not inherit state on the GPU
-		//command_list_alloc,						// Command allocator
-		//nullptr,								// Pipeline initial state
-		//IID_PPV_ARGS(&command_list)));			// Command list object
+	ThrowIfFailed(device->CreateCommandList(
+		0,										// Using only one GPU
+		D3D12_COMMAND_LIST_TYPE_DIRECT,			// Does not inherit state on the GPU
+		command_list_alloc,						// Command allocator
+		nullptr,								// Pipeline initial state
+		IID_PPV_ARGS(&command_list)));			// Command list object
 
 	// ---------------------------------------------------
 	// Create fence to synchronize CPU/GPU
 	// ---------------------------------------------------
 
-	//ThrowIfFailed(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
-
+	ThrowIfFailed(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
 }
 
 b8 JojGraphics::Dx12Graphics::wait_command_queue()

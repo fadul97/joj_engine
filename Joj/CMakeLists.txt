@@ -4,7 +4,7 @@
 # Add source to this project's executable.
 add_executable(${PROJECT_NAME} main.cpp Joj.h my_game.cpp)
 
-# If Window platform, setup entry point
+# If Windows platform, setup entry point
 if(WIN32)
 	target_link_options(${PROJECT_NAME} PRIVATE "/SUBSYSTEM:WINDOWS")
 endif()
@@ -19,10 +19,16 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../platform/)
 # Include engine folder
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../engine/)
 
+# Include graphics folder
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../graphics/)
+
 # Link JojPlatform to Joj
 target_link_libraries(${PROJECT_NAME} PRIVATE JojPlatform)
 
 # Link JojEngine to Joj
 target_link_libraries(${PROJECT_NAME} PRIVATE JojEngine)
+
+# Link JojGraphics to Joj
+target_link_libraries(${PROJECT_NAME} PRIVATE JojGraphics)
 
 # TODO: Add tests and install targets if needed.
