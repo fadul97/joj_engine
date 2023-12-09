@@ -22,4 +22,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../engine/)
 # Link JojPlatform to Joj
 target_link_libraries(${PROJECT_NAME} PRIVATE JojPlatform)
 
+# Link JojEngine to Joj
+target_link_libraries(${PROJECT_NAME} PRIVATE JojEngine)
+
 # TODO: Add tests and install targets if needed.
