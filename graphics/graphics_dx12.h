@@ -10,11 +10,11 @@
 
 namespace JojGraphics
 {
-	class Dx12Graphics
+	class DX12Graphics
 	{
 	public:
-		Dx12Graphics();
-		~Dx12Graphics();
+		DX12Graphics();
+		~DX12Graphics();
 
 		void init(JojPlatform::Win32Window* window);	// Initialize Direct3D
 

@@ -21,7 +21,7 @@ namespace JojEngine
 
 		static JojPlatform::Win32Window* window;
 		static JojPlatform::Win32Input* input;
-		static JojGraphics::Dx12Graphics* graphics;	// Graphics device
+		static JojGraphics::DX12Graphics* graphics;	// Graphics device
 		static JojEngine::Game* game;				// Game to be executed
 		static f32 frametime;						// Current frametime
 

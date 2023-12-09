@@ -5,7 +5,7 @@
 #include "error.h"
 #include <sstream>
 
-JojGraphics::Dx12Graphics::Dx12Graphics()
+JojGraphics::DX12Graphics::DX12Graphics()
 {
 	factory = nullptr;
 	device = nullptr;
@@ -16,7 +16,7 @@ JojGraphics::Dx12Graphics::Dx12Graphics()
 	current_fence = 0;
 }
 
-JojGraphics::Dx12Graphics::~Dx12Graphics()
+JojGraphics::DX12Graphics::~DX12Graphics()
 {
 	// Wait for GPU to finish queued commands
 	wait_command_queue();
@@ -46,7 +46,7 @@ JojGraphics::Dx12Graphics::~Dx12Graphics()
 		factory->Release();
 }
 
-void JojGraphics::Dx12Graphics::log_hardware_info()
+void JojGraphics::DX12Graphics::log_hardware_info()
 {
 	const u32 bytes_in_megabyte = 1048576U;
 
@@ -163,7 +163,7 @@ void JojGraphics::Dx12Graphics::log_hardware_info()
 	if (output) output->Release();
 }
 
-void JojGraphics::Dx12Graphics::init(JojPlatform::Win32Window* window)
+void JojGraphics::DX12Graphics::init(JojPlatform::Win32Window* window)
 {
 	// ---------------------------------------------------
 	// Creates DXGI infrastructure and D3D device
@@ -243,7 +243,7 @@ void JojGraphics::Dx12Graphics::init(JojPlatform::Win32Window* window)
 	ThrowIfFailed(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
 }
 
-b8 JojGraphics::Dx12Graphics::wait_command_queue()
+b8 JojGraphics::DX12Graphics::wait_command_queue()
 {
 	// Advance fence value to mark new commands from that point
 	current_fence++;
@@ -273,7 +273,7 @@ b8 JojGraphics::Dx12Graphics::wait_command_queue()
 	return true;
 }
 
-void JojGraphics::Dx12Graphics::submit_commands()
+void JojGraphics::DX12Graphics::submit_commands()
 {
 	// submits the commands recorded in the list for execution on the GPU
 	command_list->Close();

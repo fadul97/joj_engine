@@ -5,7 +5,7 @@
 // Static members
 JojPlatform::Win32Window* JojEngine::Engine::window = nullptr;		// Game window
 JojPlatform::Win32Input* JojEngine::Engine::input = nullptr;		// Input device
-JojGraphics::Dx12Graphics* JojEngine::Engine::graphics;				// Graphics device
+JojGraphics::DX12Graphics* JojEngine::Engine::graphics;				// Graphics device
 JojEngine::Game* JojEngine::Engine::game = nullptr;				    // Pointer to game
 f32 JojEngine::Engine::frametime = 0.0f;							// Current frametime
 JojPlatform::Win32Timer JojEngine::Engine::timer;					// Time counter
@@ -14,7 +14,7 @@ b8 JojEngine::Engine::paused = false;								// Engine state
 JojEngine::Engine::Engine()
 {
 	window = new JojPlatform::Win32Window();
-	graphics = new JojGraphics::Dx12Graphics();
+	graphics = new JojGraphics::DX12Graphics();
 }
 
 JojEngine::Engine::~Engine()
