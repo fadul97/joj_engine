@@ -15,6 +15,10 @@ JojPlatform::Win32Timer::Win32Timer()
 	stopped = false;
 }
 
+JojPlatform::Win32Timer::~Win32Timer()
+{
+}
+
 void JojPlatform::Win32Timer::start()
 {
 	if (stopped)
