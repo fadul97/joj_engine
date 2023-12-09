@@ -1,12 +1,16 @@
 #pragma once
 
-namespace JojEngine
-{
+#include <sstream>
+
 #ifndef ThrowIfFailed
-#define ThrowIfFailed(x)                                               \
-{                                                                      \
-    HRESULT hr = (x);                                                  \
-    if(FAILED(hr)) { throw Error(hr, __func__, __FILE__, __LINE__); }  \
-}
+#define ThrowIfFailed(x)                                                \
+{                                                                       \
+    HRESULT hr = (x);                                                   \
+    if(FAILED(hr)) {                                                    \
+        std::stringstream text;                                         \
+         text << __func__                                               \
+            << " failed in " << __FILE__                                \
+            << ", line " << std::to_string(__LINE__)                    \
+            << ":\n";                                                   \
+}                                                                       
 #endif
-}
