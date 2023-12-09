@@ -2,7 +2,7 @@
 # project specific logic here.
 
 # Add source to this project's executable.
-add_executable(${PROJECT_NAME} "main.cpp" "Joj.h")
+add_executable(${PROJECT_NAME} main.cpp Joj.h my_game.cpp)
 
 # If Window platform, setup entry point
 if(WIN32)
