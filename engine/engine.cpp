@@ -1,9 +1,13 @@
 #include "engine.h"
 
+#include <sstream>
+
 // Static members
 JojPlatform::Win32Window* JojEngine::Engine::window = nullptr;		// Game window
 JojPlatform::Win32Input* JojEngine::Engine::input = nullptr;		// Input device
 JojEngine::Game* JojEngine::Engine::game = nullptr;				    // Pointer to game
+f32 JojEngine::Engine::frametime = 0.0f;							// Current frametime
+JojPlatform::Win32Timer JojEngine::Engine::timer;					// Time counter
 
 JojEngine::Engine::Engine()
 {
@@ -17,7 +21,7 @@ JojEngine::Engine::~Engine()
 	delete window;
 }
 
-u32 JojEngine::Engine::start(JojEngine::Game* game)
+i32 JojEngine::Engine::start(JojEngine::Game* game)
 {
 	this->game = game;
 
@@ -34,12 +38,15 @@ u32 JojEngine::Engine::start(JojEngine::Game* game)
 	return loop();
 }
 
-u32 JojEngine::Engine::loop()
+i32 JojEngine::Engine::loop()
 {
+	// Start time counter
+	timer.start();
+
 	// Windows messages
 	MSG msg = { 0 };
 
-	// inicialização da aplicação
+	// Initialize game
 	game->init();
 
 	// Main loop
@@ -53,6 +60,9 @@ u32 JojEngine::Engine::loop()
 		}
 		else
 		{
+			// Calculate frametime
+			frametime = get_frametime();
+
 			// Update game
 			game->update();
 
@@ -60,7 +70,7 @@ u32 JojEngine::Engine::loop()
 			game->draw();
 
 			// Waits 16 milliseconds or the next interaction with the window
-			MsgWaitForMultipleObjects(0, NULL, FALSE, 10, QS_ALLINPUT);
+			//MsgWaitForMultipleObjects(0, NULL, FALSE, 10, QS_ALLINPUT);
 		}
 
 	} while (msg.message != WM_QUIT);
@@ -69,8 +79,48 @@ u32 JojEngine::Engine::loop()
 	game->shutdown();
 
 	// Close game
-	return u32(msg.wParam);
+	return i32(msg.wParam);
 }
+
+f32 JojEngine::Engine::get_frametime()
+{
+
+#ifdef _DEBUG
+	static f32 total_time = 0.0f;	// Total time elapsed
+	static u32  frame_count = 0;	// Elapsed frame counter
+#endif
+
+	// Current frame time
+	frametime = timer.reset();
+
+#ifdef _DEBUG
+	// Accumulated frametime
+	total_time += frametime;
+
+	// Increment frame counter
+	frame_count++;
+
+	// Updates FPS indicator in the window every 1000ms (1 second)
+	if (total_time >= 1.0f)
+	{
+		std::stringstream text;		// Text flow for messages
+		text << std::fixed;			// Always show the fractional part
+		text.precision(3);			// three numbers after comma
+
+		text << window->get_title().c_str() << "    "
+			<< "FPS: " << frame_count << "    "
+			<< "Frametime: " << frametime * 1000 << " (ms)";
+
+		SetWindowText(window->get_id(), text.str().c_str());
+
+		frame_count = 0;
+		total_time -= 1.0f;
+	}
+#endif
+
+	return frametime;
+}
+
 
 LRESULT CALLBACK JojEngine::Engine::EngineProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
