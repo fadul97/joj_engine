@@ -17,15 +17,20 @@ namespace JojGraphics
 		~DX11Graphics();
 
 		void init(JojPlatform::Win32Window* window);	// Initialize Direct3D
-		void set_vsync(b8 state);							// Vertical sync on/off
+		void set_vsync(b8 state);						// Vertical sync on/off
 		void clear();                                   // Clear backbuffer with background color
 		void present();                                 // Present drawing on screen
 
+		ID3D11Device* get_device();						// Return graphics device
+		ID3D11DeviceContext* get_context();				// Return graphics device context
+		D3D11_VIEWPORT get_viewport();					// Return viewport
+
 	private:
 		ID3D11Device* device;							// Graphics device
-		IDXGIFactory6* factory;							// Main DXGI interface
 		ID3D11DeviceContext* context;                   // Graphics device context
 		D3D11_VIEWPORT viewport;						// Viewport
+
+		IDXGIFactory6* factory;							// Main DXGI interface
 
 		IDXGISwapChain* swap_chain;						// Swap chain             
 		ID3D11RenderTargetView* render_target_view;     // Backbuffer render target view
@@ -38,6 +43,18 @@ namespace JojGraphics
 		b8 wait_command_queue();	// Wait for command queue execution
 		void submit_commands();		// Submit pending commands for execution
 	};
+
+	// Return graphics device
+	inline ID3D11Device* DX11Graphics::get_device()
+	{ return device; }
+
+	// Return graphics device context
+	inline ID3D11DeviceContext* DX11Graphics::get_context()
+	{ return context; }
+
+	// Return viewport
+	inline D3D11_VIEWPORT DX11Graphics::get_viewport()
+	{ return viewport; }
 
 	// Vertical sync on/off
 	inline void DX11Graphics::set_vsync(b8 state)
