@@ -4,6 +4,8 @@
 #include "my_game.h"
 #include "error.h"
 
+#if PLATFORM_WINDOWS
+
 int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 {
 	try
@@ -12,7 +14,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		auto engine = new JojEngine::Engine();
 		engine->window->set_mode(JojPlatform::WINDOWED);
 		engine->window->set_size(1024, 600);
-		engine->window->set_color(0, 122, 204);
+		engine->window->set_color(255, 55, 255);
 		engine->window->set_title("MyGame window");
 
 		// Game pauses/resumes when losing/gaining focus
@@ -34,3 +36,5 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		return 0;
 	}
 }
+
+#endif	// PLATFORM_WINDOWS

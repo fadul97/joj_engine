@@ -247,7 +247,7 @@ void JojGraphics::DX11Graphics::init(JojPlatform::Win32Window* window)
 	// Viewport / Rasterizer
 	// -------------------------------
 
-	// configura uma viewport
+	// Setup viewport
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
 	viewport.Width = f32(window->get_width());
@@ -255,7 +255,7 @@ void JojGraphics::DX11Graphics::init(JojPlatform::Win32Window* window)
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 
-	// liga a viewport ao estágio de rasterização
+	// Bind viewport to the Raster Stage
 	context->RSSetViewports(1, &viewport);
 
 	// ---------------------------------------------
