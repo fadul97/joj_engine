@@ -23,5 +23,6 @@ project(${PROJECT_NAME} VERSION ${PROJECT_VERSION})
 # Include sub-projects
 add_subdirectory(platform)
 add_subdirectory(graphics)
+add_subdirectory(renderer)
 add_subdirectory(engine)
 add_subdirectory(joj)

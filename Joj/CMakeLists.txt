@@ -22,6 +22,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../engine/)
 # Include graphics folder
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../graphics/)
 
+# Include renderer folder
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../renderer/)
+
 # Link JojPlatform to Joj
 target_link_libraries(${PROJECT_NAME} PRIVATE JojPlatform)
 
@@ -30,5 +33,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE JojEngine)
 
 # Link JojGraphics to Joj
 target_link_libraries(${PROJECT_NAME} PRIVATE JojGraphics)
+
+# Link JojRenderer to Joj
+target_link_libraries(${PROJECT_NAME} PRIVATE JojRenderer)
 
 # TODO: Add tests and install targets if needed.
