@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(JojGraphics)
 
-add_library(JojGraphics graphics_dx12.cpp)
+add_library(JojGraphics graphics_dx12.cpp graphics_dx11.cpp)
 
 if(CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET JojGraphics PROPERTY CXX_STANDARD 20)

@@ -7,12 +7,15 @@
 #include "input_win32.h"
 #include "timer_win32.h"
 #include "graphics_dx12.h"
+#include "graphics_dx11.h"
 #endif	// PLATFORM_WINDOWS
 
 #include "game.h"
 
 namespace JojEngine
 {
+	enum class Renderer { DX11, DX12 };
+
 	class Engine
 	{
 	public:
@@ -21,14 +24,15 @@ namespace JojEngine
 
 		static JojPlatform::Win32Window* window;
 		static JojPlatform::Win32Input* input;
-		static JojGraphics::DX12Graphics* graphics;	// Graphics device
-		static JojEngine::Game* game;				// Game to be executed
-		static f32 frametime;						// Current frametime
+		static JojGraphics::DX12Graphics* dx12_graphics;		// DX12 Graphics device
+		static JojGraphics::DX11Graphics* dx11_graphics;		// DX11 Graphics device
+		static JojEngine::Game* game;							// Game to be executed
+		static f32 frametime;									// Current frametime
 
-		i32 start(JojEngine::Game* game);			// Initializes game execution
+		i32 start(JojEngine::Game* game, Renderer renderer);	// Initializes game execution
 
-		static void pause();						// Pause engine
-		static void resume();						// Resume engine
+		static void pause();	// Pause engine
+		static void resume();	// Resume engine
 
 		// Handle Windows events
 		static LRESULT CALLBACK EngineProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

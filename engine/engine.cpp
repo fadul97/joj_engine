@@ -3,29 +3,37 @@
 #include <sstream>
 
 // Static members
-JojPlatform::Win32Window* JojEngine::Engine::window = nullptr;		// Game window
-JojPlatform::Win32Input* JojEngine::Engine::input = nullptr;		// Input device
-JojGraphics::DX12Graphics* JojEngine::Engine::graphics;				// Graphics device
-JojEngine::Game* JojEngine::Engine::game = nullptr;				    // Pointer to game
-f32 JojEngine::Engine::frametime = 0.0f;							// Current frametime
-JojPlatform::Win32Timer JojEngine::Engine::timer;					// Time counter
-b8 JojEngine::Engine::paused = false;								// Engine state
+JojPlatform::Win32Window* JojEngine::Engine::window = nullptr;				// Game window
+JojPlatform::Win32Input* JojEngine::Engine::input = nullptr;				// Input device
+JojGraphics::DX12Graphics* JojEngine::Engine::dx12_graphics = nullptr;		// DX12 Graphics device
+JojGraphics::DX11Graphics* JojEngine::Engine::dx11_graphics = nullptr;		// DX11 Graphics device
+JojEngine::Game* JojEngine::Engine::game = nullptr;							// Pointer to game
+f32 JojEngine::Engine::frametime = 0.0f;									// Current frametime
+JojPlatform::Win32Timer JojEngine::Engine::timer;							// Time counter
+b8 JojEngine::Engine::paused = false;										// Engine state
 
 JojEngine::Engine::Engine()
 {
 	window = new JojPlatform::Win32Window();
-	graphics = new JojGraphics::DX12Graphics();
+	//dx12_graphics = new JojGraphics::DX12Graphics();
+	//dx11_graphics = new JojGraphics::DX11Graphics();
 }
 
 JojEngine::Engine::~Engine()
 {
 	delete game;
-	delete graphics;
+
+	if (dx11_graphics)
+		delete dx11_graphics;
+	
+	if (dx12_graphics)
+		delete dx12_graphics;
+	
 	delete input;
 	delete window;
 }
 
-i32 JojEngine::Engine::start(JojEngine::Game* game)
+i32 JojEngine::Engine::start(JojEngine::Game* game, Renderer renderer)
 {
 	this->game = game;
 
@@ -35,8 +43,17 @@ i32 JojEngine::Engine::start(JojEngine::Game* game)
 	// ATTENTION: input must be initialized after window creation
 	input = new JojPlatform::Win32Input();
 
-	// inicializa dispositivo gráfico
-	graphics->init(window);
+	// Initialize graphics device
+	if (renderer == Renderer::DX11)
+	{
+		dx11_graphics = new JojGraphics::DX11Graphics();
+		dx11_graphics->init(window);
+	}
+	else
+	{
+		dx12_graphics = new JojGraphics::DX12Graphics();
+		dx12_graphics->init(window);
+	}
 
 	// Change window procedure to EngineProc
 	SetWindowLongPtr(window->get_id(), GWLP_WNDPROC, (LONG_PTR)EngineProc);
