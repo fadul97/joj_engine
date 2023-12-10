@@ -1,5 +1,7 @@
 #include "graphics_dx11.h"
 
+#if PLATFORM_WINDOWS
+
 #include <sstream>
 #include "error.h"
 
@@ -287,3 +289,5 @@ void JojGraphics::DX11Graphics::init(JojPlatform::Win32Window* window)
 	dxgi_factory->Release();
 	backbuffer->Release();
 }
+
+#endif	// PLATFORM_WINDOWS
