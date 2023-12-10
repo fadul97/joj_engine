@@ -25,6 +25,9 @@ namespace JojGraphics
 		ID3D11DeviceContext* get_context();				// Return graphics device context
 		D3D11_VIEWPORT get_viewport();					// Return viewport
 
+		IDXGISwapChain* get_swap_chain();					// Return swap chain    
+		ID3D11RenderTargetView* get_render_target_view();	// Return backbuffer render target view
+
 	private:
 		ID3D11Device* device;							// Graphics device
 		ID3D11DeviceContext* context;                   // Graphics device context
@@ -55,6 +58,14 @@ namespace JojGraphics
 	// Return viewport
 	inline D3D11_VIEWPORT DX11Graphics::get_viewport()
 	{ return viewport; }
+
+	// Return swap chain 
+	inline IDXGISwapChain* DX11Graphics::get_swap_chain()
+	{ return swap_chain; }
+
+	// Return backbuffer render target view
+	inline ID3D11RenderTargetView* DX11Graphics::get_render_target_view()
+	{ return render_target_view; }
 
 	// Vertical sync on/off
 	inline void DX11Graphics::set_vsync(b8 state)
