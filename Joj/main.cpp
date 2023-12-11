@@ -4,8 +4,6 @@
 #include "my_game.h"
 #include "error.h"
 
-#include "renderer_dx11.h"
-
 #if PLATFORM_WINDOWS
 
 int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
@@ -28,8 +26,6 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 
 		// Cleanup
 		delete engine;
-
-		print_dx11renderer();
 
 		// Exit program
 		return exit_code;
