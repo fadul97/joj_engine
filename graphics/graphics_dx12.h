@@ -18,6 +18,10 @@ namespace JojGraphics
 
 		void init(JojPlatform::Win32Window* window);	// Initialize Direct3D
 
+		void draw();									// Draw
+		void present();									// Present
+		void clear(ID3D12PipelineState* pso);			// Clear backbuffer for next frame
+
 		// Configuration get methods
 		u32 get_backbuffer_count();						// Return number of buffers on the swap chain (double, triple, etc.)
 		b8 get_vsync();									// Return vertical sync 

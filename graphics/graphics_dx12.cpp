@@ -458,6 +458,67 @@ void JojGraphics::DX12Graphics::init(JojPlatform::Win32Window* window)
 	bg_color[3] = 1.0f;							// Alpha (1 = solid)
 }
 
+void JojGraphics::DX12Graphics::draw()
+{
+
+}
+
+void JojGraphics::DX12Graphics::present()
+{
+	// indica que o backbuffer será usado para apresentação
+	D3D12_RESOURCE_BARRIER barrier = {};
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier.Transition.pResource = render_targets[backbuffer_index];
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	command_list->ResourceBarrier(1, &barrier);
+
+	// submete a lista de comandos para execução na GPU
+	submit_commands();
+
+	// Show frame and swap front/back buffers
+	swapchain->Present(vsync, 0);
+	backbuffer_index = (backbuffer_index + 1) % backbuffer_count;
+}
+
+void JojGraphics::DX12Graphics::clear(ID3D12PipelineState* pso)
+{
+	/* Reuses the memory associated with the command list
+	   The list of commands should have finished running on the GPU */
+	command_list_alloc->Reset();
+
+	/* A list of commands can be reinitialized after added to
+	 GPU command queue (via ExecuteCommandList) */
+	command_list->Reset(command_list_alloc, pso);
+
+	// TODO: comment specifications on barrier
+	// Indicate that the backbuffer will be used as a render target
+	D3D12_RESOURCE_BARRIER barrier = {};
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier.Transition.pResource = render_targets[backbuffer_index];
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	command_list->ResourceBarrier(1, &barrier);
+
+	// Adjust viewport and clipping rectangles
+	command_list->RSSetViewports(1, &viewport);
+	command_list->RSSetScissorRects(1, &scissor_rect);
+
+	// Clear backbuffer and depth/stencil buffer
+	D3D12_CPU_DESCRIPTOR_HANDLE ds_handle = depth_stencil_heap->GetCPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE rt_handle = render_target_heap->GetCPUDescriptorHandleForHeapStart();
+	rt_handle.ptr += SIZE_T(backbuffer_index) * SIZE_T(rt_descriptor_size);
+	command_list->ClearRenderTargetView(rt_handle, bg_color, 0, nullptr);
+	command_list->ClearDepthStencilView(ds_handle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
+	// Specify which buffers will be used in rendering
+	command_list->OMSetRenderTargets(1, &rt_handle, true, &ds_handle);
+}
+
 b8 JojGraphics::DX12Graphics::wait_command_queue()
 {
 	// Advance fence value to mark new commands from that point
