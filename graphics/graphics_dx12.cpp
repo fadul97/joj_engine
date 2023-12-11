@@ -9,8 +9,8 @@ JojGraphics::DX12Graphics::DX12Graphics()
 {
 	// Configuration
 	backbuffer_count = 2;	// Double buffering
-	antialiasing = 0;		// No antialising
-	quality = 1;			// Default quality
+	antialiasing = 1;		// No antialising
+	quality = 0;			// Default quality
 	vsync = false;			// No vertical sync
 	
 	// Background color
@@ -33,10 +33,21 @@ JojGraphics::DX12Graphics::DX12Graphics()
 	rt_descriptor_size = 0;
 	ZeroMemory(&viewport, sizeof(viewport));
 	ZeroMemory(&scissor_rect, sizeof(scissor_rect));
+
+	command_queue = nullptr;
+	command_list = nullptr;
+	command_list_alloc = nullptr;
+
+	// CPU/GPU Synchronization
+	fence = nullptr;
+	current_fence = 0;
 }
 
 JojGraphics::DX12Graphics::~DX12Graphics()
 {
+	// Wait for GPU to finish queued commands
+	wait_command_queue();
+
 	// Release depth stencil buffer
 	if (depth_stencil)
 		depth_stencil->Release();
@@ -51,6 +62,10 @@ JojGraphics::DX12Graphics::~DX12Graphics()
 		}
 		delete[] render_targets;
 	}
+
+	// Release fence
+	if (fence)
+		fence->Release();
 
 	// Release depth stencil heap
 	if (depth_stencil_heap)
@@ -67,6 +82,18 @@ JojGraphics::DX12Graphics::~DX12Graphics()
 		swapchain->SetFullscreenState(false, NULL);
 		swapchain->Release();
 	}
+
+	// Release command list
+	if (command_list)
+		command_list->Release();
+
+	// Release command allocator
+	if (command_list_alloc)
+		command_list_alloc->Release();
+
+	// Release command queue
+	if (command_queue)
+		command_queue->Release();
 
 	// Release graphics device
 	if (device)
@@ -243,6 +270,233 @@ void JojGraphics::DX12Graphics::init(JojPlatform::Win32Window* window)
 #ifdef _DEBUG
 	log_hardware_info();
 #endif 
+
+	// ---------------------------------------------------
+	// Create queue, list and command allocator
+	// ---------------------------------------------------
+
+	// Create GPU command queue
+	D3D12_COMMAND_QUEUE_DESC queue_desc = {};
+	queue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+	queue_desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+	ThrowIfFailed(device->CreateCommandQueue(&queue_desc, IID_PPV_ARGS(&command_queue)));
+
+	// Create command allocator
+	ThrowIfFailed(device->CreateCommandAllocator(
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		IID_PPV_ARGS(&command_list_alloc)));
+
+	// Create command list
+	ThrowIfFailed(device->CreateCommandList(
+		0,										// Using only one GPU
+		D3D12_COMMAND_LIST_TYPE_DIRECT,			// Does not inherit state on the GPU
+		command_list_alloc,						// Command allocator
+		nullptr,								// Pipeline initial state
+		IID_PPV_ARGS(&command_list)));			// Command list object
+
+	// ---------------------------------------------------
+	// Create fence to synchronize CPU/GPU
+	// ---------------------------------------------------
+
+	ThrowIfFailed(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
+
+	// ---------------------------------------------------
+	// Swap Chain
+	// ---------------------------------------------------
+
+	// TODO: comment specifications on swapchain_desc
+	// Specify swap chain
+	DXGI_SWAP_CHAIN_DESC1 swapchain_desc = {};
+	swapchain_desc.Width = window->get_width();
+	swapchain_desc.Height = window->get_height();
+	swapchain_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	swapchain_desc.SampleDesc.Count = antialiasing;
+	swapchain_desc.SampleDesc.Quality = quality;
+	swapchain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapchain_desc.BufferCount = backbuffer_count;
+	swapchain_desc.Scaling = DXGI_SCALING_STRETCH;
+	swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	swapchain_desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+
+	// Create swap chain
+	ThrowIfFailed(factory->CreateSwapChainForHwnd(
+		command_queue,                          // GPU Command Queue
+		window->get_id(),                       // Window ID
+		&swapchain_desc,                        // Swap chain descriptor
+		nullptr,                                // Fullscreen Swap Chain
+		nullptr,                                // Restrict output screen
+		&swapchain));                           // Swap chain object
+
+	// ---------------------------------------------------
+	// Render Target Views (and associated heaps)
+	// ---------------------------------------------------
+
+	// TODO: comment specifications on render_target_heap_desc
+	// Specify heap for Render Target (RT) descriptor
+	D3D12_DESCRIPTOR_HEAP_DESC render_target_heap_desc = {};
+	render_target_heap_desc.NumDescriptors = backbuffer_count;
+	render_target_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+	render_target_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+
+	// Create heap for render target descriptor
+	ThrowIfFailed(device->CreateDescriptorHeap(&render_target_heap_desc, IID_PPV_ARGS(&render_target_heap)));
+
+	// Get a Handle to the start of the Heap
+	D3D12_CPU_DESCRIPTOR_HANDLE rt_handle = render_target_heap->GetCPUDescriptorHandleForHeapStart();
+
+	/* Value to increment to access the next descriptor within the Heap
+	   The size of a descriptor depends on the graphics hardware and the type of heap used */
+	rt_descriptor_size = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+	// Create a Render Target descriptor (view) for each buffer (front and back buffers)
+	for (u32 i = 0; i < backbuffer_count; ++i)
+	{
+		swapchain->GetBuffer(i, IID_PPV_ARGS(&render_targets[i]));
+		device->CreateRenderTargetView(render_targets[i], nullptr, rt_handle);
+		rt_handle.ptr += rt_descriptor_size;
+	}
+
+	// ---------------------------------------------------
+	// Depth/Stencil View (e associated heaps)
+	// ---------------------------------------------------
+
+	// TODO: comment specifications on depth_stencil_desc
+	// Specify Depth/Stencil buffer
+	D3D12_RESOURCE_DESC depth_stencil_desc = {};
+	depth_stencil_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	depth_stencil_desc.Alignment = 0;
+	depth_stencil_desc.Width = window->get_width();
+	depth_stencil_desc.Height = window->get_height();
+	depth_stencil_desc.DepthOrArraySize = 1;
+	depth_stencil_desc.MipLevels = 1;
+	depth_stencil_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depth_stencil_desc.SampleDesc.Count = antialiasing;
+	depth_stencil_desc.SampleDesc.Quality = quality;
+	depth_stencil_desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	depth_stencil_desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+	// TODO: comment specifications on ds_heap_properties
+	// Depth/Stencil buffer heap properties
+	D3D12_HEAP_PROPERTIES ds_heap_properties = {};
+	ds_heap_properties.Type = D3D12_HEAP_TYPE_DEFAULT;
+	ds_heap_properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	ds_heap_properties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+	ds_heap_properties.CreationNodeMask = 1;
+	ds_heap_properties.VisibleNodeMask = 1;
+
+	// TODO: comment specifications on optmized_clear
+	// Describe values for clearing the Depth/Stencil buffer
+	D3D12_CLEAR_VALUE optmized_clear = {};
+	optmized_clear.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	optmized_clear.DepthStencil.Depth = 1.0f;
+	optmized_clear.DepthStencil.Stencil = 0;
+
+	// Create buffer Depth/Stencil
+	ThrowIfFailed(device->CreateCommittedResource(
+		&ds_heap_properties,
+		D3D12_HEAP_FLAG_NONE,
+		&depth_stencil_desc,
+		D3D12_RESOURCE_STATE_COMMON,
+		&optmized_clear,
+		IID_PPV_ARGS(&depth_stencil)));
+
+	// TODO: comment specifications on depthstencil_heap_desc
+	// Specify Depth/Stencil heap descriptor
+	D3D12_DESCRIPTOR_HEAP_DESC depth_stencil_heap_desc = {};
+	depth_stencil_heap_desc.NumDescriptors = 1;
+	depth_stencil_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	depth_stencil_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+
+	// Create heap for Depth/Stencil descriptor
+	ThrowIfFailed(device->CreateDescriptorHeap(&depth_stencil_heap_desc, IID_PPV_ARGS(&depth_stencil_heap)));
+
+	// Get a Handle to the start of the Heap
+	D3D12_CPU_DESCRIPTOR_HANDLE ds_handle = depth_stencil_heap->GetCPUDescriptorHandleForHeapStart();
+
+	// creates a Depth/Stencil descriptor (view) for mip level 0
+	device->CreateDepthStencilView(depth_stencil, nullptr, ds_handle);
+
+	// TODO: comment specifications on barrier
+	// Transition from the initial state of the resource to be used as a depth buffer
+	D3D12_RESOURCE_BARRIER barrier = {};
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier.Transition.pResource = depth_stencil;
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	command_list->ResourceBarrier(1, &barrier);
+
+	// Submit command to depth/stencil buffer transition
+	submit_commands();
+
+	// ---------------------------------------------------
+	// Viewport e Scissor Rect
+	// ---------------------------------------------------
+
+	// Setup viewport
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+	viewport.Width = static_cast<float>(window->get_width());
+	viewport.Height = static_cast<float>(window->get_height());
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+
+	// Adjust Scissor Rect
+	scissor_rect = { 0, 0, window->get_width(), window->get_height() };
+
+	// ---------------------------------------------------
+	// Backbuffer background color
+	// ---------------------------------------------------
+
+	// Background color of the backbuffer = window background color
+	COLORREF color = window->get_color();
+
+	bg_color[0] = GetRValue(color) / 255.0f;	// Red
+	bg_color[1] = GetGValue(color) / 255.0f;	// Green
+	bg_color[2] = GetBValue(color) / 255.0f;	// Blue
+	bg_color[3] = 1.0f;							// Alpha (1 = solid)
+}
+
+b8 JojGraphics::DX12Graphics::wait_command_queue()
+{
+	// Advance fence value to mark new commands from that point
+	current_fence++;
+
+	// Add an instruction to the command queue to insert a new fence
+	// GPU will finish all ongoing commands before processing this signal
+	if (FAILED(command_queue->Signal(fence, current_fence)))
+		return false;
+
+	// Wait for GPU to complete all previous commands
+	if (fence->GetCompletedValue() < current_fence)
+	{
+		HANDLE event_handle = CreateEventEx(NULL, NULL, NULL, EVENT_ALL_ACCESS);
+
+		if (event_handle)
+		{
+			// Trigger event when GPU reaches current fence
+			if (FAILED(fence->SetEventOnCompletion(current_fence, event_handle)))
+				return false;
+
+			// Wait until the event is triggered
+			WaitForSingleObject(event_handle, INFINITE);
+			CloseHandle(event_handle);
+		}
+	}
+
+	return true;
+}
+
+void JojGraphics::DX12Graphics::submit_commands()
+{
+	// submits the commands recorded in the list for execution on the GPU
+	command_list->Close();
+	ID3D12CommandList* cmds_lists[] = { command_list };
+	command_queue->ExecuteCommandLists(_countof(cmds_lists), cmds_lists);
+
+	// Wait until GPU completes executing the commands
+	wait_command_queue();
 }
 
 #endif  // PLATFORM_WINDOWS

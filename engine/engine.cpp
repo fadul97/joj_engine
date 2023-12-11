@@ -113,8 +113,12 @@ i32 JojEngine::Engine::loop()
 				// Update game
 				game->update();
 
+				dx12_graphics->clear(nullptr);
+
 				// Game draw
 				game->draw();
+
+				dx12_graphics->present();
 			}
 			else
 			{
