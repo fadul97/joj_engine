@@ -166,7 +166,7 @@ void JojGraphics::DX12Graphics::log_hardware_info()
 void JojGraphics::DX12Graphics::init(JojPlatform::Win32Window* window)
 {
 	// ---------------------------------------------------
-	// Creates DXGI infrastructure and D3D device
+	// Create DXGI infrastructure and D3D device
 	// ---------------------------------------------------
 
 	u32 factory_flags = 0;
