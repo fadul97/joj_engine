@@ -7,6 +7,7 @@
 
 JojRenderer::DX11Renderer::DX11Renderer()
 {
+    window = nullptr;
     device = nullptr;
     context = nullptr;
     render_target_view = nullptr;
@@ -91,8 +92,8 @@ b8 JojRenderer::DX11Renderer::init(JojPlatform::Win32Window* window, JojGraphics
         &vertex_buffer));   // Return the created buffer
 
     // Bind vertex buffer to an input slot of device to pass vertices to pipeline as input
-    u32 stride = sizeof(Vertex);    // size, in bytes, of an element in the corresponding vertex buffer
-    u32 offset = 0;                 /* offset, in bytes, from the start of the vertex buffer to the position in the vertex buffer from which the
+    u32 stride = sizeof(Vertex);    // Size, in bytes, of an element in the corresponding vertex buffer
+    u32 offset = 0;                 /* Offset, in bytes, from the start of the vertex buffer to the position in the vertex buffer from which the
                                        input assembly should start reading the vertex data */
 
     context->IASetVertexBuffers(
@@ -144,6 +145,8 @@ b8 JojRenderer::DX11Renderer::init(JojPlatform::Win32Window* window, JojGraphics
     // --------------------------------
 
     // TODO:
+
+    return true;
 }
 
 void JojRenderer::DX11Renderer::draw()

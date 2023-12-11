@@ -15,7 +15,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		engine->window->set_mode(JojPlatform::WINDOWED);
 		engine->window->set_size(1024, 600);
 		engine->window->set_color(255, 55, 255);
-		engine->window->set_title("MyGame window");
+		engine->window->set_title("Joj Engine");
 
 		// Game pauses/resumes when losing/gaining focus
 		engine->window->set_lost_focus(JojEngine::Engine::pause);
