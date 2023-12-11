@@ -18,23 +18,25 @@ namespace JojGraphics
 
 		void init(JojPlatform::Win32Window* window);	// Initialize Direct3D
 
+		ID3D12Device4* get_device();					// Return graphics device
+		IDXGIFactory6* get_factory();					// Return DXGI interface
+
+
 	private:
 		// Pipeline
 		ID3D12Device4* device;							// Graphics device
 		IDXGIFactory6* factory;							// Main DXGI interface
 
-		ID3D12CommandQueue* command_queue;              // GPU command queue
-		ID3D12GraphicsCommandList* command_list;        // List of commands to submit to GPU
-		ID3D12CommandAllocator* command_list_alloc;     // Memory used by the command list
-
-		// Synchronization                         
-		ID3D12Fence* fence;			// Fence to synchronize CPU/GPU
-		u64 current_fence;			// Fence counter
-
 		void log_hardware_info();	// Show hardware information
-		b8 wait_command_queue();	// Wait for command queue execution
-		void submit_commands();		// Submit pending commands for execution
 	};
+
+	// Return graphics device
+	inline ID3D12Device4* DX12Graphics::get_device()
+	{ return device; }
+
+	// Return DXGI interface
+	inline IDXGIFactory6* DX12Graphics::get_factory()
+	{ return factory; }
 }
 
 #endif  // PLATFORM_WINDOWS
