@@ -13,8 +13,12 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../platform/)
 # Include graphics folder
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../graphics/)
 
+# Include renderer folder
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../renderer/)
+
 # Link JojEngine with JojPlatform and JojGraphics
 target_link_libraries(JojEngine
 	PRIVATE
 	JojPlatform
-	JojGraphics)
+	JojGraphics
+	JojRenderer)
