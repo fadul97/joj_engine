@@ -33,6 +33,7 @@ namespace JojRenderer
 		// Return Graphics Infrastructure
 		ID3D12Device* get_device();		// Return graphics device
 
+		void reset_commands();          // reinicia lista para receber novos comandos
 		void submit_commands();			// Submit pending commands for execution
 
 		// Allocate CPU memory to resource

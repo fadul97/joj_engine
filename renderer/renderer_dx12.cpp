@@ -186,6 +186,12 @@ b8 JojRenderer::DX12Renderer::wait_command_queue()
     return true;
 }
 
+void JojRenderer::DX12Renderer::reset_commands()
+{
+    // Restart list of commands to prepare for the startup commands
+    command_list->Reset(command_list_alloc, nullptr);
+}
+
 void JojRenderer::DX12Renderer::submit_commands()
 {
     // submits the commands recorded in the list for execution on the GPU

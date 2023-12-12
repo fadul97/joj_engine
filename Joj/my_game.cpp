@@ -53,8 +53,8 @@ D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 
 void MyGame::init()
 {
-    // reinicia a lista de comandos para preparar para os comandos de inicialização
-    JojEngine::Engine::dx12_graphics->get_command_list()->Reset(JojEngine::Engine::dx12_graphics->get_command_list_alloc(), nullptr);
+    // Initialize pipeline
+    JojEngine::Engine::renderer->reset_commands();
 
     // --------------------------------
     // Vertex Buffer
