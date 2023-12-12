@@ -38,3 +38,29 @@ target_link_libraries(${PROJECT_NAME} PRIVATE JojGraphics)
 target_link_libraries(${PROJECT_NAME} PRIVATE JojRenderer)
 
 # TODO: Add tests and install targets if needed.
+
+# Build HLSL shaders
+add_custom_target (shaders)
+
+set (HLSL_SHADER_FILES vertex.hlsl pixel.hlsl)
+set_source_files_properties (vertex.hlsl PROPERTIES ShaderType "vs")
+set_source_files_properties (pixel.hlsl PROPERTIES ShaderType "ps")
+set_source_files_properties (${HLSL_SHADER_FILES} PROPERTIES ShaderModel "5_0")
+
+foreach (FILE ${HLSL_SHADER_FILES})
+  get_filename_component (FILE_WE ${FILE} NAME_WE)
+  get_source_file_property (shadertype ${FILE} ShaderType)
+  get_source_file_property (shadermodel ${FILE} ShaderModel)
+  add_custom_command (TARGET shaders
+    COMMAND fxc.exe /nologo /Emain /T${shadertype}_${shadermodel} $<IF:$<CONFIG:DEBUG>,/Od,/O1> /Zi /Fo ${CMAKE_CURRENT_BINARY_DIR}/${FILE_WE}.cso /Fd ${CMAKE_CURRENT_BINARY_DIR}/${FILE_WE}.pdb ${FILE}
+    MAIN_DEPENDENCY ${FILE}
+    COMMENT "HLSL ${FILE}"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    VERBATIM)
+endforeach (FILE)
+
+# Main project
+set (LIBS d3d11 D3DCompiler)
+target_link_libraries (${PROJECT_NAME} PRIVATE ${LIBS})
+
+add_dependencies (${PROJECT_NAME} shaders)

@@ -15,6 +15,7 @@ I'll add more information.
 [ ] Remove try/catch and handle errors in a better way
 [ ] Add comments to DX12Graphics and DX12Renderer
 [ ] Refactor DX12Graphics so it just initializes Direct3D
+[ ] Fix DX12Graphics and DX12Renderer destructors
 
 
 ### Resources
