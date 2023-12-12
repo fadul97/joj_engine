@@ -29,6 +29,8 @@ JojEngine::Engine::~Engine()
 	
 	if (dx12_graphics)
 		delete dx12_graphics;
+
+	delete renderer;
 	
 	delete input;
 	delete window;
