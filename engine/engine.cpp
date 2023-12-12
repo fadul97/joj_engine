@@ -117,12 +117,8 @@ i32 JojEngine::Engine::loop()
 				// Update game
 				game->update();
 
-				renderer->clear(nullptr);
-
 				// Game draw
 				game->draw();
-
-				renderer->present();
 			}
 			else
 			{
