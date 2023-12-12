@@ -16,8 +16,9 @@ public:
 	void build_pipeline_state();
 
 private:
-	static const u32 max_vertices = 10;
+	static const u32 max_vertices = 100;
 	JojRenderer::Vertex vertices[max_vertices];
+	JojRenderer::Vertex v[max_vertices];
 	u32 count;
 	u32 index;
 

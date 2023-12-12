@@ -56,12 +56,52 @@ void Curves::update()
         JojEngine::Engine::renderer->copy_verts_to_gpu(vertices, vertex_buffer_size, vertex_buffer_upload, vertex_buffer_gpu);
         JojEngine::Engine::renderer->submit_commands();
         display();
-    }
 
-    if (input->is_key_press('V'))
-    {
         std::string text = "Vertices: " + std::to_string(count) + "\n";
         OutputDebugString(text.c_str());
+    }
+
+    if (input->is_key_press('R'))
+    {
+        if (count > 3)
+        {
+            for (u32 i = 0; i < count - 1; i++)
+            {
+                f32 x = 3.0f / 4.0f * vertices[i].pos.x + 1.0f / 4.0f * vertices[i + 1].pos.x;
+                f32 y = 3.0f / 4.0f * vertices[i].pos.y + 1.0f / 4.0f * vertices[i + 1].pos.y;
+                v[i] = { DirectX::XMFLOAT3(x, y, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Black) };
+
+                x = 1.0f / 4.0f * vertices[i].pos.x + 3.0f / 4.0f * vertices[i + 1].pos.x;
+                y = 1.0f / 4.0f * vertices[i].pos.y + 3.0f / 4.0f * vertices[i + 1].pos.y;
+                v[i+1] = { DirectX::XMFLOAT3(x, y, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Black) };
+            }
+
+            // Copy vertices to local 'mesh' storage
+            JojEngine::Engine::renderer->copy_verts_to_cpu_blob(v, vertex_buffer_size, vertex_buffer_cpu);
+
+            // Copy vertices to the GPU buffer using the Upload buffer
+            JojEngine::Engine::renderer->reset_commands();
+            JojEngine::Engine::renderer->copy_verts_to_gpu(v, vertex_buffer_size, vertex_buffer_upload, vertex_buffer_gpu);
+            JojEngine::Engine::renderer->submit_commands();
+            display();
+
+            for (u32 i = 0; i < count; ++i)
+                vertices[i] = v[i];
+        }
+    }
+
+    if (input->is_key_press('C'))
+    {
+        // Reset vertices to pos (0, 0, 0)
+        for (u32 i = 0; i < count; ++i)
+        {
+            vertices[i] = { DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) };
+            v[i] = { DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) };
+        }
+
+        index = 0;
+        count = 0;
+        display();
     }
 }
 
