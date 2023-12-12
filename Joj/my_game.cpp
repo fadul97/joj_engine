@@ -61,15 +61,18 @@ void MyGame::init()
     // --------------------------------
 
     // Triangle vertices
-    JojRenderer::Vertex vertices[3] =
+    JojRenderer::Vertex vertices[6] =
     {
-        { DirectX::XMFLOAT3(0.0f, 0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
-        { DirectX::XMFLOAT3(0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Orange) },
-        { DirectX::XMFLOAT3(-0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Purple) }
+        { DirectX::XMFLOAT3(-0.5f,  0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Blue) },
+        { DirectX::XMFLOAT3( 0.5f,  0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Blue) },
+        { DirectX::XMFLOAT3(-0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Blue) },
+        { DirectX::XMFLOAT3(-0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Blue) },
+        { DirectX::XMFLOAT3( 0.5f,  0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Blue) },
+        { DirectX::XMFLOAT3( 0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Blue) }
     };
 
     // Vertices syze in bytes
-    const u32 vbSize = 3 * sizeof(JojRenderer::Vertex);
+    const u32 vbSize = 6 * sizeof(JojRenderer::Vertex);
 
     vertexByteStride = sizeof(JojRenderer::Vertex);
     vertexBufferSize = vbSize;
@@ -379,7 +382,7 @@ void MyGame::display()
     JojEngine::Engine::dx12_graphics->get_command_list()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     // submete comandos de desenho
-    JojEngine::Engine::dx12_graphics->get_command_list()->DrawInstanced(3, 1, 0, 0);
+    JojEngine::Engine::dx12_graphics->get_command_list()->DrawInstanced(6, 1, 0, 0);
 
     JojEngine::Engine::renderer->present();
 }
