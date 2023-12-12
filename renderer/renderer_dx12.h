@@ -17,6 +17,8 @@ namespace JojRenderer
 		DirectX::XMFLOAT4 color;
 	};
 
+	enum class AllocationType { GPU, UPLOAD };
+
 	class DX12Renderer
 	{
 	public:
@@ -29,9 +31,12 @@ namespace JojRenderer
 		void clear(ID3D12PipelineState* pso);											// Clear backbuffer for next frame
 
 		// Return Graphics Infrastructure
-		ID3D12Device* get_device();							// Return graphics device
+		ID3D12Device* get_device();		// Return graphics device
 
-		void submit_commands();		// Submit pending commands for execution
+		void submit_commands();			// Submit pending commands for execution
+
+		void allocate_resource_in_cpu(u32 size_in_bytes, ID3DBlob** resource);								// Allocate CPU memory to resource
+		void allocate_resource_in_gpu(AllocationType alloc_type, u32 size_in_bytes, ID3D12Resource** resource);   // Allocate GPU memory to resource
 	
 	private:
 		JojPlatform::Win32Window* window;

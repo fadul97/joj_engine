@@ -63,11 +63,11 @@ void MyGame::init()
     // Triangle vertices
     JojRenderer::Vertex vertices[6] =
     {
-        { DirectX::XMFLOAT3(-0.5f,  0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Blue) },
-        { DirectX::XMFLOAT3( 0.5f,  0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Blue) },
+        { DirectX::XMFLOAT3(-0.5f,  0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
+        { DirectX::XMFLOAT3( 0.5f,  0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
         { DirectX::XMFLOAT3(-0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Blue) },
         { DirectX::XMFLOAT3(-0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Blue) },
-        { DirectX::XMFLOAT3( 0.5f,  0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Blue) },
+        { DirectX::XMFLOAT3( 0.5f,  0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
         { DirectX::XMFLOAT3( 0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Blue) }
     };
 
@@ -78,77 +78,12 @@ void MyGame::init()
     vertexBufferSize = vbSize;
 
     // Allocate (2 parameters)
-    D3DCreateBlob(vbSize, &vertex_buffer_cpu);
-
-    // Allocate (3 parameters) - UPLOAD
-    // propriedades da heap do buffer
-    D3D12_HEAP_PROPERTIES bufferProp = {};
-    //bufferProp.Type = D3D12_HEAP_TYPE_DEFAULT;
-    bufferProp.Type = D3D12_HEAP_TYPE_UPLOAD;   // UPLOAD
-    bufferProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-    bufferProp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-    bufferProp.CreationNodeMask = 1;
-    bufferProp.VisibleNodeMask = 1;
-
-    // descrição do buffer 
-    D3D12_RESOURCE_DESC bufferDesc = {};
-    bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    bufferDesc.Alignment = 0;
-    bufferDesc.Width = vbSize;
-    bufferDesc.Height = 1;
-    bufferDesc.DepthOrArraySize = 1;
-    bufferDesc.MipLevels = 1;
-    bufferDesc.Format = DXGI_FORMAT_UNKNOWN;
-    bufferDesc.SampleDesc.Count = 1;
-    bufferDesc.SampleDesc.Quality = 0;
-    bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-    bufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-    D3D12_RESOURCE_STATES initState = D3D12_RESOURCE_STATE_COMMON;
-    initState = D3D12_RESOURCE_STATE_GENERIC_READ;   // UPLOAD
-
-    // cria um buffer para o recurso
-    ThrowIfFailed(JojEngine::Engine::renderer->get_device()->CreateCommittedResource(
-        &bufferProp,
-        D3D12_HEAP_FLAG_NONE,
-        &bufferDesc,
-        initState,
-        nullptr,
-        IID_PPV_ARGS(&vertexBufferUpload)));
+    //D3DCreateBlob(vbSize, &vertex_buffer_cpu);
+    JojEngine::Engine::renderer->allocate_resource_in_cpu(vbSize, &vertex_buffer_cpu);
 
     // Allocate (3 parameters) - GPU
-    // propriedades da heap do buffer
-    bufferProp = {};
-    bufferProp.Type = D3D12_HEAP_TYPE_DEFAULT;
-    bufferProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-    bufferProp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-    bufferProp.CreationNodeMask = 1;
-    bufferProp.VisibleNodeMask = 1;
-
-    // descrição do buffer 
-    bufferDesc = {};
-    bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    bufferDesc.Alignment = 0;
-    bufferDesc.Width = vbSize;
-    bufferDesc.Height = 1;
-    bufferDesc.DepthOrArraySize = 1;
-    bufferDesc.MipLevels = 1;
-    bufferDesc.Format = DXGI_FORMAT_UNKNOWN;
-    bufferDesc.SampleDesc.Count = 1;
-    bufferDesc.SampleDesc.Quality = 0;
-    bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-    bufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-    initState = D3D12_RESOURCE_STATE_COMMON;
-
-    // cria um buffer para o recurso
-    ThrowIfFailed(JojEngine::Engine::renderer->get_device()->CreateCommittedResource(
-        &bufferProp,
-        D3D12_HEAP_FLAG_NONE,
-        &bufferDesc,
-        initState,
-        nullptr,
-        IID_PPV_ARGS(&vertexBufferGPU)));
+    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::UPLOAD, vbSize, &vertexBufferUpload);
+    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::GPU, vbSize, &vertexBufferGPU);
 
     // Copy (3 parameters)
     CopyMemory(vertex_buffer_cpu->GetBufferPointer(), vertices, vbSize);

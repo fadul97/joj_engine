@@ -196,3 +196,52 @@ void JojRenderer::DX12Renderer::submit_commands()
     // Wait until GPU completes executing the commands
     wait_command_queue();
 }
+
+void JojRenderer::DX12Renderer::allocate_resource_in_cpu(u32 size_in_bytes, ID3DBlob** resource)
+{
+    D3DCreateBlob(size_in_bytes, resource);
+}
+
+void JojRenderer::DX12Renderer::allocate_resource_in_gpu(AllocationType alloc_type, u32 size_in_bytes, ID3D12Resource** resource)
+{
+    // TODO: comment specifications on buffer_prop
+    // Buffer heap properties
+    D3D12_HEAP_PROPERTIES buffer_prop = {};
+    buffer_prop.Type = D3D12_HEAP_TYPE_DEFAULT;
+    buffer_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    buffer_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+    buffer_prop.CreationNodeMask = 1;
+    buffer_prop.VisibleNodeMask = 1;
+
+    if (alloc_type == AllocationType::UPLOAD)
+        buffer_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
+
+    // TODO: comment specifications on buffer_desc
+    // Buffer description
+    D3D12_RESOURCE_DESC buffer_desc = {};
+    buffer_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    buffer_desc.Alignment = 0;
+    buffer_desc.Width = size_in_bytes;
+    buffer_desc.Height = 1;
+    buffer_desc.DepthOrArraySize = 1;
+    buffer_desc.MipLevels = 1;
+    buffer_desc.Format = DXGI_FORMAT_UNKNOWN;
+    buffer_desc.SampleDesc.Count = 1;
+    buffer_desc.SampleDesc.Quality = 0;
+    buffer_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    buffer_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+    D3D12_RESOURCE_STATES init_state = D3D12_RESOURCE_STATE_COMMON;
+
+    if (alloc_type == AllocationType::UPLOAD)
+        init_state = D3D12_RESOURCE_STATE_GENERIC_READ;
+
+    // Create a buffer for resource
+    ThrowIfFailed(device->CreateCommittedResource(
+        &buffer_prop,
+        D3D12_HEAP_FLAG_NONE,
+        &buffer_desc,
+        init_state,
+        nullptr,
+        IID_PPV_ARGS(resource)));
+}
