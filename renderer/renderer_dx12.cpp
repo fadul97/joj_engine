@@ -245,3 +245,96 @@ void JojRenderer::DX12Renderer::allocate_resource_in_gpu(AllocationType alloc_ty
         nullptr,
         IID_PPV_ARGS(resource)));
 }
+
+void JojRenderer::DX12Renderer::copy_verts_to_cpu_blob(const void* vertices, u32 size_in_bytes, ID3DBlob* buffer_cpu)
+{
+    CopyMemory(buffer_cpu->GetBufferPointer(), vertices, size_in_bytes);
+}
+
+/* @brief Copy vertices to the default buffer (GPU)
+ * To copy data to the GPU:
+ *  - First, copy the data to the intermediate upload heap
+ *  - Then, ID3D12CommandList::CopyBufferRegion copies itself from upload to GPU
+ */
+void JojRenderer::DX12Renderer::copy_verts_to_gpu(const void* vertices, u32 size_in_bytes, ID3D12Resource* buffer_upload, ID3D12Resource* buffer_gpu)
+{
+    // Describe the data that will be copied
+    D3D12_SUBRESOURCE_DATA vertex_sub_resource_data = {};
+    vertex_sub_resource_data.pData = vertices;
+    vertex_sub_resource_data.RowPitch = size_in_bytes;
+    vertex_sub_resource_data.SlicePitch = size_in_bytes;
+
+    // Describe the layout of the video memory (GPU)
+    D3D12_PLACED_SUBRESOURCE_FOOTPRINT layouts;
+    u32 num_rows;
+    u64 row_size_in_bytes;
+    u64 required_size = 0;
+
+    // Get GPU buffer description
+    D3D12_RESOURCE_DESC buffer_gpu_desc = buffer_gpu->GetDesc();
+
+    // Get video memory layout
+    device->GetCopyableFootprints(
+        &buffer_gpu_desc,
+        0, 1, 0, &layouts, &num_rows,
+        &row_size_in_bytes, &required_size);
+
+    // Lock Upload Buffer memory for exclusive access
+    BYTE* pData;
+    buffer_upload->Map(0, nullptr, (void**)&pData);
+
+    // Describe the destiny of a copy operation
+    D3D12_MEMCPY_DEST dest_data =
+    {
+        pData + layouts.Offset,
+        layouts.Footprint.RowPitch,
+        layouts.Footprint.RowPitch * u64(num_rows)
+    };
+
+    // Copy vertices into the upload buffer
+    for (u32 z = 0; z < layouts.Footprint.Depth; ++z)
+    {
+        // Destiny address
+        BYTE* dest_slice = (BYTE*)(dest_data.pData) + dest_data.SlicePitch * z;
+
+        // Source address
+        const BYTE* srcSlice = (const BYTE*)(vertex_sub_resource_data.pData) + vertex_sub_resource_data.SlicePitch * z;
+
+        // Copy line by line
+        for (u32 y = 0; y < num_rows; ++y)
+            memcpy(dest_slice + dest_data.RowPitch * y,
+                srcSlice + vertex_sub_resource_data.RowPitch * y,
+                (size_t)row_size_in_bytes);
+    }
+
+    // Release Memory Lock from Upload Buffer
+    buffer_upload->Unmap(0, nullptr);
+
+    // Change GPU memory state (from read to write)
+    D3D12_RESOURCE_BARRIER barrier = {};
+    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+    barrier.Transition.pResource = buffer_gpu;
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
+    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    command_list->ResourceBarrier(1, &barrier);
+
+    // Copy vertex buffer from upload buffer to GPU
+    command_list->CopyBufferRegion(
+        buffer_gpu,
+        0,
+        buffer_upload,
+        layouts.Offset,
+        layouts.Footprint.Width);
+
+    // Change GPU memory state (from write to read)
+    barrier = {};
+    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+    barrier.Transition.pResource = buffer_gpu;
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
+    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    command_list->ResourceBarrier(1, &barrier);
+}

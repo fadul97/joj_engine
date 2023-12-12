@@ -86,98 +86,12 @@ void MyGame::init()
     JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::GPU, vbSize, &vertexBufferGPU);
 
     // Copy (3 parameters)
-    CopyMemory(vertex_buffer_cpu->GetBufferPointer(), vertices, vbSize);
+    //CopyMemory(vertex_buffer_cpu->GetBufferPointer(), vertices, vbSize);
+    JojEngine::Engine::renderer->copy_verts_to_cpu_blob(vertices, vbSize, vertex_buffer_cpu);
 
     // Copy (4 parameters)
-
-    // ----------------------------------------------------------------------------------
-    // Copia vértices para o buffer padrão (GPU)
-    // ----------------------------------------------------------------------------------
-    //
-    //  Para copiar dados para a GPU:
-    //  - primeiro copia-se os dados para a heap intermediária de upload
-    //  - depois usando ID3D12CommandList::CopyBufferRegion copia-se de upload para a GPU
-    //
-    // ----------------------------------------------------------------------------------
-
-    // descreve os dados que serão copiados
-    D3D12_SUBRESOURCE_DATA vertexSubResourceData = {};
-    vertexSubResourceData.pData = vertices;
-    vertexSubResourceData.RowPitch = vbSize;
-    vertexSubResourceData.SlicePitch = vbSize;
-
-    // descreve o layout da memória de vídeo (GPU)
-    D3D12_PLACED_SUBRESOURCE_FOOTPRINT layouts;
-    u32 numRows;
-    unsigned long long rowSizesInBytes;
-    unsigned long long requiredSize = 0;
-
-    D3D12_RESOURCE_DESC bufferGPUDesc = vertexBufferGPU->GetDesc();
-
-    // pega layout da memória de vídeo
-    JojEngine::Engine::renderer->get_device()->GetCopyableFootprints(
-        &bufferGPUDesc,
-        0, 1, 0, &layouts, &numRows,
-        &rowSizesInBytes, &requiredSize);
-
-    // trava memória do upload buffer para acesso exclusivo 
-    BYTE* pData;
-    vertexBufferUpload->Map(0, nullptr, (void**)&pData);
-
-    // descreve o destino de uma operação de cópia
-    D3D12_MEMCPY_DEST DestData =
-    {
-        pData + layouts.Offset,
-        layouts.Footprint.RowPitch,
-        layouts.Footprint.RowPitch * unsigned long long(numRows)
-    };
-
-    // copia vértices no upload buffer
-    for (u32 z = 0; z < layouts.Footprint.Depth; ++z)
-    {
-        // endereço de destino
-        BYTE* destSlice = (BYTE*)(DestData.pData) + DestData.SlicePitch * z;
-
-        // endereço da fonte
-        const BYTE* srcSlice = (const BYTE*)(vertexSubResourceData.pData) + vertexSubResourceData.SlicePitch * z;
-
-        // faz cópia linha a linha
-        for (u32 y = 0; y < numRows; ++y)
-            memcpy(destSlice + DestData.RowPitch * y,
-                srcSlice + vertexSubResourceData.RowPitch * y,
-                (size_t)rowSizesInBytes);
-    }
-
-    // libera trava de memória do upload buffer 
-    vertexBufferUpload->Unmap(0, nullptr);
-
-    // altera estado da memória da GPU (de leitura para escrita)
-    D3D12_RESOURCE_BARRIER barrier = {};
-    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    barrier.Transition.pResource = vertexBufferGPU;
-    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-    JojEngine::Engine::dx12_graphics->get_command_list()->ResourceBarrier(1, &barrier);
-
-    // copia vertex buffer do upload buffer para a GPU
-    JojEngine::Engine::dx12_graphics->get_command_list()->CopyBufferRegion(
-        vertexBufferGPU,
-        0,
-        vertexBufferUpload,
-        layouts.Offset,
-        layouts.Footprint.Width);
-
-    // altera estado da memória da GPU (de escrita para leitura)
-    barrier = {};
-    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    barrier.Transition.pResource = vertexBufferGPU;
-    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
-    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-    JojEngine::Engine::dx12_graphics->get_command_list()->ResourceBarrier(1, &barrier);
+    JojEngine::Engine::renderer->copy_verts_to_gpu(vertices, vbSize, vertexBufferUpload, vertexBufferGPU);
+    
 
     // Build Root Signature
 

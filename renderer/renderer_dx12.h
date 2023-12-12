@@ -35,9 +35,12 @@ namespace JojRenderer
 
 		void submit_commands();			// Submit pending commands for execution
 
-		void allocate_resource_in_cpu(u32 size_in_bytes, ID3DBlob** resource);								// Allocate CPU memory to resource
-		void allocate_resource_in_gpu(AllocationType alloc_type, u32 size_in_bytes, ID3D12Resource** resource);   // Allocate GPU memory to resource
+		void allocate_resource_in_cpu(u32 size_in_bytes, ID3DBlob** resource);									// Allocate CPU memory to resource
+		void allocate_resource_in_gpu(AllocationType alloc_type, u32 size_in_bytes, ID3D12Resource** resource); // Allocate GPU memory to resource
 	
+		void copy_verts_to_cpu_blob(const void* vertices, u32 size_in_bytes, ID3DBlob* buffer_cpu);									// Copy vertices to Blob in CPU
+		void copy_verts_to_gpu(const void* vertices, u32 size_in_bytes, ID3D12Resource* buffer_upload, ID3D12Resource* buffer_gpu); // Copy vertices to GPU
+
 	private:
 		JojPlatform::Win32Window* window;
 		JojGraphics::DX12Graphics* graphics;
