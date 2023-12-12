@@ -54,8 +54,8 @@ JojRenderer::DX12Renderer::~DX12Renderer()
 		device->Release();
 
 	// Release main interface
-	if (factory)
-		factory->Release();
+	//if (factory)
+		//factory->Release();
 }
 
 b8 JojRenderer::DX12Renderer::init(JojPlatform::Win32Window* window, JojGraphics::DX12Graphics* graphics)

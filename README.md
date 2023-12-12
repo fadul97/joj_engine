@@ -16,6 +16,7 @@ I'll add more information.
 [ ] Add comments to DX12Graphics and DX12Renderer
 [ ] Refactor DX12Graphics so it just initializes Direct3D
 [ ] Fix DX12Graphics and DX12Renderer destructors
+[ ] Fix innacurate mouse click
 
 
 ### Resources

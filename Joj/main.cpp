@@ -1,7 +1,7 @@
 ﻿// main.cpp : Defines the entry point for the application.
 
 #include "engine.h"
-#include "my_game.h"
+#include "curves.h"
 #include "error.h"
 
 #if PLATFORM_WINDOWS
@@ -22,7 +22,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		engine->window->set_on_focus(JojEngine::Engine::resume);
 
 		// Create and execute game
-		int exit_code = engine->start(new MyGame(), JojEngine::Renderer::DX12);
+		int exit_code = engine->start(new Curves(), JojEngine::Renderer::DX12);
 
 		// Cleanup
 		delete engine;

@@ -1,11 +1,14 @@
-#include "my_game.h"
+#include "curves.h"
 
 #include <d3dcompiler.h>
 #include "error.h"
 #include "engine.h"
 
-void MyGame::init()
+void Curves::init()
 {
+    count = 0;
+    index = 0;
+
     JojEngine::Engine::renderer->reset_commands();
 
     // Build geometry and initialize pipeline
@@ -16,14 +19,53 @@ void MyGame::init()
     JojEngine::Engine::renderer->submit_commands();
 }
 
-void MyGame::update()
+void Curves::update()
 {
 	// Exit with ESCAPE key
 	if (input->is_key_press(VK_ESCAPE))
 		window->close();
+
+    if (input->is_key_press(VK_LBUTTON))
+    {
+        f32 cx = f32(window->get_xcenter());
+        f32 cy = f32(window->get_ycenter());
+        f32 mx = f32(input->get_xmouse());
+        f32 my = f32(input->get_ymouse());
+
+        /* Convert screen coordinates to interval (-1.0 to 1.0)
+          'cy' and 'my' have been reversed to take into account that
+          the Y-axis of the screen grows in the opposite direction of the Cartesian */
+        f32 x = (mx - cx) / cx;
+        f32 y = (cy - my) / cy;
+
+        vertices[index] = { DirectX::XMFLOAT3(x, y, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) };
+        
+        if (count == 10)
+            vertices[index] = { DirectX::XMFLOAT3(x, y, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::White) };
+        
+        index = (index + 1) % max_vertices;
+
+        if (count < max_vertices)
+            ++count;
+
+        // Copy vertices to local 'mesh' storage
+        JojEngine::Engine::renderer->copy_verts_to_cpu_blob(vertices, vertex_buffer_size, vertex_buffer_cpu);
+
+        // Copy vertices to the GPU buffer using the Upload buffer
+        JojEngine::Engine::renderer->reset_commands();
+        JojEngine::Engine::renderer->copy_verts_to_gpu(vertices, vertex_buffer_size, vertex_buffer_upload, vertex_buffer_gpu);
+        JojEngine::Engine::renderer->submit_commands();
+        display();
+    }
+
+    if (input->is_key_press('V'))
+    {
+        std::string text = "Vertices: " + std::to_string(count) + "\n";
+        OutputDebugString(text.c_str());
+    }
 }
 
-void MyGame::display()
+void Curves::display()
 {
     JojEngine::Engine::renderer->clear(pipeline_state);
 
@@ -33,57 +75,40 @@ void MyGame::display()
     vertex_buffer_view.StrideInBytes = vertex_byte_stride;
     vertex_buffer_view.SizeInBytes = vertex_buffer_size;
     JojEngine::Engine::dx12_graphics->get_command_list()->IASetVertexBuffers(0, 1, &vertex_buffer_view);
-    JojEngine::Engine::dx12_graphics->get_command_list()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    JojEngine::Engine::dx12_graphics->get_command_list()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINESTRIP);
 
     // Submit Drawing Commands
-    JojEngine::Engine::dx12_graphics->get_command_list()->DrawInstanced(6, 1, 0, 0);
+    JojEngine::Engine::dx12_graphics->get_command_list()->DrawInstanced(count, 1, 0, 0);
 
     JojEngine::Engine::renderer->present();
 }
 
-void MyGame::shutdown()
+void Curves::shutdown()
 {
     root_signature->Release();
     pipeline_state->Release();
 }
 
-void MyGame::build_geometry()
+void Curves::build_geometry()
 {
     // --------------------------------
     // Vertex Buffer
     // --------------------------------
 
-    // Triangle vertices
-    JojRenderer::Vertex vertices[6] =
-    {
-        { DirectX::XMFLOAT3(-0.5f,  0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
-        { DirectX::XMFLOAT3( 0.5f,  0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
-        { DirectX::XMFLOAT3(-0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
-        { DirectX::XMFLOAT3(-0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
-        { DirectX::XMFLOAT3( 0.5f,  0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
-        { DirectX::XMFLOAT3( 0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) }
-    };
-
     // Vertices size in bytes
-    const u32 vertices_size = 6 * sizeof(JojRenderer::Vertex);
+    //const u32 vertices_size = 6 * sizeof(JojRenderer::Vertex);
 
     // Set geometry attributes
     vertex_byte_stride = sizeof(JojRenderer::Vertex);
-    vertex_buffer_size = vertices_size;
+    vertex_buffer_size = max_vertices * sizeof(JojRenderer::Vertex);
 
     // Allocate resources to the Vertex Buffer
-    JojEngine::Engine::renderer->allocate_resource_in_cpu(vertices_size, &vertex_buffer_cpu);
-    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::UPLOAD, vertices_size, &vertex_buffer_upload);
-    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::GPU, vertices_size, &vertex_buffer_gpu);
-
-    // Copy vertices to local 'mesh' storage
-    JojEngine::Engine::renderer->copy_verts_to_cpu_blob(vertices, vertices_size, vertex_buffer_cpu);
-
-    // Copy vertices to the GPU buffer using the Upload buffer
-    JojEngine::Engine::renderer->copy_verts_to_gpu(vertices, vertices_size, vertex_buffer_upload, vertex_buffer_gpu);
+    JojEngine::Engine::renderer->allocate_resource_in_cpu(vertex_buffer_size, &vertex_buffer_cpu);
+    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::UPLOAD, vertex_buffer_size, &vertex_buffer_upload);
+    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::GPU, vertex_buffer_size, &vertex_buffer_gpu);
 }
 
-void MyGame::build_root_signature()
+void Curves::build_root_signature()
 {
     // TODO: comment specifications on root_sig_desc
     // Describe empty root signature
@@ -112,7 +137,7 @@ void MyGame::build_root_signature()
         IID_PPV_ARGS(&root_signature)));
 }
 
-void MyGame::build_pipeline_state()
+void Curves::build_pipeline_state()
 {
     // --------------------------------
     // Input Assembler
@@ -158,9 +183,10 @@ void MyGame::build_pipeline_state()
     // TODO: comment specifications on rasterizer
     // Describe rasterizer
     D3D12_RASTERIZER_DESC rasterizer = {};
-    rasterizer.FillMode = D3D12_FILL_MODE_SOLID;
-    //rasterizer.FillMode = D3D12_FILL_MODE_WIREFRAME;
-    rasterizer.CullMode = D3D12_CULL_MODE_BACK;
+    //rasterizer.FillMode = D3D12_FILL_MODE_SOLID;
+    rasterizer.FillMode = D3D12_FILL_MODE_WIREFRAME;
+    //rasterizer.CullMode = D3D12_CULL_MODE_BACK;
+    rasterizer.CullMode = D3D12_CULL_MODE_NONE;
     rasterizer.FrontCounterClockwise = FALSE;
     rasterizer.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
     rasterizer.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
@@ -225,7 +251,7 @@ void MyGame::build_pipeline_state()
     pso.RasterizerState = rasterizer;
     pso.DepthStencilState = depth_stencil;
     pso.InputLayout = { input_layout, 2 };
-    pso.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    pso.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
     pso.NumRenderTargets = 1;
     pso.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
     pso.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
