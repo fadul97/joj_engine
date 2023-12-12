@@ -7,6 +7,7 @@
 #include "window_win32.h"
 #include "graphics_dx12.h"
 #include <DirectXColors.h>
+#include <d3d12.h>
 
 namespace JojRenderer
 {
@@ -27,6 +28,11 @@ namespace JojRenderer
 		void present();																	// Present
 		void clear(ID3D12PipelineState* pso);											// Clear backbuffer for next frame
 
+		// Return Graphics Infrastructure
+		ID3D12Device* get_device();							// Return graphics device
+
+		void submit_commands();		// Submit pending commands for execution
+	
 	private:
 		JojPlatform::Win32Window* window;
 		JojGraphics::DX12Graphics* graphics;
@@ -60,8 +66,11 @@ namespace JojRenderer
 		u64 current_fence;								// Fence counter
 
 		b8 wait_command_queue();	// Wait for command queue execution
-		void submit_commands();		// Submit pending commands for execution
 	};
+
+	// Return graphics device
+	inline ID3D12Device* DX12Renderer::get_device()
+	{ return device; }
 }
 
 #endif  // PLATFORM_WINDOWS
