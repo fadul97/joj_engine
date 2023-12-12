@@ -24,6 +24,8 @@ namespace JojGraphics
 
 		// Configuration get methods
 		u32 get_backbuffer_count();						// Return number of buffers on the swap chain (double, triple, etc.)
+		u32 get_antialiasing();							// Return number of samples for each pixel on the screen
+		u32 get_quality();								// Return antialiasing sampling quality
 		b8 get_vsync();									// Return vertical sync 
 		f32* get_bg_color();							// Return backbuffer background color
 
@@ -89,6 +91,14 @@ namespace JojGraphics
 	// Return number of buffers on the swap chain (double, triple, etc.)
 	inline u32 DX12Graphics::get_backbuffer_count()
 	{ return backbuffer_count; }
+
+	// Return number of samples for each pixel on the screen
+	inline u32 DX12Graphics::get_antialiasing()
+	{ return antialiasing; }
+
+	// Return antialiasing sampling quality
+	inline u32 DX12Graphics::get_quality()
+	{ return quality; }
 
 	// Return vertical sync 
 	inline b8 DX12Graphics::get_vsync()
