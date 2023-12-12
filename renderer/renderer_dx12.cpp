@@ -5,6 +5,8 @@
 #include <DirectXColors.h>
 #include "error.h"
 
+#include <sstream>
+
 JojRenderer::DX12Renderer::DX12Renderer()
 {
     window = nullptr;
@@ -147,8 +149,8 @@ void JojRenderer::DX12Renderer::clear(ID3D12PipelineState* pso)
     D3D12_CPU_DESCRIPTOR_HANDLE ds_handle = depth_stencil_heap->GetCPUDescriptorHandleForHeapStart();
     D3D12_CPU_DESCRIPTOR_HANDLE rt_handle = render_target_heap->GetCPUDescriptorHandleForHeapStart();
     rt_handle.ptr += SIZE_T(backbuffer_index) * SIZE_T(rt_descriptor_size);
-    command_list->ClearRenderTargetView(ds_handle, bg_color, 0, nullptr);
-    command_list->ClearDepthStencilView(rt_handle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+    command_list->ClearRenderTargetView(rt_handle, bg_color, 0, nullptr);
+    command_list->ClearDepthStencilView(ds_handle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
     // Specify which buffers will be used in rendering
     command_list->OMSetRenderTargets(1, &rt_handle, true, &ds_handle);

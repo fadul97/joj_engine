@@ -12,11 +12,12 @@ f32 JojEngine::Engine::frametime = 0.0f;									// Current frametime
 JojPlatform::Win32Timer JojEngine::Engine::timer;							// Time counter
 b8 JojEngine::Engine::paused = false;										// Engine state
 
+JojRenderer::DX12Renderer* JojEngine::Engine::renderer = nullptr;			// DX12 Renderer
+
 JojEngine::Engine::Engine()
 {
 	window = new JojPlatform::Win32Window();
-	//dx12_graphics = new JojGraphics::DX12Graphics();
-	//dx11_graphics = new JojGraphics::DX11Graphics();
+	renderer = new JojRenderer::DX12Renderer();
 }
 
 JojEngine::Engine::~Engine()
@@ -33,7 +34,7 @@ JojEngine::Engine::~Engine()
 	delete window;
 }
 
-i32 JojEngine::Engine::start(JojEngine::Game* game, Renderer renderer)
+i32 JojEngine::Engine::start(JojEngine::Game* game, Renderer renderer_api)
 {
 	this->game = game;
 
@@ -44,7 +45,7 @@ i32 JojEngine::Engine::start(JojEngine::Game* game, Renderer renderer)
 	input = new JojPlatform::Win32Input();
 
 	// Initialize graphics device
-	if (renderer == Renderer::DX11)
+	if (renderer_api == Renderer::DX11)
 	{
 		dx11_graphics = new JojGraphics::DX11Graphics();
 		dx11_graphics->init(window);
@@ -53,6 +54,7 @@ i32 JojEngine::Engine::start(JojEngine::Game* game, Renderer renderer)
 	{
 		dx12_graphics = new JojGraphics::DX12Graphics();
 		dx12_graphics->init(window);
+		renderer->init(window, dx12_graphics);
 	}
 
 	// Change window procedure to EngineProc
@@ -113,12 +115,12 @@ i32 JojEngine::Engine::loop()
 				// Update game
 				game->update();
 
-				dx12_graphics->clear(nullptr);
+				renderer->clear(nullptr);
 
 				// Game draw
 				game->draw();
 
-				dx12_graphics->present();
+				renderer->present();
 			}
 			else
 			{

@@ -8,6 +8,7 @@
 #include "timer_win32.h"
 #include "graphics_dx12.h"
 #include "graphics_dx11.h"
+#include "renderer_dx12.h"
 #endif	// PLATFORM_WINDOWS
 
 #include "game.h"
@@ -29,7 +30,9 @@ namespace JojEngine
 		static JojEngine::Game* game;							// Game to be executed
 		static f32 frametime;									// Current frametime
 
-		i32 start(JojEngine::Game* game, Renderer renderer);	// Initializes game execution
+		static JojRenderer::DX12Renderer* renderer;				// DX12 Renderer
+
+		i32 start(JojEngine::Game* game, Renderer renderer_api);	// Initializes game execution
 
 		static void pause();	// Pause engine
 		static void resume();	// Resume engine
