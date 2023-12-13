@@ -67,19 +67,19 @@ void JojPlatform::Win32Window::set_mode(u32 mode)
 	}
 }
 
-void JojPlatform::Win32Window::set_size(i16 width, i16 height)
+void JojPlatform::Win32Window::set_size(i32 width, i32 height)
 {
 	// Window size
 	this->width = width;
 	this->height = height;
 
 	// Calculates window center position
-	xcenter = this->width / 2;
-	ycenter = this->height / 2;
+	xcenter = width / 2;
+	ycenter = height / 2;
 
 	// Adjusts window position to the center of the screen
-	xpos = (GetSystemMetrics(SM_CXSCREEN) / 2) - (this->width / 2);
-	ypos = (GetSystemMetrics(SM_CYSCREEN) / 2) - (this->height / 2);
+	xpos = (GetSystemMetrics(SM_CXSCREEN) / 2) - (width / 2);
+	ypos = (GetSystemMetrics(SM_CYSCREEN) / 2) - (height / 2);
 }
 
 /*
@@ -104,7 +104,7 @@ b8 JojPlatform::Win32Window::create()
 	HINSTANCE appId = GetModuleHandle(NULL);
 
 	// Define window class
-	WNDCLASSEX wndClass;
+	WNDCLASSEX wndClass = { };
 	wndClass.cbSize = sizeof(WNDCLASSEX);
 	wndClass.style = CS_DBLCLKS | CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
 	wndClass.lpfnWndProc = JojPlatform::Win32Window::WinProc;
@@ -148,7 +148,7 @@ b8 JojPlatform::Win32Window::create()
 		RECT new_rect = { 0, 0, width, height };
 
 		// Adjusts rectangle size
-		AdjustWindowRectEx(&rect,
+		AdjustWindowRectEx(&new_rect,
 			GetWindowStyle(id),
 			GetMenu(id) != NULL,
 			GetWindowExStyle(id));

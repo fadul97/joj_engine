@@ -20,19 +20,19 @@ namespace JojPlatform
 		Win32Window();
 		~Win32Window();
 
-		HWND get_id();								// Return window ID
-		i16 get_width();							// Return window width
-		i16 get_height();							// Return window height
+		HWND get_id() const;						// Return window ID
+		i32 get_width() const;						// Return window width
+		i32 get_height() const;						// Return window height
 		u32 get_mode() const;						// Return window mode (Full-screen, windowed or borderless mode)
-		i16 get_xcenter() const;					// Return center position in x
-		i16 get_ycenter() const;					// Return center position in y
+		i32 get_xcenter() const;					// Return center position in x
+		i32 get_ycenter() const;					// Return center position in y
 		std::string get_title() const;				// Return window title
-		COLORREF get_color();						// Return window background color
+		COLORREF get_color() const;					// Return window background color
 
 		void set_icon(const u32 icon);				// Set window icon
 		void set_cursor(const u32 cursor);			// Set window cursor
 		void set_title(const std::string title);	// Set window title
-		void set_size(i16 width, i16 height);		// Set window width and height
+		void set_size(i32 width, i32 height);		// Set window width and height
 		void set_mode(u32 mode);					// Set window mode (Full-screen, windowed or borderless mode)
 		void set_color(u32 r, u32 g, u32 b);		// Set window background color
 
@@ -58,33 +58,33 @@ namespace JojPlatform
 		HDC			hdc;    						// Device context
 		RECT		rect;							// Window client area
 		HWND		id;								// Window ID
-		i16			width;							// Window width
-		i16			height;							// Window heigh
+		i32			width;							// Window width
+		i32			height;							// Window heigh
 		HICON		icon;							// Window icon
 		HCURSOR		cursor;							// Window cursor
 		COLORREF	color;							// Window background color
 		std::string	title;							// Window title
 		DWORD		style;							// Window style 
 		u32			mode;							// Full-screen, windowed or borderless mode
-		i16			xpos;							// Initial window position on the x-axis
-		i16			ypos;							// Initial window position on the y-axis
-		i16			xcenter;						// Window center on the x-axis
-		i16			ycenter;						// Window center on the y-axis
+		i32			xpos;							// Initial window position on the x-axis
+		i32			ypos;							// Initial window position on the y-axis
+		i32			xcenter;						// Window center on the x-axis
+		i32			ycenter;						// Window center on the y-axis
 
 		static void (*on_focus)();					// Run when window regains focus
 		static void (*lost_focus)();				// Run when window loses focus
 	};
 
 	// Return window ID
-	inline HWND Win32Window::get_id()
+	inline HWND Win32Window::get_id() const
 	{ return id; }
 
 	// Return window width
-	inline i16 Win32Window::get_width()
+	inline i32 Win32Window::get_width() const
 	{ return width; }
 
 	// Return window height
-	inline i16 Win32Window::get_height()
+	inline i32 Win32Window::get_height() const
 	{ return height; }
 
 	// Return window mode (Full-screen, windowed, or borderless mode)
@@ -92,11 +92,11 @@ namespace JojPlatform
 	{ return mode; }
 
 	// Return center position in x
-	inline i16 Win32Window::get_xcenter() const
+	inline i32 Win32Window::get_xcenter() const
 	{return xcenter; }
 
 	// Return center position in y
-	inline i16 Win32Window::get_ycenter() const
+	inline i32 Win32Window::get_ycenter() const
 	{ return ycenter; }
 
 	// Return window title
@@ -104,7 +104,7 @@ namespace JojPlatform
 	{ return title; }
 
 	// Return window background color
-	inline COLORREF Win32Window::get_color()
+	inline COLORREF Win32Window::get_color() const
 	{ return color; }
 
 	// Set window icon
