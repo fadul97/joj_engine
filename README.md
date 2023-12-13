@@ -18,6 +18,7 @@ I'll add more information.
 [ ] Fix DX12Graphics and DX12Renderer destructors
 [ ] Fix innacurate mouse click
 [ ] Fix reference count - ReportLiveDeviceObjects or ReportLiveObjects may help
+[ ] Fix JojPlatform::Win32Window when in Windowed mode
 
 
 ### Resources
