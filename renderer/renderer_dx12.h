@@ -17,6 +17,17 @@ namespace JojRenderer
 		DirectX::XMFLOAT4 color;
 	};
 
+	struct ObjectConstant
+	{
+		DirectX::XMFLOAT4X4 world_view_proj =
+		{
+			1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f
+		};
+	};
+
 	enum class AllocationType { GPU, UPLOAD };
 
 	class DX12Renderer

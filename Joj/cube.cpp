@@ -6,38 +6,10 @@
 
 void Cube::init()
 {
-    // Initialize members
-    // Default members for handling pipeline
-    root_signature = nullptr;
-    pipeline_state = nullptr;
-
-    // Buffers in CPU
-    vertex_buffer_cpu = nullptr;
-    index_buffer_cpu = nullptr;
-
-    // Upload buffers: CPU -> GPU
-    vertex_buffer_upload = nullptr;
-    index_buffer_upload = nullptr;
-
-    // Buffers in GPU
-    vertex_buffer_gpu = nullptr;
-    index_buffer_gpu = nullptr;
-
-    // Buffer descriptors
-    vertex_buffer_view = { 0 };	// Vertex buffer descriptor
-    index_buffer_view = { 0 };		// Index buffer descriptor
-
-    // Vertex buffer characteristics
-    vertex_byte_stride = 0;
-    vertex_buffer_size = 0;
-
-    // Index buffer characteristics
-    index_format = DXGI_FORMAT_UNKNOWN;
-    index_buffer_size = 0;
-
     JojEngine::Engine::renderer->reset_commands();
 
     // Build geometry and initialize pipeline
+    build_constant_buffers();
     build_geometry();
     build_root_signature();
     build_pipeline_state();
@@ -57,6 +29,9 @@ void Cube::display()
     JojEngine::Engine::renderer->clear(pipeline_state);
 
     // Submit pipeline configuration commands
+    ID3D12DescriptorHeap* descriptor_heaps[] = { constant_buffer_heap };
+    JojEngine::Engine::dx12_graphics->get_command_list()->SetDescriptorHeaps(_countof(descriptor_heaps), descriptor_heaps);
+
     JojEngine::Engine::dx12_graphics->get_command_list()->SetGraphicsRootSignature(root_signature);
 
     vertex_buffer_view.BufferLocation = vertex_buffer_gpu->GetGPUVirtualAddress();
@@ -71,6 +46,8 @@ void Cube::display()
 
     JojEngine::Engine::dx12_graphics->get_command_list()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+    JojEngine::Engine::dx12_graphics->get_command_list()->SetGraphicsRootDescriptorTable(0, constant_buffer_heap->GetGPUDescriptorHandleForHeapStart());
+
     // Submit Drawing Commands
     JojEngine::Engine::dx12_graphics->get_command_list()->DrawIndexedInstanced(36, 1, 0, 0, 0);
 
@@ -79,8 +56,75 @@ void Cube::display()
 
 void Cube::shutdown()
 {
+    constant_buffer_upload->Unmap(0, nullptr);
+    constant_buffer_upload->Release();
+    constant_buffer_heap->Release();
+
     root_signature->Release();
     pipeline_state->Release();
+}
+
+void Cube::build_constant_buffers()
+{
+    // Constant buffer descriptor
+    D3D12_DESCRIPTOR_HEAP_DESC constant_buffer_heap_desc = {};
+    constant_buffer_heap_desc.NumDescriptors = 1;
+    constant_buffer_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+    constant_buffer_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+
+    // Create descriptor for constant buffer
+    JojEngine::Engine::renderer->get_device()->CreateDescriptorHeap(&constant_buffer_heap_desc, IID_PPV_ARGS(&constant_buffer_heap));
+
+    // Upload buffer heap properties
+    D3D12_HEAP_PROPERTIES upload_heap_properties = {};
+    upload_heap_properties.Type = D3D12_HEAP_TYPE_UPLOAD;
+    upload_heap_properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    upload_heap_properties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+    upload_heap_properties.CreationNodeMask = 1;
+    upload_heap_properties.VisibleNodeMask = 1;
+
+    /* The size of the "Constant Buffers" must be multiple
+      of the minimum allocation size of the hardware (256 bytes) */
+    u32 constant_buffer_size = (sizeof(JojRenderer::ObjectConstant) + 255) & ~255;
+
+    // Upload buffer descriptor
+    D3D12_RESOURCE_DESC upload_buffer_desc = {};
+    upload_buffer_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    upload_buffer_desc.Alignment = 0;
+    upload_buffer_desc.Width = constant_buffer_size;
+    upload_buffer_desc.Height = 1;
+    upload_buffer_desc.DepthOrArraySize = 1;
+    upload_buffer_desc.MipLevels = 1;
+    upload_buffer_desc.Format = DXGI_FORMAT_UNKNOWN;
+    upload_buffer_desc.SampleDesc.Count = 1;
+    upload_buffer_desc.SampleDesc.Quality = 0;
+    upload_buffer_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    upload_buffer_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+    // Create an upload buffer for the constant buffer
+    JojEngine::Engine::renderer->get_device()->CreateCommittedResource(
+        &upload_heap_properties,
+        D3D12_HEAP_FLAG_NONE,
+        &upload_buffer_desc,
+        D3D12_RESOURCE_STATE_GENERIC_READ,
+        nullptr,
+        IID_PPV_ARGS(&constant_buffer_upload));
+
+    // Upload buffer address in GPU
+    D3D12_GPU_VIRTUAL_ADDRESS upload_address = constant_buffer_upload->GetGPUVirtualAddress();
+
+    // Describe constant buffer view
+    D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc;
+    cbv_desc.BufferLocation = upload_address;
+    cbv_desc.SizeInBytes = constant_buffer_size;
+
+    // Create a view for constant buffer
+    JojEngine::Engine::renderer->get_device()->CreateConstantBufferView(
+        &cbv_desc,
+        constant_buffer_heap->GetCPUDescriptorHandleForHeapStart());
+
+    // Map memory from the upload buffer to a CPU-accessible address
+    constant_buffer_upload->Map(0, nullptr, reinterpret_cast<void**>(&constant_buffer_data));
 }
 
 void Cube::build_geometry()
@@ -142,7 +186,7 @@ void Cube::build_geometry()
     DirectX::XMMATRIX W = S * Ry * Rx * T;
 
     // View Matrix
-    DirectX::XMVECTOR pos = DirectX::XMVectorSet(0, 0, -6, 1);
+    DirectX::XMVECTOR pos = DirectX::XMVectorSet(0, 0, -10, 1);
     DirectX::XMVECTOR target = DirectX::XMVectorZero();
     DirectX::XMVECTOR up = DirectX::XMVectorSet(0, 1, 0, 0);
     DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(pos, target, up);
@@ -154,15 +198,12 @@ void Cube::build_geometry()
         1.0f, 100.0f);
 
     // Word-View-Projection Matrix
-    DirectX::XMMATRIX WorldViewProj = W * V * P;
+    DirectX::XMMATRIX world_view_proj = W * V * P;
 
-    // Place vertices in the projection window
-    for (int i = 0; i < 8; ++i)
-    {
-        DirectX::XMVECTOR vertex = DirectX::XMLoadFloat3(&vertices[i].pos);
-        DirectX::XMVECTOR proj = DirectX::XMVector3TransformCoord(vertex, WorldViewProj);
-        DirectX::XMStoreFloat3(&vertices[i].pos, proj);
-    }
+    // Update constant buffer with combined matrix (Word-View-Projection Matrix)
+    JojRenderer::ObjectConstant obj_constant;
+    XMStoreFloat4x4(&obj_constant.world_view_proj, DirectX::XMMatrixTranspose(world_view_proj));
+    memcpy(constant_buffer_data, &obj_constant, sizeof(JojRenderer::ObjectConstant));
 
     // -----------------------------------------------------------
     // >> Allocate and Copy Vertex and Index Buffers to the GPU <<
@@ -199,11 +240,28 @@ void Cube::build_geometry()
 
 void Cube::build_root_signature()
 {
+    // TODO: comment specifications on cbv_table
+    // Create a single table of CBV descriptors
+    D3D12_DESCRIPTOR_RANGE cbv_table = {};
+    cbv_table.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+    cbv_table.NumDescriptors = 1;
+    cbv_table.BaseShaderRegister = 0;
+    cbv_table.RegisterSpace = 0;
+    cbv_table.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+    // TODO: comment specifications on root_parameters
+    // Root parameter can be a table, root descriptor, or root constant
+    D3D12_ROOT_PARAMETER root_parameters[1];
+    root_parameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    root_parameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+    root_parameters[0].DescriptorTable.NumDescriptorRanges = 1;
+    root_parameters[0].DescriptorTable.pDescriptorRanges = &cbv_table;
+
     // TODO: comment specifications on root_sig_desc
     // Describe empty root signature
     D3D12_ROOT_SIGNATURE_DESC root_sig_desc = {};
-    root_sig_desc.NumParameters = 0;
-    root_sig_desc.pParameters = nullptr;
+    root_sig_desc.NumParameters = 1;
+    root_sig_desc.pParameters = root_parameters;
     root_sig_desc.NumStaticSamplers = 0;
     root_sig_desc.pStaticSamplers = nullptr;
     root_sig_desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -218,7 +276,11 @@ void Cube::build_root_signature()
         &serialized_root_sig,
         &error));
 
-    // Create empty root signature
+    if (error != nullptr)
+        OutputDebugString((char*)error->GetBufferPointer());
+    
+    /* Create a root signature with a single slot that points to
+     a range of descriptors consisting of a single constant buffer */
     ThrowIfFailed(JojEngine::Engine::renderer->get_device()->CreateRootSignature(
         0,
         serialized_root_sig->GetBufferPointer(),
