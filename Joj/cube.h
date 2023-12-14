@@ -2,13 +2,14 @@
 
 #include "game.h"
 #include "renderer_dx12.h"
+#include "DirectXMath.h"
 
 class Cube : public JojEngine::Game
 {
 public:
 	void init();
 	void update();
-	void display();
+	void draw();
 	void shutdown();
 
 	void build_constant_buffers();
@@ -49,4 +50,16 @@ private:
 	ID3D12DescriptorHeap* constant_buffer_heap = nullptr;
 	ID3D12Resource* constant_buffer_upload = nullptr;
 	BYTE* constant_buffer_data = nullptr;
+
+	// Camera settings
+	DirectX::XMFLOAT4X4 World = {};
+	DirectX::XMFLOAT4X4 View = {};
+	DirectX::XMFLOAT4X4 Proj = {};
+
+	f32 theta = 0;
+	f32 phi = 0;
+	f32 radius = 0;
+
+	f32 last_xmouse = 0;
+	f32 last_ymouse = 0;
 };

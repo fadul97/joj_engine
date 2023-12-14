@@ -6,6 +6,28 @@
 
 void Cube::init()
 {
+    // controla rotação do cubo
+    theta = DirectX::XM_PIDIV4;
+    phi = DirectX::XM_PIDIV4;
+    radius = 10.0f;
+
+    // pega última posição do mouse
+    last_xmouse = (f32)input->get_xmouse();
+    last_ymouse  = (f32)input->get_ymouse();
+
+    // inicializa as matrizes World e View para a identidade
+    World = View = {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f };
+
+    // inicializa a matriz de projeção
+    XMStoreFloat4x4(&Proj, DirectX::XMMatrixPerspectiveFovLH(
+        DirectX::XMConvertToRadians(45.0f),
+        window->get_aspect_ratio(),
+        1.0f, 100.0f));
+
     JojEngine::Engine::renderer->reset_commands();
 
     // Build geometry and initialize pipeline
@@ -19,12 +41,67 @@ void Cube::init()
 
 void Cube::update()
 {
-	// Exit with ESCAPE key
-	if (input->is_key_press(VK_ESCAPE))
-		window->close();
+    // Exit with ESCAPE key
+    if (input->is_key_press(VK_ESCAPE))
+        window->close();
+
+    f32 xmouse = (f32)input->get_xmouse();
+    f32 ymouse = (f32)input->get_ymouse();
+
+    if (input->is_key_down(VK_LBUTTON))
+    {
+        // cada pixel corresponde a 1/4 de grau
+        f32 dx = DirectX::XMConvertToRadians(0.4f * (xmouse - last_xmouse));
+        f32 dy = DirectX::XMConvertToRadians(0.4f * (ymouse - last_ymouse));
+
+        // atualiza ângulos com base no deslocamento do mouse 
+        // para orbitar a câmera ao redor da caixa
+        theta += dx;
+        phi += dy;
+
+        // restringe o ângulo de phi ]0-180[ graus
+        phi = phi < 0.1f ? 0.1f : (phi > (DirectX::XM_PI - 0.1f) ? DirectX::XM_PI - 0.1f : phi);
+    }
+    else if (input->is_key_down(VK_RBUTTON))
+    {
+        // cada pixel corresponde a 0.05 unidades
+        f32 dx = 0.05f * (xmouse - last_xmouse);
+        f32 dy = 0.05f * (ymouse - last_ymouse);
+
+        // atualiza o raio da câmera com base no deslocamento do mouse 
+        radius += dx - dy;
+
+        // restringe o raio (3 a 15 unidades)
+        radius = radius < 3.0f ? 3.0f : (radius > 15.0f ? 15.0f : radius);
+    }
+
+    last_xmouse = xmouse;
+    last_ymouse = ymouse;
+
+    // converte coordenadas esféricas para cartesianas
+    f32 x = radius * sinf(phi) * cosf(theta);
+    f32 z = radius * sinf(phi) * sinf(theta);
+    f32 y = radius * cosf(phi);
+
+    // constrói a matriz da câmera (view matrix)
+    DirectX::XMVECTOR pos = DirectX::XMVectorSet(x, y, z, 1.0f);
+    DirectX::XMVECTOR target = DirectX::XMVectorZero();
+    DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(pos, target, up);
+    XMStoreFloat4x4(&View, view);
+
+    // constrói matriz combinada (world x view x proj)
+    DirectX::XMMATRIX world = XMLoadFloat4x4(&World);
+    DirectX::XMMATRIX proj = XMLoadFloat4x4(&Proj);
+    DirectX::XMMATRIX WorldViewProj = world * view * proj;
+
+    // Update constant buffer with combined matrix (Word-View-Projection Matrix)
+    JojRenderer::ObjectConstant obj_constant;
+    XMStoreFloat4x4(&obj_constant.world_view_proj, DirectX::XMMatrixTranspose(WorldViewProj));
+    memcpy(constant_buffer_data, &obj_constant, sizeof(JojRenderer::ObjectConstant));
 }
 
-void Cube::display()
+void Cube::draw()
 {
     JojEngine::Engine::renderer->clear(pipeline_state);
 
@@ -38,7 +115,7 @@ void Cube::display()
     vertex_buffer_view.StrideInBytes = vertex_byte_stride;
     vertex_buffer_view.SizeInBytes = vertex_buffer_size;
     JojEngine::Engine::dx12_graphics->get_command_list()->IASetVertexBuffers(0, 1, &vertex_buffer_view);
-    
+
     index_buffer_view.BufferLocation = index_buffer_gpu->GetGPUVirtualAddress();
     index_buffer_view.Format = index_format;
     index_buffer_view.SizeInBytes = index_buffer_size;
@@ -174,37 +251,6 @@ void Cube::build_geometry()
         4, 3, 7
     };
 
-    // ------------------------------------------------------------------
-    // ------->> Transformation, Visualization and Projection <<---------
-    // ------------------------------------------------------------------
-
-    // World Matrix
-    DirectX::XMMATRIX S = DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
-    DirectX::XMMATRIX Ry = DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(30));
-    DirectX::XMMATRIX Rx = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(-30));
-    DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(0, 0, 0);
-    DirectX::XMMATRIX W = S * Ry * Rx * T;
-
-    // View Matrix
-    DirectX::XMVECTOR pos = DirectX::XMVectorSet(0, 0, -10, 1);
-    DirectX::XMVECTOR target = DirectX::XMVectorZero();
-    DirectX::XMVECTOR up = DirectX::XMVectorSet(0, 1, 0, 0);
-    DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(pos, target, up);
-
-    // Projection Matrix
-    DirectX::XMMATRIX P = DirectX::XMMatrixPerspectiveFovLH(
-        DirectX::XMConvertToRadians(45),
-        window->get_aspect_ratio(),
-        1.0f, 100.0f);
-
-    // Word-View-Projection Matrix
-    DirectX::XMMATRIX world_view_proj = W * V * P;
-
-    // Update constant buffer with combined matrix (Word-View-Projection Matrix)
-    JojRenderer::ObjectConstant obj_constant;
-    XMStoreFloat4x4(&obj_constant.world_view_proj, DirectX::XMMatrixTranspose(world_view_proj));
-    memcpy(constant_buffer_data, &obj_constant, sizeof(JojRenderer::ObjectConstant));
-
     // -----------------------------------------------------------
     // >> Allocate and Copy Vertex and Index Buffers to the GPU <<
     // -----------------------------------------------------------
@@ -278,7 +324,7 @@ void Cube::build_root_signature()
 
     if (error != nullptr)
         OutputDebugString((char*)error->GetBufferPointer());
-    
+
     /* Create a root signature with a single slot that points to
      a range of descriptors consisting of a single constant buffer */
     ThrowIfFailed(JojEngine::Engine::renderer->get_device()->CreateRootSignature(
@@ -300,7 +346,7 @@ void Cube::build_pipeline_state()
         {
             "POSITION",                                     // Semantic name
             0,                                              // Semantic index
-            DXGI_FORMAT_R32G32B32_FLOAT,                    // Format of this vertex element (3D 32-bit float vector)
+            DXGI_FORMAT_R32G32B32_FLOAT,                    // Format of this vertex element (3D 32-bit f32 vector)
             0,                                              // Input slot index this element will come from
             0,                                              // Aligned byte offset
             D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,     // Input slot class (simple technique of instancing)
@@ -309,7 +355,7 @@ void Cube::build_pipeline_state()
         {
             "COLOR",                                        // Semantic name
             0,                                              // Semantic index
-            DXGI_FORMAT_R32G32B32A32_FLOAT,                 // Format of this vertex element (3D 32-bit float vector)
+            DXGI_FORMAT_R32G32B32A32_FLOAT,                 // Format of this vertex element (3D 32-bit f32 vector)
             0,                                              // Input slot index this element will come from
             12,                                             // Aligned byte offset (4 bytes * XMFLOAT3 = 12)
             D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,     // Input slot class (simple technique of instancing)
