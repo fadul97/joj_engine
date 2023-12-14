@@ -1,7 +1,7 @@
 ﻿// main.cpp : Defines the entry point for the application.
 
 #include "engine.h"
-#include "curves.h"
+#include "cube.h"
 #include "error.h"
 
 #if PLATFORM_WINDOWS
@@ -13,8 +13,8 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		// Create Engine and setup window
 		auto engine = new JojEngine::Engine();
 		engine->window->set_mode(JojPlatform::WINDOWED);
-		engine->window->set_size(600, 600);
-		engine->window->set_color(255, 55, 255);
+		engine->window->set_size(800, 600);
+		engine->window->set_color(30, 30, 30);
 		engine->window->set_title("Joj Engine");
 
 		// Game pauses/resumes when losing/gaining focus
@@ -22,7 +22,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		engine->window->set_on_focus(JojEngine::Engine::resume);
 
 		// Create and execute game
-		int exit_code = engine->start(new Curves(), JojEngine::Renderer::DX12);
+		int exit_code = engine->start(new Cube(), JojEngine::Renderer::DX12);
 
 		// Cleanup
 		delete engine;

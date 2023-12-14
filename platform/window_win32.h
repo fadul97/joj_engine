@@ -28,6 +28,7 @@ namespace JojPlatform
 		i32 get_ycenter() const;					// Return center position in y
 		std::string get_title() const;				// Return window title
 		COLORREF get_color() const;					// Return window background color
+		f32 get_aspect_ratio() const;				// Return window aspect ratio
 
 		void set_icon(const u32 icon);				// Set window icon
 		void set_cursor(const u32 cursor);			// Set window cursor
@@ -106,6 +107,10 @@ namespace JojPlatform
 	// Return window background color
 	inline COLORREF Win32Window::get_color() const
 	{ return color; }
+
+	// Return window aspect ratio
+	inline f32 Win32Window::get_aspect_ratio() const
+	{ return width / f32(height); }
 
 	// Set window icon
 	inline void Win32Window::set_icon(const u32 icon)

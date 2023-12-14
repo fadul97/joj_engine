@@ -1,13 +1,39 @@
-#include "curves.h"
+#include "cube.h"
 
 #include <d3dcompiler.h>
 #include "error.h"
 #include "engine.h"
 
-void Curves::init()
+void Cube::init()
 {
-    count = 0;
-    index = 0;
+    // Initialize members
+    // Default members for handling pipeline
+    root_signature = nullptr;
+    pipeline_state = nullptr;
+
+    // Buffers in CPU
+    vertex_buffer_cpu = nullptr;
+    index_buffer_cpu = nullptr;
+
+    // Upload buffers: CPU -> GPU
+    vertex_buffer_upload = nullptr;
+    index_buffer_upload = nullptr;
+
+    // Buffers in GPU
+    vertex_buffer_gpu = nullptr;
+    index_buffer_gpu = nullptr;
+
+    // Buffer descriptors
+    vertex_buffer_view = { 0 };	// Vertex buffer descriptor
+    index_buffer_view = { 0 };		// Index buffer descriptor
+
+    // Vertex buffer characteristics
+    vertex_byte_stride = 0;
+    vertex_buffer_size = 0;
+
+    // Index buffer characteristics
+    index_format = DXGI_FORMAT_UNKNOWN;
+    index_buffer_size = 0;
 
     JojEngine::Engine::renderer->reset_commands();
 
@@ -19,136 +45,159 @@ void Curves::init()
     JojEngine::Engine::renderer->submit_commands();
 }
 
-void Curves::update()
+void Cube::update()
 {
 	// Exit with ESCAPE key
 	if (input->is_key_press(VK_ESCAPE))
 		window->close();
-
-    if (input->is_key_press(VK_LBUTTON))
-    {
-        f32 cx = f32(window->get_xcenter());
-        f32 cy = f32(window->get_ycenter());
-        f32 mx = f32(input->get_xmouse());
-        f32 my = f32(input->get_ymouse());
-
-        /* Convert screen coordinates to interval (-1.0 to 1.0)
-          'cy' and 'my' have been reversed to take into account that
-          the Y-axis of the screen grows in the opposite direction of the Cartesian */
-        f32 x = (mx - cx) / cx;
-        f32 y = (cy - my) / cy;
-
-        vertices[index] = { DirectX::XMFLOAT3(x, y, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) };
-        
-        if (count == 10)
-            vertices[index] = { DirectX::XMFLOAT3(x, y, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::White) };
-        
-        index = (index + 1) % max_vertices;
-
-        if (count < max_vertices)
-            ++count;
-
-        // Copy vertices to local 'mesh' storage
-        JojEngine::Engine::renderer->copy_verts_to_cpu_blob(vertices, vertex_buffer_size, vertex_buffer_cpu);
-
-        // Copy vertices to the GPU buffer using the Upload buffer
-        JojEngine::Engine::renderer->reset_commands();
-        JojEngine::Engine::renderer->copy_verts_to_gpu(vertices, vertex_buffer_size, vertex_buffer_upload, vertex_buffer_gpu);
-        JojEngine::Engine::renderer->submit_commands();
-        display();
-
-        std::string text = "Vertices: " + std::to_string(count) + "\n";
-        OutputDebugString(text.c_str());
-    }
-
-    if (input->is_key_press('R'))
-    {
-        if (count > 3)
-        {
-            for (u32 i = 0; i < count - 1; i++)
-            {
-                f32 x = 3.0f / 4.0f * vertices[i].pos.x + 1.0f / 4.0f * vertices[i + 1].pos.x;
-                f32 y = 3.0f / 4.0f * vertices[i].pos.y + 1.0f / 4.0f * vertices[i + 1].pos.y;
-                v[i] = { DirectX::XMFLOAT3(x, y, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Black) };
-
-                x = 1.0f / 4.0f * vertices[i].pos.x + 3.0f / 4.0f * vertices[i + 1].pos.x;
-                y = 1.0f / 4.0f * vertices[i].pos.y + 3.0f / 4.0f * vertices[i + 1].pos.y;
-                v[i+1] = { DirectX::XMFLOAT3(x, y, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Black) };
-            }
-
-            // Copy vertices to local 'mesh' storage
-            JojEngine::Engine::renderer->copy_verts_to_cpu_blob(v, vertex_buffer_size, vertex_buffer_cpu);
-
-            // Copy vertices to the GPU buffer using the Upload buffer
-            JojEngine::Engine::renderer->reset_commands();
-            JojEngine::Engine::renderer->copy_verts_to_gpu(v, vertex_buffer_size, vertex_buffer_upload, vertex_buffer_gpu);
-            JojEngine::Engine::renderer->submit_commands();
-            display();
-
-            for (u32 i = 0; i < count; ++i)
-                vertices[i] = v[i];
-        }
-    }
-
-    if (input->is_key_press('C'))
-    {
-        // Reset vertices to pos (0, 0, 0)
-        for (u32 i = 0; i < count; ++i)
-        {
-            vertices[i] = { DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) };
-            v[i] = { DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) };
-        }
-
-        index = 0;
-        count = 0;
-        display();
-    }
 }
 
-void Curves::display()
+void Cube::display()
 {
     JojEngine::Engine::renderer->clear(pipeline_state);
 
     // Submit pipeline configuration commands
     JojEngine::Engine::dx12_graphics->get_command_list()->SetGraphicsRootSignature(root_signature);
+
     vertex_buffer_view.BufferLocation = vertex_buffer_gpu->GetGPUVirtualAddress();
     vertex_buffer_view.StrideInBytes = vertex_byte_stride;
     vertex_buffer_view.SizeInBytes = vertex_buffer_size;
     JojEngine::Engine::dx12_graphics->get_command_list()->IASetVertexBuffers(0, 1, &vertex_buffer_view);
-    JojEngine::Engine::dx12_graphics->get_command_list()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINESTRIP);
+    
+    index_buffer_view.BufferLocation = index_buffer_gpu->GetGPUVirtualAddress();
+    index_buffer_view.Format = index_format;
+    index_buffer_view.SizeInBytes = index_buffer_size;
+    JojEngine::Engine::dx12_graphics->get_command_list()->IASetIndexBuffer(&index_buffer_view);
+
+    JojEngine::Engine::dx12_graphics->get_command_list()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     // Submit Drawing Commands
-    JojEngine::Engine::dx12_graphics->get_command_list()->DrawInstanced(count, 1, 0, 0);
+    JojEngine::Engine::dx12_graphics->get_command_list()->DrawIndexedInstanced(36, 1, 0, 0, 0);
 
     JojEngine::Engine::renderer->present();
 }
 
-void Curves::shutdown()
+void Cube::shutdown()
 {
     root_signature->Release();
     pipeline_state->Release();
 }
 
-void Curves::build_geometry()
+void Cube::build_geometry()
 {
     // --------------------------------
     // Vertex Buffer
     // --------------------------------
 
-    // Vertices size in bytes
-    //const u32 vertices_size = 6 * sizeof(JojRenderer::Vertex);
+    // Geometry vertexes
+    JojRenderer::Vertex vertices[8] =
+    {
+        { DirectX::XMFLOAT3(-1.0f, -1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
+        { DirectX::XMFLOAT3(-1.0f, +1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
+        { DirectX::XMFLOAT3(+1.0f, +1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
+        { DirectX::XMFLOAT3(+1.0f, -1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
+        { DirectX::XMFLOAT3(-1.0f, -1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
+        { DirectX::XMFLOAT3(-1.0f, +1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
+        { DirectX::XMFLOAT3(+1.0f, +1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
+        { DirectX::XMFLOAT3(+1.0f, -1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) }
+    };
 
-    // Set geometry attributes
+    // Geometry indexes
+    u16 indices[36] =
+    {
+        // front face
+        0, 1, 3,
+        1, 2, 3,
+
+        // back face
+        4, 6, 5,
+        4, 7, 6,
+
+        // left face
+        4, 5, 1,
+        4, 1, 0,
+
+        // right face
+        3, 2, 6,
+        3, 6, 7,
+
+        // top face
+        1, 5, 6,
+        1, 6, 2,
+
+        // bottom face
+        4, 0, 3,
+        4, 3, 7
+    };
+
+    // ------------------------------------------------------------------
+    // ------->> Transformation, Visualization and Projection <<---------
+    // ------------------------------------------------------------------
+
+    // World Matrix
+    DirectX::XMMATRIX S = DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
+    DirectX::XMMATRIX Ry = DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(30));
+    DirectX::XMMATRIX Rx = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(-30));
+    DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(0, 0, 0);
+    DirectX::XMMATRIX W = S * Ry * Rx * T;
+
+    // View Matrix
+    DirectX::XMVECTOR pos = DirectX::XMVectorSet(0, 0, -6, 1);
+    DirectX::XMVECTOR target = DirectX::XMVectorZero();
+    DirectX::XMVECTOR up = DirectX::XMVectorSet(0, 1, 0, 0);
+    DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(pos, target, up);
+
+    // Projection Matrix
+    DirectX::XMMATRIX P = DirectX::XMMatrixPerspectiveFovLH(
+        DirectX::XMConvertToRadians(45),
+        window->get_aspect_ratio(),
+        1.0f, 100.0f);
+
+    // Word-View-Projection Matrix
+    DirectX::XMMATRIX WorldViewProj = W * V * P;
+
+    // Place vertices in the projection window
+    for (int i = 0; i < 8; ++i)
+    {
+        DirectX::XMVECTOR vertex = DirectX::XMLoadFloat3(&vertices[i].pos);
+        DirectX::XMVECTOR proj = DirectX::XMVector3TransformCoord(vertex, WorldViewProj);
+        DirectX::XMStoreFloat3(&vertices[i].pos, proj);
+    }
+
+    // -----------------------------------------------------------
+    // >> Allocate and Copy Vertex and Index Buffers to the GPU <<
+    // -----------------------------------------------------------
+
+    // Byte size of vertices and indexes
+    const u32 vb_size = 8 * sizeof(JojRenderer::Vertex);
+    const u32 ib_size = 36 * sizeof(u16);
+
+    // Setup geometry attributes
     vertex_byte_stride = sizeof(JojRenderer::Vertex);
-    vertex_buffer_size = max_vertices * sizeof(JojRenderer::Vertex);
+    vertex_buffer_size = vb_size;
+    index_format = DXGI_FORMAT_R16_UINT;
+    index_buffer_size = ib_size;
 
     // Allocate resources to the Vertex Buffer
-    JojEngine::Engine::renderer->allocate_resource_in_cpu(vertex_buffer_size, &vertex_buffer_cpu);
-    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::UPLOAD, vertex_buffer_size, &vertex_buffer_upload);
-    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::GPU, vertex_buffer_size, &vertex_buffer_gpu);
+    JojEngine::Engine::renderer->allocate_resource_in_cpu(vb_size, &vertex_buffer_cpu);
+    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::UPLOAD, vb_size, &vertex_buffer_upload);
+    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::GPU, vb_size, &vertex_buffer_gpu);
+
+    // Allocate resources to the Index Buffer
+    JojEngine::Engine::renderer->allocate_resource_in_cpu(ib_size, &index_buffer_cpu);
+    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::UPLOAD, ib_size, &index_buffer_upload);
+    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::GPU, ib_size, &index_buffer_gpu);
+
+    // Save a copy of the vertices and indexes in the 'mesh'
+    JojEngine::Engine::renderer->copy_verts_to_cpu_blob(vertices, vb_size, vertex_buffer_cpu);
+    JojEngine::Engine::renderer->copy_verts_to_cpu_blob(indices, ib_size, index_buffer_cpu);
+
+    // Copy vertices and indexes to the GPU using the Upload buffer
+    JojEngine::Engine::renderer->copy_verts_to_gpu(vertices, vb_size, vertex_buffer_upload, vertex_buffer_gpu);
+    JojEngine::Engine::renderer->copy_verts_to_gpu(indices, ib_size, index_buffer_upload, index_buffer_gpu);
 }
 
-void Curves::build_root_signature()
+void Cube::build_root_signature()
 {
     // TODO: comment specifications on root_sig_desc
     // Describe empty root signature
@@ -177,7 +226,7 @@ void Curves::build_root_signature()
         IID_PPV_ARGS(&root_signature)));
 }
 
-void Curves::build_pipeline_state()
+void Cube::build_pipeline_state()
 {
     // --------------------------------
     // Input Assembler
@@ -223,10 +272,10 @@ void Curves::build_pipeline_state()
     // TODO: comment specifications on rasterizer
     // Describe rasterizer
     D3D12_RASTERIZER_DESC rasterizer = {};
-    //rasterizer.FillMode = D3D12_FILL_MODE_SOLID;
-    rasterizer.FillMode = D3D12_FILL_MODE_WIREFRAME;
-    //rasterizer.CullMode = D3D12_CULL_MODE_BACK;
-    rasterizer.CullMode = D3D12_CULL_MODE_NONE;
+    rasterizer.FillMode = D3D12_FILL_MODE_SOLID;
+    //rasterizer.FillMode = D3D12_FILL_MODE_WIREFRAME;
+    rasterizer.CullMode = D3D12_CULL_MODE_BACK;
+    //rasterizer.CullMode = D3D12_CULL_MODE_NONE;
     rasterizer.FrontCounterClockwise = FALSE;
     rasterizer.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
     rasterizer.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
@@ -291,7 +340,7 @@ void Curves::build_pipeline_state()
     pso.RasterizerState = rasterizer;
     pso.DepthStencilState = depth_stencil;
     pso.InputLayout = { input_layout, 2 };
-    pso.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+    pso.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     pso.NumRenderTargets = 1;
     pso.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
     pso.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
