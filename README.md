@@ -15,7 +15,6 @@ I'll add more information.
 [ ] Add comments to DX12Graphics and DX12Renderer  
 [ ] Refactor DX12Graphics so it just initializes Direct3D  
 [ ] Fix DX12Graphics and DX12Renderer destructors  
-[ ] Fix innacurate mouse click  
 [ ] Fix reference count - ReportLiveDeviceObjects or ReportLiveObjects may help  
 [ ] Make it so when including window.h in file, type #include "platform/window.h"  
 
