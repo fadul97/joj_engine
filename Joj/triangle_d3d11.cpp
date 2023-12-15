@@ -14,9 +14,9 @@ void D3D11Triangle::init()
 	// Set vertices
 	Vertex vertices[3] =
 	{
-		{ DirectX::XMFLOAT3(+0.0f, +0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
-		{ DirectX::XMFLOAT3(+0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Purple) },
-		{ DirectX::XMFLOAT3(-0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
+		{ DirectX::XMFLOAT3(+0.0f, +0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
+		{ DirectX::XMFLOAT3(+0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
+		{ DirectX::XMFLOAT3(-0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Purple) },
 	};
 
 	// Describe Buffer - Resource structure
