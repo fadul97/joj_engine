@@ -4,15 +4,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(JojRenderer)
 
-add_library(JojRenderer renderer_dx11.cpp geometry.cpp)
-
-if(CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET JojRenderer PROPERTY CXX_STANDARD 20)
-endif()
-
-if(WIN32)
-	target_link_libraries(JojRenderer PRIVATE dxgi.lib d3d11.lib d3d12.lib D3DCompiler.lib)
-endif()
+add_library(JojRenderer geometry.cpp)
 
 # Include engine folder
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../engine/)
@@ -24,12 +16,16 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../graphics/)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../platform/)
 
 # Link JojGraphics and JojPlatform to JojRenderer
-target_link_libraries(JojRenderer PRIVATE  JojGraphics JojPlatform)
+target_link_libraries(JojRenderer PRIVATE JojGraphics JojPlatform)
 
 if(WIN32)
+	# Include dx11 folder
+	add_subdirectory(dx11)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/dx11/)
+
 	# Include dx12 folder
 	add_subdirectory(dx12)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/dx12/)
 
-	target_link_libraries(JojGraphics INTERFACE JojRendererD3D12)
+	target_link_libraries(JojGraphics INTERFACE JojRendererD3D11 JojRendererD3D12)
 endif()
