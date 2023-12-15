@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(JojRenderer)
 
-add_library(JojRenderer renderer_dx11.cpp renderer_dx12.cpp)
+add_library(JojRenderer renderer_dx11.cpp renderer_dx12.cpp geometry.cpp)
 
 if(CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET JojRenderer PROPERTY CXX_STANDARD 20)
