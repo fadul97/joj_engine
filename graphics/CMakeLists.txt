@@ -24,3 +24,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../platform/)
 target_link_libraries(JojGraphics
 	PRIVATE 
 	JojPlatform)
+
+if(WIN32)
+	add_subdirectory(dx12)
+endif()
