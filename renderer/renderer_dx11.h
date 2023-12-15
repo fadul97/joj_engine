@@ -5,7 +5,7 @@
 #if PLATFORM_WINDOWS
 
 #include "window.h"
-#include "graphics_dx11.h"
+#include "dx11/graphics_dx11.h"
 #include <DirectXColors.h>
 
 namespace JojRenderer

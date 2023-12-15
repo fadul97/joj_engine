@@ -7,7 +7,7 @@
 #include "input.h"
 #include "timer.h"
 #include "dx12/graphics_dx12.h"
-//#include "graphics_dx11.h"
+#include "dx11/graphics_dx11.h"
 #include "renderer_dx12.h"
 #endif	// PLATFORM_WINDOWS
 
@@ -26,7 +26,7 @@ namespace JojEngine
 		static JojPlatform::Window* window;
 		static JojPlatform::Input* input;
 		static JojGraphics::DX12Graphics* dx12_graphics;		// DX12 Graphics device
-		//static JojGraphics::DX11Graphics* dx11_graphics;		// DX11 Graphics device
+		static JojGraphics::DX11Graphics* dx11_graphics;		// DX11 Graphics device
 		static JojEngine::Game* game;							// Game to be executed
 		static f32 frametime;									// Current frametime
 
