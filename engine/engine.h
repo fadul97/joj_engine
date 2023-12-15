@@ -8,7 +8,7 @@
 #include "timer.h"
 #include "dx12/graphics_dx12.h"
 #include "dx11/graphics_dx11.h"
-#include "renderer_dx12.h"
+#include "dx12/renderer_dx12.h"
 #endif	// PLATFORM_WINDOWS
 
 #include "game.h"

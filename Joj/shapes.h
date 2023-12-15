@@ -1,7 +1,7 @@
 #pragma once
 
 #include "game.h"
-#include "renderer_dx12.h"
+#include "dx12/renderer_dx12.h"
 #include "DirectXMath.h"
 #include "geometry.h"
 
@@ -65,10 +65,10 @@ private:
 	f32 last_xmouse = 0;
 	f32 last_ymouse = 0;
 
-	//JojRenderer::Cube geo = {};
+	JojRenderer::Cube geo = {};
 	//JojRenderer::Cylinder geo = {};
 	//JojRenderer::Sphere geo = {};
 	//JojRenderer::GeoSphere geo = {};
-	JojRenderer::Grid geo = {};
+	//JojRenderer::Grid geo = {};
 	//JojRenderer::Quad geo = {};
 };
