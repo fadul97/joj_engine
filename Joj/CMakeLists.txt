@@ -2,7 +2,7 @@
 # project specific logic here.
 
 # Add source to this project's executable.
-add_executable(${PROJECT_NAME} main.cpp Joj.h shapes.cpp)
+add_executable(${PROJECT_NAME} main.cpp Joj.h shapes.cpp triangle_d3d11.cpp)
 
 # If Windows platform, setup entry point
 if(WIN32)

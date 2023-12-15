@@ -2,6 +2,7 @@
 
 #include "engine.h"
 #include "shapes.h"
+#include "triangle_d3d11.h"
 #include "error.h"
 
 #if PLATFORM_WINDOWS
@@ -14,7 +15,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		auto engine = new JojEngine::Engine();
 		engine->window->set_mode(JojPlatform::WINDOWED);
 		engine->window->set_size(800, 600);
-		engine->window->set_color(30, 30, 30);
+		engine->window->set_color(60, 60, 60);
 		engine->window->set_title("Joj Engine");
 
 		// Game pauses/resumes when losing/gaining focus
@@ -22,7 +23,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		engine->window->set_on_focus(JojEngine::Engine::resume);
 
 		// Create and execute game
-		int exit_code = engine->start(new Shapes(), JojEngine::Renderer::DX12);
+		int exit_code = engine->start(new D3D11Triangle(), JojEngine::Renderer::DX11);
 
 		// Cleanup
 		delete engine;
