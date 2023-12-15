@@ -10,12 +10,6 @@
 
 namespace JojRenderer
 {
-	struct Vertex
-	{
-		DirectX::XMFLOAT3 pos;
-		DirectX::XMFLOAT4 color;
-	};
-
 	class DX11Renderer
 	{
 	public:
@@ -24,14 +18,18 @@ namespace JojRenderer
 
 		b8 init(JojPlatform::Window* window, JojGraphics::DX11Graphics* graphics);	// Initialize renderer
 		void draw();																	// Draw
-		void clear();																	// Clear backbuffer for next frame
+		void clear();														// Clear backbuffer for next frame
+		void present();
 
 	private:
 		JojPlatform::Window* window;
+		f32 bg_color[4];
+		b8 vsync;
 
 		ID3D11Device* device;						// Graphics device
 		ID3D11DeviceContext* context;				// Graphics device context
 		ID3D11RenderTargetView* render_target_view; // Backbuffer render target view
+		ID3D11DepthStencilView* depth_stencil_view; // Depth/Stencil view
 		IDXGISwapChain* swap_chain;					// Swap chain
 	};
 }

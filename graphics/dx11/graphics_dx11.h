@@ -25,8 +25,9 @@ namespace JojGraphics
 		ID3D11DeviceContext* get_context();				// Return graphics device context
 		D3D11_VIEWPORT get_viewport();					// Return viewport
 
-		IDXGISwapChain* get_swap_chain();					// Return swap chain    
 		ID3D11RenderTargetView* get_render_target_view();	// Return backbuffer render target view
+		ID3D11DepthStencilView* get_depth_stencil_view();	// Return depth/stencil view
+		IDXGISwapChain* get_swap_chain();					// Return swap chain    
 
 	private:
 		ID3D11Device* device;							// Graphics device
@@ -37,9 +38,12 @@ namespace JojGraphics
 
 		IDXGISwapChain* swap_chain;						// Swap chain             
 		ID3D11RenderTargetView* render_target_view;     // Backbuffer render target view
+		ID3D11DepthStencilView* depth_stencil_view;		// Depth/Stencil view
 		ID3D11BlendState* blend_state;					// Color mix settings
 		D3D_FEATURE_LEVEL feature_level;				// Level of D3D features supported by hardware
 		f32 bg_color[4];								// Backbuffer background color
+		u32 antialiasing;								// Number of samples for each pixel on the screen
+		u32 quality;									// Antialiasing sampling quality
 		b8 vsync;										// Vertical sync 
 
 		void log_hardware_info();	// Show hardware information
@@ -66,6 +70,10 @@ namespace JojGraphics
 	// Return backbuffer render target view
 	inline ID3D11RenderTargetView* DX11Graphics::get_render_target_view()
 	{ return render_target_view; }
+
+	// Return depth/stencil view
+	inline ID3D11DepthStencilView* DX11Graphics::get_depth_stencil_view()
+	{ return depth_stencil_view; }
 
 	// Vertical sync on/off
 	inline void DX11Graphics::set_vsync(b8 state)
