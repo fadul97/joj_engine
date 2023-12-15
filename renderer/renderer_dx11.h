@@ -4,7 +4,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include "window_win32.h"
+#include "window.h"
 #include "graphics_dx11.h"
 #include <DirectXColors.h>
 
@@ -22,12 +22,12 @@ namespace JojRenderer
 		DX11Renderer();
 		~DX11Renderer();
 
-		b8 init(JojPlatform::Win32Window* window, JojGraphics::DX11Graphics* graphics);	// Initialize renderer
+		b8 init(JojPlatform::Window* window, JojGraphics::DX11Graphics* graphics);	// Initialize renderer
 		void draw();																	// Draw
 		void clear();																	// Clear backbuffer for next frame
 
 	private:
-		JojPlatform::Win32Window* window;
+		JojPlatform::Window* window;
 
 		ID3D11Device* device;						// Graphics device
 		ID3D11DeviceContext* context;				// Graphics device context

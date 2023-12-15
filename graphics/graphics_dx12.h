@@ -6,7 +6,7 @@
 
 #include <dxgi1_6.h>    // DirectX graphics infrastructure
 #include <d3d12.h>      // Main Direct3D functions
-#include "window_win32.h"
+#include "window.h"
 
 namespace JojGraphics
 {
@@ -16,7 +16,7 @@ namespace JojGraphics
 		DX12Graphics();
 		~DX12Graphics();
 
-		void init(JojPlatform::Win32Window* window);	// Initialize Direct3D
+		void init(JojPlatform::Window* window);	// Initialize Direct3D
 
 		void draw();									// Draw
 		void present();									// Present

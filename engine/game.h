@@ -3,8 +3,8 @@
 #include "defines.h"
 
 #if PLATFORM_WINDOWS
-#include "window_win32.h"
-#include "input_win32.h"
+#include "window.h"
+#include "input.h"
 #endif	// PLATFORM_WINDOWS
 
 namespace JojEngine
@@ -32,7 +32,7 @@ namespace JojEngine
 		virtual void on_pause() { Sleep(10); }	// On pause
 
 	protected:
-		static JojPlatform::Win32Window* window;
-		static JojPlatform::Win32Input* input;
+		static JojPlatform::Window* window;
+		static JojPlatform::Input* input;
 	};
 }

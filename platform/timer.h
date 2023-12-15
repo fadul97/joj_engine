@@ -8,11 +8,11 @@
 
 namespace JojPlatform
 {
-	class Win32Timer
+	class Timer
 	{
 	public:
-		Win32Timer();
-		~Win32Timer();
+		Timer();
+		~Timer();
 
 		void start();				// Start/resume counting time
 		void stop();				// Stop counting time
@@ -28,13 +28,13 @@ namespace JojPlatform
 		LARGE_INTEGER freq;				// Counter frequency
 		b8 stopped;						// Counter state
 	};
-	inline b8 Win32Timer::was_elapsed(f32 secs)
+	inline b8 Timer::was_elapsed(f32 secs)
 	{ return (elapsed() >= secs ? true : false); }
 
-	inline void Win32Timer::time_begin_period()
+	inline void Timer::time_begin_period()
 	{ timeBeginPeriod(1); }
 
-	inline void Win32Timer::time_end_period()
+	inline void Timer::time_end_period()
 	{ timeEndPeriod(1); }
 }
 

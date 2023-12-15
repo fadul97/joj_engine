@@ -3,9 +3,9 @@
 #include "defines.h"
 
 #if PLATFORM_WINDOWS
-#include "window_win32.h"
-#include "input_win32.h"
-#include "timer_win32.h"
+#include "window.h"
+#include "input.h"
+#include "timer.h"
 #include "graphics_dx12.h"
 #include "graphics_dx11.h"
 #include "renderer_dx12.h"
@@ -23,8 +23,8 @@ namespace JojEngine
 		Engine();
 		~Engine();
 
-		static JojPlatform::Win32Window* window;
-		static JojPlatform::Win32Input* input;
+		static JojPlatform::Window* window;
+		static JojPlatform::Input* input;
 		static JojGraphics::DX12Graphics* dx12_graphics;		// DX12 Graphics device
 		static JojGraphics::DX11Graphics* dx11_graphics;		// DX11 Graphics device
 		static JojEngine::Game* game;							// Game to be executed
@@ -41,7 +41,7 @@ namespace JojEngine
 		static LRESULT CALLBACK EngineProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 	private:
-		static JojPlatform::Win32Timer timer;	// Time counter
+		static JojPlatform::Timer timer;	// Time counter
 		static b8 paused;						// Engine state
 
 		f32 get_frametime();					// Calculate frametime

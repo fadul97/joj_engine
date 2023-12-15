@@ -3,8 +3,8 @@
 #include "engine.h"
 
 // Static members
-JojPlatform::Win32Window* JojEngine::Game::window = nullptr;	// Pointer to window
-JojPlatform::Win32Input* JojEngine::Game::input = nullptr;		// Pointer to input
+JojPlatform::Window* JojEngine::Game::window = nullptr;	// Pointer to window
+JojPlatform::Input* JojEngine::Game::input = nullptr;		// Pointer to input
 
 JojEngine::Game::Game()
 {

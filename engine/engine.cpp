@@ -3,20 +3,20 @@
 #include <sstream>
 
 // Static members
-JojPlatform::Win32Window* JojEngine::Engine::window = nullptr;				// Game window
-JojPlatform::Win32Input* JojEngine::Engine::input = nullptr;				// Input device
+JojPlatform::Window* JojEngine::Engine::window = nullptr;				// Game window
+JojPlatform::Input* JojEngine::Engine::input = nullptr;				// Input device
 JojGraphics::DX12Graphics* JojEngine::Engine::dx12_graphics = nullptr;		// DX12 Graphics device
 JojGraphics::DX11Graphics* JojEngine::Engine::dx11_graphics = nullptr;		// DX11 Graphics device
 JojEngine::Game* JojEngine::Engine::game = nullptr;							// Pointer to game
 f32 JojEngine::Engine::frametime = 0.0f;									// Current frametime
-JojPlatform::Win32Timer JojEngine::Engine::timer;							// Time counter
+JojPlatform::Timer JojEngine::Engine::timer;							// Time counter
 b8 JojEngine::Engine::paused = false;										// Engine state
 
 JojRenderer::DX12Renderer* JojEngine::Engine::renderer = nullptr;			// DX12 Renderer
 
 JojEngine::Engine::Engine()
 {
-	window = new JojPlatform::Win32Window();
+	window = new JojPlatform::Window();
 	renderer = new JojRenderer::DX12Renderer();
 }
 
@@ -44,7 +44,7 @@ i32 JojEngine::Engine::start(JojEngine::Game* game, Renderer renderer_api)
 	window->create();
 
 	// ATTENTION: input must be initialized after window creation
-	input = new JojPlatform::Win32Input();
+	input = new JojPlatform::Input();
 
 	// Initialize graphics device
 	if (renderer_api == Renderer::DX11)
@@ -182,5 +182,5 @@ LRESULT CALLBACK JojEngine::Engine::EngineProc(HWND hWnd, UINT msg, WPARAM wPara
 	if (msg == WM_PAINT)
 		game->display();
 
-	return CallWindowProc(JojPlatform::Win32Input::InputProc, hWnd, msg, wParam, lParam);
+	return CallWindowProc(JojPlatform::Input::InputProc, hWnd, msg, wParam, lParam);
 }

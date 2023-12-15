@@ -1,8 +1,8 @@
-#include "timer_win32.h"
+#include "timer.h"
 
 #if PLATFORM_WINDOWS
 
-JojPlatform::Win32Timer::Win32Timer()
+JojPlatform::Timer::Timer()
 {
 	// Get frequency from high-resolution counter
 	QueryPerformanceFrequency(&freq);
@@ -15,11 +15,11 @@ JojPlatform::Win32Timer::Win32Timer()
 	stopped = false;
 }
 
-JojPlatform::Win32Timer::~Win32Timer()
+JojPlatform::Timer::~Timer()
 {
 }
 
-void JojPlatform::Win32Timer::start()
+void JojPlatform::Timer::start()
 {
 	if (stopped)
 	{
@@ -47,7 +47,7 @@ void JojPlatform::Win32Timer::start()
 	}
 }
 
-void JojPlatform::Win32Timer::stop()
+void JojPlatform::Timer::stop()
 {
 	if (!stopped)
 	{
@@ -57,7 +57,7 @@ void JojPlatform::Win32Timer::stop()
 	}
 }
 
-f32 JojPlatform::Win32Timer::reset()
+f32 JojPlatform::Timer::reset()
 {
 	i64 elapsed;
 
@@ -88,7 +88,7 @@ f32 JojPlatform::Win32Timer::reset()
 	return f32(elapsed / f64(freq.QuadPart));
 }
 
-f32 JojPlatform::Win32Timer::elapsed()
+f32 JojPlatform::Timer::elapsed()
 {
 	i64 elapsed;
 

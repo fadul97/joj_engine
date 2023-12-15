@@ -4,7 +4,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include "window_win32.h"
+#include "window.h"
 #include "graphics_dx12.h"
 #include <DirectXColors.h>
 #include <d3d12.h>
@@ -36,7 +36,7 @@ namespace JojRenderer
 		DX12Renderer();
 		~DX12Renderer();
 
-		b8 init(JojPlatform::Win32Window* window, JojGraphics::DX12Graphics* graphics);	// Initialize renderer
+		b8 init(JojPlatform::Window* window, JojGraphics::DX12Graphics* graphics);	// Initialize renderer
 		void draw();																	// Draw
 		void present();																	// Present
 		void clear(ID3D12PipelineState* pso);											// Clear backbuffer for next frame
@@ -60,7 +60,7 @@ namespace JojRenderer
 		void copy_verts_to_gpu(const void* vertices, u32 size_in_bytes, ID3D12Resource* buffer_upload, ID3D12Resource* buffer_gpu);
 
 	private:
-		JojPlatform::Win32Window* window;
+		JojPlatform::Window* window;
 		JojGraphics::DX12Graphics* graphics;
 
 		// Configuration

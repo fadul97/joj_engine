@@ -1,4 +1,4 @@
-#include "window_win32.h"
+#include "window.h"
 
 #if PLATFORM_WINDOWS
 
@@ -22,10 +22,10 @@ void print_window_win32(u32 n)
 }
 
 // Static members
-void (*JojPlatform::Win32Window::on_focus)() = nullptr;		// Do nothing when gaining focus
-void (*JojPlatform::Win32Window::lost_focus)() = nullptr;	// Do nothing when losing focus
+void (*JojPlatform::Window::on_focus)() = nullptr;		// Do nothing when gaining focus
+void (*JojPlatform::Window::lost_focus)() = nullptr;	// Do nothing when losing focus
 
-JojPlatform::Win32Window::Win32Window()
+JojPlatform::Window::Window()
 {
 	id = 0;									// Null ID because the window does not exist yet
 	width = GetSystemMetrics(SM_CXSCREEN);  // Window occupies the entire screen (fullscreen)
@@ -44,14 +44,14 @@ JojPlatform::Win32Window::Win32Window()
 	rect = { 0, 0, 0, 0 };                  // Window client area
 }
 
-JojPlatform::Win32Window::~Win32Window()
+JojPlatform::Window::~Window()
 {
 	// Release device context
 	if (hdc)
 		ReleaseDC(id, hdc);
 }
 
-void JojPlatform::Win32Window::set_mode(u32 mode)
+void JojPlatform::Window::set_mode(u32 mode)
 {
 	this->mode = mode;
 
@@ -67,7 +67,7 @@ void JojPlatform::Win32Window::set_mode(u32 mode)
 	}
 }
 
-void JojPlatform::Win32Window::set_size(i32 width, i32 height)
+void JojPlatform::Window::set_size(i32 width, i32 height)
 {
 	// Window size
 	this->width = width;
@@ -86,7 +86,7 @@ void JojPlatform::Win32Window::set_size(i32 width, i32 height)
  *	@brief Displays the text at the (x,y) position on the screen using the specified color,
  *	it uses Windows GDI (slow) and should only be used for debugging.
  */
-void JojPlatform::Win32Window::print_on_window(std::string text, i16 x, i16 y, COLORREF color)
+void JojPlatform::Window::print_on_window(std::string text, i16 x, i16 y, COLORREF color)
 {
 	// Set text color
 	SetTextColor(hdc, color);
@@ -98,7 +98,7 @@ void JojPlatform::Win32Window::print_on_window(std::string text, i16 x, i16 y, C
 	TextOut(hdc, x, y, text.c_str(), (int)text.size());
 }
 
-b8 JojPlatform::Win32Window::create()
+b8 JojPlatform::Window::create()
 {
 	// Application ID
 	HINSTANCE appId = GetModuleHandle(NULL);
@@ -107,7 +107,7 @@ b8 JojPlatform::Win32Window::create()
 	WNDCLASSEX wndClass = { };
 	wndClass.cbSize = sizeof(WNDCLASSEX);
 	wndClass.style = CS_DBLCLKS | CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
-	wndClass.lpfnWndProc = JojPlatform::Win32Window::WinProc;
+	wndClass.lpfnWndProc = JojPlatform::Window::WinProc;
 	wndClass.cbClsExtra = 0;
 	wndClass.cbWndExtra = 0;
 	wndClass.hInstance = appId;
@@ -177,7 +177,7 @@ b8 JojPlatform::Win32Window::create()
 	return (id ? true : false);
 }
 
-LRESULT CALLBACK JojPlatform::Win32Window::WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK JojPlatform::Window::WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{

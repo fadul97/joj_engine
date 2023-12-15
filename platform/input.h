@@ -4,15 +4,15 @@
 
 #if PLATFORM_WINDOWS
 
-#include "window_win32.h"
+#include "window.h"
 
 namespace JojPlatform
 {
-	class Win32Input
+	class Input
 	{
 	public:
-		Win32Input();
-		~Win32Input();
+		Input();
+		~Input();
 
 		b8 is_key_down(u32 vkcode);		// Checks if key is pressed
 		b8 is_key_up(u32 vkcode);		// Checks if key is released
@@ -35,19 +35,19 @@ namespace JojPlatform
 	};
 
 	// Returns true if key is pressed
-	inline b8 Win32Input::is_key_down(u32 vkcode)
+	inline b8 Input::is_key_down(u32 vkcode)
 	{ return keys[vkcode]; }
 
 	//  Returns true if key is released
-	inline b8 Win32Input::is_key_up(u32 vkcode)
+	inline b8 Input::is_key_up(u32 vkcode)
 	{ return !(keys[vkcode]); }
 
 	// retorna a posição do mouse no eixo x
-	inline i32 Win32Input::get_xmouse()
+	inline i32 Input::get_xmouse()
 	{ return xmouse; }
 
 	// retorna a posição do mouse no eixo y
-	inline i32 Win32Input::get_ymouse()
+	inline i32 Input::get_ymouse()
 	{ return ymouse; }
 
 }   // JojPlatform

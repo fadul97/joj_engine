@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(JojPlatform)
 
-add_library(JojPlatform window_win32.cpp input_win32.cpp timer_win32.cpp)
+add_library(JojPlatform window.cpp input.cpp timer.cpp)
 
 if(CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET JojPlatform PROPERTY CXX_STANDARD 20)
@@ -16,3 +16,7 @@ endif()
 
 # Include engine folder
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../engine/)
+
+if(WIN32)
+	add_subdirectory(win32)
+endif()

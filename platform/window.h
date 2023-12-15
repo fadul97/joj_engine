@@ -14,11 +14,11 @@ namespace JojPlatform
 {
 	enum WindowModes { FULLSCREEN, WINDOWED };
 
-	class Win32Window
+	class Window
 	{
 	public:
-		Win32Window();
-		~Win32Window();
+		Window();
+		~Window();
 
 		HWND get_id() const;						// Return window ID
 		i32 get_width() const;						// Return window width
@@ -77,75 +77,75 @@ namespace JojPlatform
 	};
 
 	// Return window ID
-	inline HWND Win32Window::get_id() const
+	inline HWND Window::get_id() const
 	{ return id; }
 
 	// Return window width
-	inline i32 Win32Window::get_width() const
+	inline i32 Window::get_width() const
 	{ return width; }
 
 	// Return window height
-	inline i32 Win32Window::get_height() const
+	inline i32 Window::get_height() const
 	{ return height; }
 
 	// Return window mode (Full-screen, windowed, or borderless mode)
-	inline u32 Win32Window::get_mode() const
+	inline u32 Window::get_mode() const
 	{ return mode; }
 
 	// Return center position in x
-	inline i32 Win32Window::get_xcenter() const
+	inline i32 Window::get_xcenter() const
 	{return xcenter; }
 
 	// Return center position in y
-	inline i32 Win32Window::get_ycenter() const
+	inline i32 Window::get_ycenter() const
 	{ return ycenter; }
 
 	// Return window title
-	inline std::string Win32Window::get_title() const
+	inline std::string Window::get_title() const
 	{ return title; }
 
 	// Return window background color
-	inline COLORREF Win32Window::get_color() const
+	inline COLORREF Window::get_color() const
 	{ return color; }
 
 	// Return window aspect ratio
-	inline f32 Win32Window::get_aspect_ratio() const
+	inline f32 Window::get_aspect_ratio() const
 	{ return width / f32(height); }
 
 	// Set window icon
-	inline void Win32Window::set_icon(const u32 icon)
+	inline void Window::set_icon(const u32 icon)
 	{ this->icon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(icon)); }
 
 	// Set window cursor
-	inline void Win32Window::set_cursor(const u32 cursor)
+	inline void Window::set_cursor(const u32 cursor)
 	{ this->cursor = LoadCursor(GetModuleHandle(NULL), MAKEINTRESOURCE(cursor)); }
 
 	// Set window title
-	inline void Win32Window::set_title(const std::string title)
+	inline void Window::set_title(const std::string title)
 	{ this->title = title; }
 
 	// Set window background color
-	inline void Win32Window::set_color(u32 r, u32 g, u32 b)
+	inline void Window::set_color(u32 r, u32 g, u32 b)
 	{ this->color = RGB(r, g, b); }
 
 	// Enable or disable cursor display
-	inline void Win32Window::hide_cursor(b8 hide)
+	inline void Window::hide_cursor(b8 hide)
 	{ ShowCursor(!hide); }
 
 	// Close window
-	inline void Win32Window::close()
+	inline void Window::close()
 	{ PostMessage(id, WM_DESTROY, 0, 0); }
 
 	// Clear client area
-	inline void Win32Window::clear()
+	inline void Window::clear()
 	{ FillRect(hdc, &rect, CreateSolidBrush(get_color())); }
 
 	// Set function to be executed when regaining focus
-	inline void Win32Window::set_on_focus(void(*func)())
+	inline void Window::set_on_focus(void(*func)())
 	{ on_focus = func; }
 
 	// // Set function to be executed when losing focus
-	inline void Win32Window::set_lost_focus(void(*func)())
+	inline void Window::set_lost_focus(void(*func)())
 	{ lost_focus = func; }
 
 }	// namespace JojPlatform

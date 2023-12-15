@@ -1,30 +1,30 @@
-#include "input_win32.h"
+#include "input.h"
 
 #if PLATFORM_WINDOWS
 
 // Static members
-b8 JojPlatform::Win32Input::keys[256] = { 0 };		// Keyboard/Mouse state
-b8 JojPlatform::Win32Input::ctrl[256] = { 0 };		// Key release control
+b8 JojPlatform::Input::keys[256] = { 0 };		// Keyboard/Mouse state
+b8 JojPlatform::Input::ctrl[256] = { 0 };		// Key release control
 
-i32	JojPlatform::Win32Input::xmouse = 0;			// X mouse position
-i32	JojPlatform::Win32Input::ymouse = 0;			// Y mouse position
-i16 JojPlatform::Win32Input::mouse_wheel = 0;		// Mouse wheel value
+i32	JojPlatform::Input::xmouse = 0;			// X mouse position
+i32	JojPlatform::Input::ymouse = 0;			// Y mouse position
+i16 JojPlatform::Input::mouse_wheel = 0;		// Mouse wheel value
 
-JojPlatform::Win32Input::Win32Input()
+JojPlatform::Input::Input()
 {
 	/* ATTENTION: assumes that the window has already been created with a call to window->create();
   	 * change the window procedure of the active window to InputProc
 	 */
-	SetWindowLongPtr(GetActiveWindow(), GWLP_WNDPROC, (LONG_PTR)JojPlatform::Win32Input::InputProc);
+	SetWindowLongPtr(GetActiveWindow(), GWLP_WNDPROC, (LONG_PTR)JojPlatform::Input::InputProc);
 }
 
-JojPlatform::Win32Input::~Win32Input()
+JojPlatform::Input::~Input()
 {
 	// returns to use the Window Procedure of the Window class
-	SetWindowLongPtr(GetActiveWindow(), GWLP_WNDPROC, (LONG_PTR)JojPlatform::Win32Window::WinProc);
+	SetWindowLongPtr(GetActiveWindow(), GWLP_WNDPROC, (LONG_PTR)JojPlatform::Window::WinProc);
 }
 
-b8 JojPlatform::Win32Input::is_key_press(u32 vkcode)
+b8 JojPlatform::Input::is_key_press(u32 vkcode)
 {
 	if (ctrl[vkcode])
 	{
@@ -42,14 +42,14 @@ b8 JojPlatform::Win32Input::is_key_press(u32 vkcode)
 	return false;
 }
 
-short JojPlatform::Win32Input::get_mouse_wheel()
+short JojPlatform::Input::get_mouse_wheel()
 {
 	i16 val = mouse_wheel;
 	mouse_wheel = 0;
 	return val;
 }
 
-LRESULT CALLBACK JojPlatform::Win32Input::InputProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK JojPlatform::Input::InputProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
@@ -108,7 +108,7 @@ LRESULT CALLBACK JojPlatform::Win32Input::InputProc(HWND hWnd, UINT msg, WPARAM 
 		return 0;
 	}
 
-	return CallWindowProc(JojPlatform::Win32Window::WinProc, hWnd, msg, wParam, lParam);
+	return CallWindowProc(JojPlatform::Window::WinProc, hWnd, msg, wParam, lParam);
 }
 
 #endif	// PLATFORM_WINDOWS

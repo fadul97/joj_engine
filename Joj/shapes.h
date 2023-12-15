@@ -65,9 +65,9 @@ private:
 	f32 last_xmouse = 0;
 	f32 last_ymouse = 0;
 
-	JojRenderer::Cube geo = {};
+	//JojRenderer::Cube geo = {};
 	//JojRenderer::Cylinder geo = {};
-	//JojRenderer::Sphere geo = {};
+	JojRenderer::Sphere geo = {};
 	//JojRenderer::GeoSphere geo = {};
 	//JojRenderer::Grid geo = {};
 	//JojRenderer::Quad geo = {};

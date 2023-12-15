@@ -140,7 +140,7 @@ void JojGraphics::DX11Graphics::log_hardware_info()
 	if (output) output->Release();
 }
 
-void JojGraphics::DX11Graphics::init(JojPlatform::Win32Window* window)
+void JojGraphics::DX11Graphics::init(JojPlatform::Window* window)
 {
 	// ---------------------------------------------------
 	// Creates DXGI infrastructure and D3D device

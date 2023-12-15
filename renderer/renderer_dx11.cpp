@@ -18,7 +18,7 @@ JojRenderer::DX11Renderer::~DX11Renderer()
 {
 }
 
-b8 JojRenderer::DX11Renderer::init(JojPlatform::Win32Window* window, JojGraphics::DX11Graphics* graphics)
+b8 JojRenderer::DX11Renderer::init(JojPlatform::Window* window, JojGraphics::DX11Graphics* graphics)
 {
     // Set window
     this->window = window;
