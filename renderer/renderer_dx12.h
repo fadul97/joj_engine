@@ -5,7 +5,7 @@
 #if PLATFORM_WINDOWS
 
 #include "window.h"
-#include "graphics_dx12.h"
+#include "dx12/graphics_dx12.h"
 #include <DirectXColors.h>
 #include <d3d12.h>
 

@@ -6,7 +6,7 @@
 JojPlatform::Window* JojEngine::Engine::window = nullptr;				// Game window
 JojPlatform::Input* JojEngine::Engine::input = nullptr;				// Input device
 JojGraphics::DX12Graphics* JojEngine::Engine::dx12_graphics = nullptr;		// DX12 Graphics device
-JojGraphics::DX11Graphics* JojEngine::Engine::dx11_graphics = nullptr;		// DX11 Graphics device
+//JojGraphics::DX11Graphics* JojEngine::Engine::dx11_graphics = nullptr;		// DX11 Graphics device
 JojEngine::Game* JojEngine::Engine::game = nullptr;							// Pointer to game
 f32 JojEngine::Engine::frametime = 0.0f;									// Current frametime
 JojPlatform::Timer JojEngine::Engine::timer;							// Time counter
@@ -24,8 +24,7 @@ JojEngine::Engine::~Engine()
 {
 	delete game;
 
-	if (dx11_graphics)
-		delete dx11_graphics;
+	//if (dx11_graphics) delete dx11_graphics;
 	
 	if (dx12_graphics)
 		delete dx12_graphics;
@@ -49,8 +48,8 @@ i32 JojEngine::Engine::start(JojEngine::Game* game, Renderer renderer_api)
 	// Initialize graphics device
 	if (renderer_api == Renderer::DX11)
 	{
-		dx11_graphics = new JojGraphics::DX11Graphics();
-		dx11_graphics->init(window);
+		//dx11_graphics = new JojGraphics::DX11Graphics();
+		//dx11_graphics->init(window);
 	}
 	else
 	{
