@@ -13,11 +13,13 @@ JojPlatform::Timer JojEngine::Engine::timer;								// Time counter
 b8 JojEngine::Engine::paused = false;										// Engine state
 
 JojRenderer::DX12Renderer* JojEngine::Engine::renderer = nullptr;			// DX12 Renderer
+JojRenderer::DX11Renderer* JojEngine::Engine::dx11_renderer = nullptr;		// DX12 Renderer
 
 JojEngine::Engine::Engine()
 {
 	window = new JojPlatform::Window();
 	renderer = new JojRenderer::DX12Renderer();
+	dx11_renderer = new JojRenderer::DX11Renderer();
 }
 
 JojEngine::Engine::~Engine()
@@ -31,6 +33,7 @@ JojEngine::Engine::~Engine()
 		delete dx12_graphics;
 
 	delete renderer;
+	delete dx11_renderer;
 	
 	delete input;
 	delete window;
@@ -51,6 +54,7 @@ i32 JojEngine::Engine::start(JojEngine::Game* game, Renderer renderer_api)
 	{
 		dx11_graphics = new JojGraphics::DX11Graphics();
 		dx11_graphics->init(window);
+		dx11_renderer->init(window, dx11_graphics);
 	}
 	else
 	{

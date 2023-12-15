@@ -9,6 +9,7 @@
 #include "dx12/graphics_dx12.h"
 #include "dx11/graphics_dx11.h"
 #include "dx12/renderer_dx12.h"
+#include "dx11/renderer_dx11.h"
 #endif	// PLATFORM_WINDOWS
 
 #include "game.h"
@@ -31,6 +32,7 @@ namespace JojEngine
 		static f32 frametime;									// Current frametime
 
 		static JojRenderer::DX12Renderer* renderer;				// DX12 Renderer
+		static JojRenderer::DX11Renderer* dx11_renderer;		// DX11 Renderer
 
 		i32 start(JojEngine::Game* game, Renderer renderer_api);	// Initializes game execution
 
