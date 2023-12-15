@@ -3,8 +3,9 @@
 #include "game.h"
 #include "renderer_dx12.h"
 #include "DirectXMath.h"
+#include "geometry.h"
 
-class Cube : public JojEngine::Game
+class Shapes : public JojEngine::Game
 {
 public:
 	void init();
@@ -12,6 +13,7 @@ public:
 	void draw();
 	void shutdown();
 
+	void build_descriptor_heaps();
 	void build_constant_buffers();
 	void build_geometry();
 	void build_root_signature();
@@ -62,4 +64,11 @@ private:
 
 	f32 last_xmouse = 0;
 	f32 last_ymouse = 0;
+
+	JojRenderer::Cube geo = {};
+	//JojRenderer::Cylinder geo = {};
+	//JojRenderer::Sphere geo = {};
+	//JojRenderer::GeoSphere geo = {};
+	//JojRenderer::Grid geo = {};
+	//JojRenderer::Quad geo = {};
 };

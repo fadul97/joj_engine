@@ -1,10 +1,10 @@
-#include "cube.h"
+#include "shapes.h"
 
 #include <d3dcompiler.h>
 #include "error.h"
 #include "engine.h"
 
-void Cube::init()
+void Shapes::init()
 {
     // controla rotação do cubo
     theta = DirectX::XM_PIDIV4;
@@ -31,6 +31,7 @@ void Cube::init()
     JojEngine::Engine::renderer->reset_commands();
 
     // Build geometry and initialize pipeline
+    build_descriptor_heaps();
     build_constant_buffers();
     build_geometry();
     build_root_signature();
@@ -39,7 +40,7 @@ void Cube::init()
     JojEngine::Engine::renderer->submit_commands();
 }
 
-void Cube::update()
+void Shapes::update()
 {
     // Exit with ESCAPE key
     if (input->is_key_press(VK_ESCAPE))
@@ -101,7 +102,7 @@ void Cube::update()
     memcpy(constant_buffer_data, &obj_constant, sizeof(JojRenderer::ObjectConstant));
 }
 
-void Cube::draw()
+void Shapes::draw()
 {
     JojEngine::Engine::renderer->clear(pipeline_state);
 
@@ -126,12 +127,12 @@ void Cube::draw()
     JojEngine::Engine::dx12_graphics->get_command_list()->SetGraphicsRootDescriptorTable(0, constant_buffer_heap->GetGPUDescriptorHandleForHeapStart());
 
     // Submit Drawing Commands
-    JojEngine::Engine::dx12_graphics->get_command_list()->DrawIndexedInstanced(36, 1, 0, 0, 0);
+    JojEngine::Engine::dx12_graphics->get_command_list()->DrawIndexedInstanced(geo.get_index_count() , 1, 0, 0, 0);
 
     JojEngine::Engine::renderer->present();
 }
 
-void Cube::shutdown()
+void Shapes::shutdown()
 {
     constant_buffer_upload->Unmap(0, nullptr);
     constant_buffer_upload->Release();
@@ -141,7 +142,7 @@ void Cube::shutdown()
     pipeline_state->Release();
 }
 
-void Cube::build_constant_buffers()
+void Shapes::build_descriptor_heaps()
 {
     // Constant buffer descriptor
     D3D12_DESCRIPTOR_HEAP_DESC constant_buffer_heap_desc = {};
@@ -151,7 +152,10 @@ void Cube::build_constant_buffers()
 
     // Create descriptor for constant buffer
     JojEngine::Engine::renderer->get_device()->CreateDescriptorHeap(&constant_buffer_heap_desc, IID_PPV_ARGS(&constant_buffer_heap));
+}
 
+void Shapes::build_constant_buffers()
+{
     // Upload buffer heap properties
     D3D12_HEAP_PROPERTIES upload_heap_properties = {};
     upload_heap_properties.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -204,65 +208,32 @@ void Cube::build_constant_buffers()
     constant_buffer_upload->Map(0, nullptr, reinterpret_cast<void**>(&constant_buffer_data));
 }
 
-void Cube::build_geometry()
+void Shapes::build_geometry()
 {
     // --------------------------------
     // Vertex Buffer
     // --------------------------------
 
-    // Geometry vertexes
-    JojRenderer::Vertex vertices[8] =
-    {
-        { DirectX::XMFLOAT3(-1.0f, -1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
-        { DirectX::XMFLOAT3(-1.0f, +1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
-        { DirectX::XMFLOAT3(+1.0f, +1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
-        { DirectX::XMFLOAT3(+1.0f, -1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
-        { DirectX::XMFLOAT3(-1.0f, -1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
-        { DirectX::XMFLOAT3(-1.0f, +1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
-        { DirectX::XMFLOAT3(+1.0f, +1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
-        { DirectX::XMFLOAT3(+1.0f, -1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) }
-    };
-
-    // Geometry indexes
-    u16 indices[36] =
-    {
-        // front face
-        0, 1, 3,
-        1, 2, 3,
-
-        // back face
-        4, 6, 5,
-        4, 7, 6,
-
-        // left face
-        4, 5, 1,
-        4, 1, 0,
-
-        // right face
-        3, 2, 6,
-        3, 6, 7,
-
-        // top face
-        1, 5, 6,
-        1, 6, 2,
-
-        // bottom face
-        4, 0, 3,
-        4, 3, 7
-    };
+    // Geometries
+    geo = JojRenderer::Cube(2.0f, 2.0f, 2.0f);
+    //geo = JojRenderer::Cylinder(1.0f, 0.5f, 3.0f, 10, 10);
+    //geo = JojRenderer::Sphere(1.0f, 20, 20);
+    //geo = JojRenderer::GeoSphere(1.0f, 3);
+    //geo = JojRenderer::Grid(20.0f, 20.0f, 20, 20);
+    //geo = JojRenderer::Quad(3.0f, 1.0f);
 
     // -----------------------------------------------------------
     // >> Allocate and Copy Vertex and Index Buffers to the GPU <<
     // -----------------------------------------------------------
 
     // Byte size of vertices and indexes
-    const u32 vb_size = 8 * sizeof(JojRenderer::Vertex);
-    const u32 ib_size = 36 * sizeof(u16);
+    const u32 vb_size = geo.get_vertex_count() * sizeof(JojRenderer::Vertex);
+    const u32 ib_size = geo.get_index_count() * sizeof(u32);
 
-    // Setup geometry attributes
+    // Setup geometry attributes (Mesh)
     vertex_byte_stride = sizeof(JojRenderer::Vertex);
     vertex_buffer_size = vb_size;
-    index_format = DXGI_FORMAT_R16_UINT;
+    index_format = DXGI_FORMAT_R32_UINT;
     index_buffer_size = ib_size;
 
     // Allocate resources to the Vertex Buffer
@@ -276,15 +247,15 @@ void Cube::build_geometry()
     JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::GPU, ib_size, &index_buffer_gpu);
 
     // Save a copy of the vertices and indexes in the 'mesh'
-    JojEngine::Engine::renderer->copy_verts_to_cpu_blob(vertices, vb_size, vertex_buffer_cpu);
-    JojEngine::Engine::renderer->copy_verts_to_cpu_blob(indices, ib_size, index_buffer_cpu);
+    JojEngine::Engine::renderer->copy_verts_to_cpu_blob(geo.get_vertex_data(), vb_size, vertex_buffer_cpu);
+    JojEngine::Engine::renderer->copy_verts_to_cpu_blob(geo.get_index_data(), ib_size, index_buffer_cpu);
 
     // Copy vertices and indexes to the GPU using the Upload buffer
-    JojEngine::Engine::renderer->copy_verts_to_gpu(vertices, vb_size, vertex_buffer_upload, vertex_buffer_gpu);
-    JojEngine::Engine::renderer->copy_verts_to_gpu(indices, ib_size, index_buffer_upload, index_buffer_gpu);
+    JojEngine::Engine::renderer->copy_verts_to_gpu(geo.get_vertex_data(), vb_size, vertex_buffer_upload, vertex_buffer_gpu);
+    JojEngine::Engine::renderer->copy_verts_to_gpu(geo.get_index_data(), ib_size, index_buffer_upload, index_buffer_gpu);
 }
 
-void Cube::build_root_signature()
+void Shapes::build_root_signature()
 {
     // TODO: comment specifications on cbv_table
     // Create a single table of CBV descriptors
@@ -334,7 +305,7 @@ void Cube::build_root_signature()
         IID_PPV_ARGS(&root_signature)));
 }
 
-void Cube::build_pipeline_state()
+void Shapes::build_pipeline_state()
 {
     // --------------------------------
     // Input Assembler
@@ -380,8 +351,8 @@ void Cube::build_pipeline_state()
     // TODO: comment specifications on rasterizer
     // Describe rasterizer
     D3D12_RASTERIZER_DESC rasterizer = {};
-    rasterizer.FillMode = D3D12_FILL_MODE_SOLID;
-    //rasterizer.FillMode = D3D12_FILL_MODE_WIREFRAME;
+    //rasterizer.FillMode = D3D12_FILL_MODE_SOLID;
+    rasterizer.FillMode = D3D12_FILL_MODE_WIREFRAME;
     rasterizer.CullMode = D3D12_CULL_MODE_BACK;
     //rasterizer.CullMode = D3D12_CULL_MODE_NONE;
     rasterizer.FrontCounterClockwise = FALSE;
