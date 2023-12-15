@@ -64,3 +64,19 @@ set (LIBS d3d11 D3DCompiler)
 target_link_libraries (${PROJECT_NAME} PRIVATE ${LIBS})
 
 add_dependencies (${PROJECT_NAME} shaders)
+
+
+
+# Specify the source files
+set(D3D11_SHADER_FILES
+    VertexShader.hlsl
+    PixelShader.hlsl
+)
+
+# Specify the destination directory (the same directory as the executable)
+set(DESTINATION_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
+# Copy shader files to the destination directory during CMake configuration
+foreach(D3D11_SHADER_FILES ${SHADER_FILES})
+    configure_file(${SHADER_FILE} ${DESTINATION_DIR} COPYONLY)
+endforeach()
