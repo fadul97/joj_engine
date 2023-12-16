@@ -34,6 +34,9 @@ namespace JojRenderer
 		// Compile and create Pixel Shader from file
 		ID3D11PixelShader* compile_and_create_ps_from_file(LPCWSTR file_path, ID3DBlob*& blob, unsigned long shader_flags);
 
+		// Create and set input layout
+		b8 create_and_set_input_layout(D3D11_INPUT_ELEMENT_DESC* input_desc, u32 array_size, ID3DBlob* blob, ID3D11InputLayout* input_layout);
+
 	private:
 		JojPlatform::Window* window;				// Engine window
 		JojGraphics::DX11Graphics* graphics;		// Graphics context

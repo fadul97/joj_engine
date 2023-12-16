@@ -163,3 +163,18 @@ ID3D11PixelShader* JojRenderer::DX11Renderer::compile_and_create_ps_from_file(LP
 
     return pixel_shader;
 }
+
+b8 JojRenderer::DX11Renderer::create_and_set_input_layout(D3D11_INPUT_ELEMENT_DESC* input_desc, u32 array_size, ID3DBlob* blob, ID3D11InputLayout* input_layout)
+{
+    // Create input layout
+    if FAILED(device->CreateInputLayout(input_desc, array_size, blob->GetBufferPointer(), blob->GetBufferSize(), &input_layout))
+    {
+        MessageBoxA(nullptr, "Failed to create Input Layout.", 0, 0);
+        return false;
+    }
+
+    // Bind input layout to the Input Assembler Stage
+    context->IASetInputLayout(input_layout);
+
+    return true;
+}

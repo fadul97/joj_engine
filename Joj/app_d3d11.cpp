@@ -118,20 +118,18 @@ void D3D11App::init()
 	// --------------------------------
 
 	// Input layout
-	ID3D11InputLayout* inputLayout;
+	ID3D11InputLayout* input_layout = nullptr;
 
 	// Description of Vertex Structure we created
-	D3D11_INPUT_ELEMENT_DESC inputDesc[2] =
+	D3D11_INPUT_ELEMENT_DESC input_desc[2] =
 	{
 		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR",		0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }				// 3 'floats' x 4 bytes = 12 bytes
 	};
 
-	// Create input layout
-	ThrowIfFailed(JojEngine::Engine::dx11_graphics->get_device()->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), vs_blob->GetBufferPointer(), vs_blob->GetBufferSize(), &inputLayout));
-
-	// Bind input layout to the Imput Assembler Stage
-	JojEngine::Engine::dx11_graphics->get_context()->IASetInputLayout(inputLayout);
+	// Create and bind input layout to Input Assembler Stage
+	if (!JojEngine::Engine::dx11_renderer->create_and_set_input_layout(input_desc, ARRAYSIZE(input_desc), vs_blob, input_layout))
+		OutputDebugString("Failed to create and set input layout\n");
 
 	// Tell how Direct3D will form geometric primitives from vertex data
 	JojEngine::Engine::dx11_graphics->get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
