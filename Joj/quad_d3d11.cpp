@@ -1,22 +1,29 @@
-#include "triangle_d3d11.h"
+#include "quad_d3d11.h"
 
 #include "engine.h"
 #include <d3dcompiler.h>
 #include "error.h"
 
 
-void D3D11Triangle::init()
+void D3D11Quad::init()
 {
     // --------------------------------
     // Vertex Buffer
     // --------------------------------
 
 	// Set vertices
-	Vertex vertices[3] =
+	Vertex vertices[4] =
+	{	
+		{ DirectX::XMFLOAT3(-0.5f, -0.5f, 0.0f),	DirectX::XMFLOAT4(DirectX::Colors::Yellow) },	// Yellow
+		{ DirectX::XMFLOAT3(-0.5f, +0.5f, 0.0f),	DirectX::XMFLOAT4(DirectX::Colors::Red) },		// Red
+		{ DirectX::XMFLOAT3(+0.5f, +0.5f, 0.0f),	DirectX::XMFLOAT4(DirectX::Colors::Purple) },	// Purple
+		{ DirectX::XMFLOAT3(+0.5f, -0.5f, 0.0f),	DirectX::XMFLOAT4(DirectX::Colors::Yellow) },	// Yellow
+	};
+
+	u16 indices[6] =
 	{
-		{ DirectX::XMFLOAT3(+0.0f, +0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
-		{ DirectX::XMFLOAT3(+0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
-		{ DirectX::XMFLOAT3(-0.5f, -0.5f, 0.0f), DirectX::XMFLOAT4(DirectX::Colors::Purple) },
+		0, 1, 2,
+		2, 3, 0,
 	};
 
 	// Describe Buffer - Resource structure
@@ -35,6 +42,25 @@ void D3D11Triangle::init()
 	// Create Buffer
 	if FAILED(JojEngine::Engine::dx11_graphics->get_device()->CreateBuffer(&bufferDesc, &srd, &vertexBuffer))
 		MessageBoxA(nullptr, "Failed to create Buffer", 0, 0);
+
+	// Describe index buffer
+	D3D11_BUFFER_DESC index_buffer_desc;
+	index_buffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
+	index_buffer_desc.ByteWidth = 6 * sizeof(u16);
+	index_buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	index_buffer_desc.CPUAccessFlags = 0;
+	index_buffer_desc.MiscFlags = 0;
+	index_buffer_desc.StructureByteStride = 0;
+
+	// Specify the data to initialize the index buffer.
+	D3D11_SUBRESOURCE_DATA indices_init_data;
+	indices_init_data.pSysMem = indices;
+
+	// Create the index buffer.
+	ThrowIfFailed(JojEngine::Engine::dx11_graphics->get_device()->CreateBuffer(&index_buffer_desc, &indices_init_data, &index_buffer));
+
+	// Bind index buffer to the pipeline
+	JojEngine::Engine::dx11_graphics->get_context()->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R16_UINT, 0);
 
 	DWORD shaderFlags = 0;
 #ifndef _DEBUG
@@ -98,14 +124,14 @@ void D3D11Triangle::init()
 
 }
 
-void D3D11Triangle::update()
+void D3D11Quad::update()
 {
     // Exit with ESCAPE key
     if (input->is_key_press(VK_ESCAPE))
         window->close();
 }
 
-void D3D11Triangle::draw()
+void D3D11Quad::draw()
 {
 	JojEngine::Engine::dx11_renderer->clear();
 
@@ -115,18 +141,22 @@ void D3D11Triangle::draw()
 	// Bind Vertex Buffer to an input slot of the device
 	JojEngine::Engine::dx11_graphics->get_context()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
+	// Bind index buffer to the pipeline
+	JojEngine::Engine::dx11_graphics->get_context()->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R16_UINT, 0);
+
 	// Bind Vertex and Pixel Shaders
 	JojEngine::Engine::dx11_graphics->get_context()->VSSetShader(vertexShader, nullptr, 0);
 	JojEngine::Engine::dx11_graphics->get_context()->PSSetShader(pixelShader, nullptr, 0);
 
 	// Draw
-	UINT numVerts = 3;
-	JojEngine::Engine::dx11_graphics->get_context()->Draw(numVerts, 0);
+	UINT numVerts = 4;
+	u32 num_indices = 6;
+	JojEngine::Engine::dx11_graphics->get_context()->DrawIndexedInstanced(num_indices, 1, 0, 0, 0);
 
 	JojEngine::Engine::dx11_renderer->present();
 }
 
-void D3D11Triangle::shutdown()
+void D3D11Quad::shutdown()
 {
 
 }
