@@ -5,13 +5,15 @@
 #include "DirectXMath.h"
 #include <d3d11.h>
 
+#include "geometry.h"
+
 struct Vertex
 {
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT4 color;
 };
 
-class D3D11Quad : public JojEngine::Game
+class D3D11App : public JojEngine::Game
 {
 public:
 	void init();
@@ -24,4 +26,7 @@ private:
 	ID3D11Buffer* index_buffer = nullptr;		// Index buffer;
 	ID3D11VertexShader* vertexShader = nullptr;	// Manages Vertex Shade Program and control Vertex Shader Stage 
 	ID3D11PixelShader* pixelShader = nullptr;	// Manages Pixel Shader Program and controls Pixel Shader Stage
+
+	//JojRenderer::Cube geo = {};
+	ID3D11Buffer* pConstantBuffer = nullptr;
 };

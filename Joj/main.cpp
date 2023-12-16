@@ -2,7 +2,7 @@
 
 #include "engine.h"
 #include "shapes.h"
-#include "quad_d3d11.h"
+#include "app_d3d11.h"
 #include "error.h"
 
 #if PLATFORM_WINDOWS
@@ -23,7 +23,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		engine->window->set_on_focus(JojEngine::Engine::resume);
 
 		// Create and execute game
-		int exit_code = engine->start(new D3D11Quad(), JojEngine::Renderer::DX11);
+		int exit_code = engine->start(new D3D11App(), JojEngine::Renderer::DX11);
 
 		// Cleanup
 		delete engine;

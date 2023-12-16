@@ -1,34 +1,99 @@
-#include "quad_d3d11.h"
+#include "app_d3d11.h"
 
 #include "engine.h"
 #include <d3dcompiler.h>
 #include "error.h"
 
+using namespace DirectX;
 
-void D3D11Quad::init()
+
+void D3D11App::init()
 {
     // --------------------------------
     // Vertex Buffer
     // --------------------------------
 
-	// Set vertices
-	Vertex vertices[4] =
-	{	
-		{ DirectX::XMFLOAT3(-0.5f, -0.5f, 0.0f),	DirectX::XMFLOAT4(DirectX::Colors::Yellow) },	// Yellow
-		{ DirectX::XMFLOAT3(-0.5f, +0.5f, 0.0f),	DirectX::XMFLOAT4(DirectX::Colors::Red) },		// Red
-		{ DirectX::XMFLOAT3(+0.5f, +0.5f, 0.0f),	DirectX::XMFLOAT4(DirectX::Colors::Purple) },	// Purple
-		{ DirectX::XMFLOAT3(+0.5f, -0.5f, 0.0f),	DirectX::XMFLOAT4(DirectX::Colors::Yellow) },	// Yellow
+	// Geometries
+	//geo = JojRenderer::Cube(0.2f, 0.2f, 0.2f);
+
+	// Geometry vertexes
+	JojRenderer::Vertex vertices[8] =
+	{
+		{ DirectX::XMFLOAT3(-1.0f, -1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
+		{ DirectX::XMFLOAT3(-1.0f, +1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
+		{ DirectX::XMFLOAT3(+1.0f, +1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
+		{ DirectX::XMFLOAT3(+1.0f, -1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
+		{ DirectX::XMFLOAT3(-1.0f, -1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
+		{ DirectX::XMFLOAT3(-1.0f, +1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
+		{ DirectX::XMFLOAT3(+1.0f, +1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
+		{ DirectX::XMFLOAT3(+1.0f, -1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) }
 	};
 
-	u16 indices[6] =
+	// Geometry indexes
+	u16 indices[36] =
 	{
-		0, 1, 2,
-		2, 3, 0,
+		// front face
+		0, 1, 3,
+		1, 2, 3,
+
+		// back face
+		4, 6, 5,
+		4, 7, 6,
+
+		// left face
+		4, 5, 1,
+		4, 1, 0,
+
+		// right face
+		3, 2, 6,
+		3, 6, 7,
+
+		// top face
+		1, 5, 6,
+		1, 6, 2,
+
+		// bottom face
+		4, 0, 3,
+		4, 3, 7
 	};
+
+	// ------------------------------------------------------------------
+	// ------->> Transformation, Visualization and Projection <<---------
+	// ------------------------------------------------------------------
+
+	// World Matrix
+	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	DirectX::XMMATRIX Ry = DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(30));
+	DirectX::XMMATRIX Rx = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(-30));
+	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(0, 0, 0);
+	DirectX::XMMATRIX W = S * Ry * Rx * T;
+
+	// View Matrix
+	DirectX::XMVECTOR pos = DirectX::XMVectorSet(0, 0, -6, 1);
+	DirectX::XMVECTOR target = DirectX::XMVectorZero();
+	DirectX::XMVECTOR up = DirectX::XMVectorSet(0, 1, 0, 0);
+	DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(pos, target, up);
+
+	// Projection Matrix
+	DirectX::XMMATRIX P = DirectX::XMMatrixPerspectiveFovLH(
+		DirectX::XMConvertToRadians(45),
+		window->get_aspect_ratio(),
+		1.0f, 100.0f);
+
+	// Word-View-Projection Matrix
+	DirectX::XMMATRIX WorldViewProj = W * V * P;
+
+	// Place vertices in the projection window
+	for (int i = 0; i < 8; ++i)
+	{
+		DirectX::XMVECTOR vertex = DirectX::XMLoadFloat3(&vertices[i].pos);
+		DirectX::XMVECTOR proj = DirectX::XMVector3TransformCoord(vertex, WorldViewProj);
+		DirectX::XMStoreFloat3(&vertices[i].pos, proj);
+	}
 
 	// Describe Buffer - Resource structure
 	D3D11_BUFFER_DESC bufferDesc = { 0 };
-	bufferDesc.ByteWidth = sizeof(Vertex) * ARRAYSIZE(vertices);
+	bufferDesc.ByteWidth = sizeof(Vertex) * 8;
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
 	bufferDesc.CPUAccessFlags = 0;
@@ -36,8 +101,7 @@ void D3D11Quad::init()
 	bufferDesc.StructureByteStride = 0;
 
 	// Set data we want to initialize the buffer contents with
-	D3D11_SUBRESOURCE_DATA srd = { vertices, 0, 0 };
-
+	D3D11_SUBRESOURCE_DATA srd = { vertices, 0, 0};
 
 	// Create Buffer
 	if FAILED(JojEngine::Engine::dx11_graphics->get_device()->CreateBuffer(&bufferDesc, &srd, &vertexBuffer))
@@ -46,7 +110,7 @@ void D3D11Quad::init()
 	// Describe index buffer
 	D3D11_BUFFER_DESC index_buffer_desc;
 	index_buffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
-	index_buffer_desc.ByteWidth = 6 * sizeof(u16);
+	index_buffer_desc.ByteWidth = 36 * sizeof(u16);
 	index_buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	index_buffer_desc.CPUAccessFlags = 0;
 	index_buffer_desc.MiscFlags = 0;
@@ -117,21 +181,39 @@ void D3D11Quad::init()
 	JojEngine::Engine::dx11_graphics->get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
-
 	// Relase Direct3D resources
 	psBlob->Release();
 	vsBlob->Release();
 
+
+	// --------------------
+	// ---- Rasterizer ----
+	// --------------------
+
+	// TODO: comment specifications on rasterizer
+	// Describe rasterizer
+	D3D11_RASTERIZER_DESC rasterizer = {};
+	//rasterizer.FillMode = D3D11_FILL_SOLID;
+	rasterizer.FillMode = D3D11_FILL_WIREFRAME;
+	rasterizer.CullMode = D3D11_CULL_BACK;
+	//rasterizer.CullMode = D3D11_CULL_NONE;
+	rasterizer.FrontCounterClockwise = FALSE;
+	rasterizer.DepthBias = D3D11_DEFAULT_DEPTH_BIAS;
+	rasterizer.DepthBiasClamp = D3D11_DEFAULT_DEPTH_BIAS_CLAMP;
+	rasterizer.SlopeScaledDepthBias = D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+	rasterizer.DepthClipEnable = TRUE;
+	rasterizer.MultisampleEnable = FALSE;
+	rasterizer.AntialiasedLineEnable = FALSE;
 }
 
-void D3D11Quad::update()
+void D3D11App::update()
 {
     // Exit with ESCAPE key
     if (input->is_key_press(VK_ESCAPE))
         window->close();
 }
 
-void D3D11Quad::draw()
+void D3D11App::draw()
 {
 	JojEngine::Engine::dx11_renderer->clear();
 
@@ -148,15 +230,16 @@ void D3D11Quad::draw()
 	JojEngine::Engine::dx11_graphics->get_context()->VSSetShader(vertexShader, nullptr, 0);
 	JojEngine::Engine::dx11_graphics->get_context()->PSSetShader(pixelShader, nullptr, 0);
 
+	JojEngine::Engine::dx11_graphics->get_context()->VSSetConstantBuffers(0, 1, &pConstantBuffer);
+
 	// Draw
-	UINT numVerts = 4;
-	u32 num_indices = 6;
+	u32 num_indices = 36;
 	JojEngine::Engine::dx11_graphics->get_context()->DrawIndexedInstanced(num_indices, 1, 0, 0, 0);
 
 	JojEngine::Engine::dx11_renderer->present();
 }
 
-void D3D11Quad::shutdown()
+void D3D11App::shutdown()
 {
 
 }
