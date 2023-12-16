@@ -132,7 +132,7 @@ void D3D11App::init()
 		OutputDebugString("Failed to create and set input layout\n");
 
 	// Tell how Direct3D will form geometric primitives from vertex data
-	JojEngine::Engine::dx11_graphics->get_context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	JojEngine::Engine::dx11_renderer->set_primitive_topology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
 	// Relase Direct3D resources

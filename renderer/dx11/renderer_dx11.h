@@ -37,6 +37,9 @@ namespace JojRenderer
 		// Create and set input layout
 		b8 create_and_set_input_layout(D3D11_INPUT_ELEMENT_DESC* input_desc, u32 array_size, ID3DBlob* blob, ID3D11InputLayout* input_layout);
 
+		// Set primitive topology
+		void set_primitive_topology(D3D11_PRIMITIVE_TOPOLOGY topology);
+
 	private:
 		JojPlatform::Window* window;				// Engine window
 		JojGraphics::DX11Graphics* graphics;		// Graphics context
@@ -52,6 +55,10 @@ namespace JojRenderer
 		IDXGISwapChain* swap_chain;					// Swap chain
 		ID3D11RasterizerState* rasterizer_state;	// Rasterizer state
 	};
+
+	// Set primitive topology
+	inline void DX11Renderer::set_primitive_topology(D3D11_PRIMITIVE_TOPOLOGY topology)
+	{ context->IASetPrimitiveTopology(topology); }
 }
 
 #endif  // PLATFORM_WINDOWS
