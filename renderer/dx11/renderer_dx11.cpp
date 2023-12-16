@@ -106,12 +106,9 @@ ID3D11Buffer* JojRenderer::DX11Renderer::create_vertex_buffer(u64 vertex_size, u
     D3D11_SUBRESOURCE_DATA srd = { vertex_data, 0, 0 };
 
     // Create Buffer
-    ID3D11Buffer* vertex_buffer;
+    ID3D11Buffer* vertex_buffer = nullptr;
     if FAILED(device->CreateBuffer(&buffer_desc, &srd, &vertex_buffer))
-    {
         MessageBoxA(nullptr, "Failed to create Vertex Buffer", 0, 0);
-        return nullptr;
-    }
 
     return vertex_buffer;
 }
@@ -139,29 +136,29 @@ ID3D11Buffer* JojRenderer::DX11Renderer::create_index_buffer(u64 index_size, u32
     return index_buffer;
 }
 
-ID3D11VertexShader* JojRenderer::DX11Renderer::compile_and_create_vs_from_file(LPCWSTR file_path, ID3DBlob** blob, unsigned long shader_flags)
+ID3D11VertexShader* JojRenderer::DX11Renderer::compile_and_create_vs_from_file(LPCWSTR file_path, ID3DBlob*& blob, unsigned long shader_flags)
 {
     ID3DBlob* compile_errors_blob;  // To get info about compilation
 
-    if FAILED(D3DCompileFromFile(file_path, nullptr, nullptr, "main", "vs_5_0", shader_flags, NULL, blob, &compile_errors_blob))
+    if FAILED(D3DCompileFromFile(file_path, nullptr, nullptr, "main", "vs_5_0", shader_flags, NULL, &blob, &compile_errors_blob))
         MessageBoxA(nullptr, "Failed to compile Vertex Shader.", 0, 0);
 
     ID3D11VertexShader* vertex_shader = nullptr;
-    if FAILED(device->CreateVertexShader((*blob)->GetBufferPointer(), (*blob)->GetBufferSize(), nullptr, &vertex_shader))
+    if FAILED(device->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &vertex_shader))
         MessageBoxA(nullptr, "Failed to create Vertex Shader.", 0, 0);
 
     return vertex_shader;
 }
 
-ID3D11PixelShader* JojRenderer::DX11Renderer::compile_and_create_ps_from_file(LPCWSTR file_path, ID3DBlob** blob, unsigned long shader_flags)
+ID3D11PixelShader* JojRenderer::DX11Renderer::compile_and_create_ps_from_file(LPCWSTR file_path, ID3DBlob*& blob, unsigned long shader_flags)
 {
     ID3DBlob* compile_errors_blob;  // To get info about compilation
 
-    if FAILED(D3DCompileFromFile(file_path, nullptr, nullptr, "main", "ps_5_0", shader_flags, NULL, blob, &compile_errors_blob))
+    if FAILED(D3DCompileFromFile(file_path, nullptr, nullptr, "main", "ps_5_0", shader_flags, NULL, &blob, &compile_errors_blob))
         MessageBoxA(nullptr, "Failed to compile Pixel Shader.", 0, 0);
 
     ID3D11PixelShader* pixel_shader = nullptr;
-    if FAILED(device->CreatePixelShader((*blob)->GetBufferPointer(), (*blob)->GetBufferSize(), nullptr, &pixel_shader))
+    if FAILED(device->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &pixel_shader))
         MessageBoxA(nullptr, "Failed to create Vertex Shader.", 0, 0);
 
     return pixel_shader;

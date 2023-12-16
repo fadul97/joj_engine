@@ -106,11 +106,11 @@ void D3D11App::init()
 	
 	// Joj\--out\-build\-x64-debug\-joj\-Debug
 	// Compile and create Vertex Shader
-	vertex_shader = JojEngine::Engine::dx11_renderer->compile_and_create_vs_from_file(L"../../../../../joj/vertex.hlsl", &vs_blob, shaderFlags);
+	vertex_shader = JojEngine::Engine::dx11_renderer->compile_and_create_vs_from_file(L"../../../../../joj/vertex.hlsl", vs_blob, shaderFlags);
 
 	// Compile and Create Pixel Shader
 	ID3DBlob* ps_blob = nullptr;			// Pixel shader
-	pixel_shader = JojEngine::Engine::dx11_renderer->compile_and_create_ps_from_file(L"../../../../../joj/pixel.hlsl", &ps_blob, shaderFlags);
+	pixel_shader = JojEngine::Engine::dx11_renderer->compile_and_create_ps_from_file(L"../../../../../joj/pixel.hlsl", ps_blob, shaderFlags);
 
 
 	// --------------------------------
