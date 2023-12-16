@@ -69,7 +69,7 @@ void D3D11App::init()
 	DirectX::XMMATRIX W = S * Ry * Rx * T;
 
 	// View Matrix
-	DirectX::XMVECTOR pos = DirectX::XMVectorSet(0, 0, -6, 1);
+	DirectX::XMVECTOR pos = DirectX::XMVectorSet(0, 0, -20, 1);
 	DirectX::XMVECTOR target = DirectX::XMVectorZero();
 	DirectX::XMVECTOR up = DirectX::XMVectorSet(0, 1, 0, 0);
 	DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(pos, target, up);
@@ -83,20 +83,32 @@ void D3D11App::init()
 	// Word-View-Projection Matrix
 	DirectX::XMMATRIX WorldViewProj = W * V * P;
 
-	// Place vertices in the projection window
-	for (int i = 0; i < 8; ++i)
-	{
-		DirectX::XMVECTOR vertex = DirectX::XMLoadFloat3(&vertices[i].pos);
-		DirectX::XMVECTOR proj = DirectX::XMVector3TransformCoord(vertex, WorldViewProj);
-		DirectX::XMStoreFloat3(&vertices[i].pos, proj);
-	}
+
+	// --------------------------------
+	// Constant Buffer
+	// --------------------------------
+
+	D3D11_BUFFER_DESC constBufferDesc = { 0 };
+	constBufferDesc.ByteWidth = sizeof(XMMATRIX);
+	constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	D3D11_SUBRESOURCE_DATA constantData = { 0 };
+	XMMATRIX world_view_proj = XMMatrixTranspose(WorldViewProj);
+	constantData.pSysMem = &world_view_proj;
+
+	JojEngine::Engine::dx11_graphics->get_device()->CreateBuffer(&constBufferDesc, &constantData, &constant_buffer);
+
+	JojEngine::Engine::dx11_graphics->get_context()->VSSetConstantBuffers(0, 1, &constant_buffer);
+
 
 	// Describe Buffer - Resource structure
 	D3D11_BUFFER_DESC bufferDesc = { 0 };
 	bufferDesc.ByteWidth = sizeof(Vertex) * 8;
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	bufferDesc.MiscFlags = 0;
 	bufferDesc.StructureByteStride = 0;
 
@@ -142,7 +154,7 @@ void D3D11App::init()
 	ID3DBlob* vsBlob;										// Vertex shader
 	
 	// Joj\--out\-build\-x64-debug\-joj\-Debug
-	if FAILED(D3DCompileFromFile(L"../../../../../joj/VertexShader.hlsl", nullptr, nullptr, "main", "vs_5_0", shaderFlags, NULL, &vsBlob, &shaderCompileErrorsBlob))
+	if FAILED(D3DCompileFromFile(L"../../../../../joj/vertex.hlsl", nullptr, nullptr, "main", "vs_5_0", shaderFlags, NULL, &vsBlob, &shaderCompileErrorsBlob))
 		MessageBoxA(nullptr, "Failed to compile Vertex Shader.", 0, 0);
 
 	if FAILED(JojEngine::Engine::dx11_graphics->get_device()->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &vertexShader))
@@ -151,7 +163,7 @@ void D3D11App::init()
 
 	// Compile and Create Pixel Shader
 	ID3DBlob* psBlob;										// Pixel shader
-	if FAILED(D3DCompileFromFile(L"../../../../../joj/PixelShader.hlsl", nullptr, nullptr, "main", "ps_5_0", shaderFlags, NULL, &psBlob, &shaderCompileErrorsBlob))
+	if FAILED(D3DCompileFromFile(L"../../../../../joj/pixel.hlsl", nullptr, nullptr, "main", "ps_5_0", shaderFlags, NULL, &psBlob, &shaderCompileErrorsBlob))
 		MessageBoxA(nullptr, "Failed to compile Pixel Shader.", 0, 0);
 
 	if FAILED(JojEngine::Engine::dx11_graphics->get_device()->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &pixelShader))
@@ -192,18 +204,17 @@ void D3D11App::init()
 
 	// TODO: comment specifications on rasterizer
 	// Describe rasterizer
-	D3D11_RASTERIZER_DESC rasterizer = {};
-	//rasterizer.FillMode = D3D11_FILL_SOLID;
-	rasterizer.FillMode = D3D11_FILL_WIREFRAME;
-	rasterizer.CullMode = D3D11_CULL_BACK;
-	//rasterizer.CullMode = D3D11_CULL_NONE;
-	rasterizer.FrontCounterClockwise = FALSE;
-	rasterizer.DepthBias = D3D11_DEFAULT_DEPTH_BIAS;
-	rasterizer.DepthBiasClamp = D3D11_DEFAULT_DEPTH_BIAS_CLAMP;
-	rasterizer.SlopeScaledDepthBias = D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-	rasterizer.DepthClipEnable = TRUE;
-	rasterizer.MultisampleEnable = FALSE;
-	rasterizer.AntialiasedLineEnable = FALSE;
+	D3D11_RASTERIZER_DESC rasterizer_desc = {};
+	ZeroMemory(&rasterizer_desc, sizeof(rasterizer_desc));
+	rasterizer_desc.FillMode = D3D11_FILL_SOLID;
+	//rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
+	rasterizer_desc.CullMode = D3D11_CULL_NONE;
+	rasterizer_desc.DepthClipEnable = true;
+
+	// Create rasterizer state
+	//JojEngine::Engine::dx11_graphics->get_device()->CreateRasterizerState(&rasterizer_desc, &rasterState);
+
+
 }
 
 void D3D11App::update()
@@ -230,7 +241,7 @@ void D3D11App::draw()
 	JojEngine::Engine::dx11_graphics->get_context()->VSSetShader(vertexShader, nullptr, 0);
 	JojEngine::Engine::dx11_graphics->get_context()->PSSetShader(pixelShader, nullptr, 0);
 
-	JojEngine::Engine::dx11_graphics->get_context()->VSSetConstantBuffers(0, 1, &pConstantBuffer);
+	JojEngine::Engine::dx11_graphics->get_context()->VSSetConstantBuffers(0, 1, &constant_buffer);
 
 	// Draw
 	u32 num_indices = 36;
@@ -241,5 +252,6 @@ void D3D11App::draw()
 
 void D3D11App::shutdown()
 {
-
+	if (constant_buffer)
+		constant_buffer->Release();
 }

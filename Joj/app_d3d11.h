@@ -28,5 +28,5 @@ private:
 	ID3D11PixelShader* pixelShader = nullptr;	// Manages Pixel Shader Program and controls Pixel Shader Stage
 
 	//JojRenderer::Cube geo = {};
-	ID3D11Buffer* pConstantBuffer = nullptr;
+	ID3D11Buffer* constant_buffer = nullptr;
 };
