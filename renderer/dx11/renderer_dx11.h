@@ -19,7 +19,12 @@ namespace JojRenderer
 		b8 init(JojPlatform::Window* window, JojGraphics::DX11Graphics* graphics);	// Initialize renderer
 		void draw();																// Draw
 		void clear();																// Clear backbuffer for next frame
-		void swap_buffers();
+		void swap_buffers();														// Swap buffers
+
+		// Create vertex buffer
+		// TODO: Check if using templates is better than using void*
+		ID3D11Buffer* create_vertex_buffer(u64 vertex_size, u32 vertex_count, const void* vertex_data);
+		ID3D11Buffer* create_index_buffer(u64 index_size, u32 index_count, const void* index_data);
 
 	private:
 		JojPlatform::Window* window;				// Engine window

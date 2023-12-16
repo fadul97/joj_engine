@@ -31,8 +31,6 @@ void D3D11App::init()
 		window->get_aspect_ratio(),
 		1.0f, 100.0f));
 
-
-
     // --------------------------------
     // Vertex Buffer
     // --------------------------------
@@ -88,41 +86,11 @@ void D3D11App::init()
 
 	JojEngine::Engine::dx11_graphics->get_context()->VSSetConstantBuffers(0, 1, &constant_buffer);
 
+	// Create vertex buffer
+	vertexBuffer = JojEngine::Engine::dx11_renderer->create_vertex_buffer(sizeof(Vertex), geo.get_vertex_count(), geo.get_vertex_data());
 
-	// Describe Buffer - Resource structure
-	D3D11_BUFFER_DESC bufferDesc = { 0 };
-	bufferDesc.ByteWidth = sizeof(Vertex) * geo.get_vertex_count();
-	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	bufferDesc.MiscFlags = 0;
-	bufferDesc.StructureByteStride = 0;
-
-	// Set data we want to initialize the buffer contents with
-	D3D11_SUBRESOURCE_DATA srd = { geo.get_vertex_data(), 0, 0};
-
-	// Create Buffer
-	if FAILED(JojEngine::Engine::dx11_graphics->get_device()->CreateBuffer(&bufferDesc, &srd, &vertexBuffer))
-		MessageBoxA(nullptr, "Failed to create Buffer", 0, 0);
-
-	// Describe index buffer
-	D3D11_BUFFER_DESC index_buffer_desc;
-	index_buffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
-	index_buffer_desc.ByteWidth = geo.get_index_count() * sizeof(u32);
-	index_buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	index_buffer_desc.CPUAccessFlags = 0;
-	index_buffer_desc.MiscFlags = 0;
-	index_buffer_desc.StructureByteStride = 0;
-
-	// Specify the data to initialize the index buffer.
-	D3D11_SUBRESOURCE_DATA indices_init_data;
-	indices_init_data.pSysMem = geo.get_index_data();
-
-	// Create the index buffer.
-	ThrowIfFailed(JojEngine::Engine::dx11_graphics->get_device()->CreateBuffer(&index_buffer_desc, &indices_init_data, &index_buffer));
-
-	// Bind index buffer to the pipeline
-	JojEngine::Engine::dx11_graphics->get_context()->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
+	// Create index buffer
+	index_buffer = JojEngine::Engine::dx11_renderer->create_index_buffer(sizeof(u32), geo.get_index_count(), geo.get_index_data());
 
 	DWORD shaderFlags = 0;
 #ifndef _DEBUG

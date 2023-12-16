@@ -89,3 +89,55 @@ void JojRenderer::DX11Renderer::swap_buffers()
     swap_chain->Present(vsync, NULL);
     context->OMSetRenderTargets(1, &render_target_view, depth_stencil_view);
 }
+
+ID3D11Buffer* JojRenderer::DX11Renderer::create_vertex_buffer(u64 vertex_size, u32 vertex_count, const void* vertex_data)
+{
+    // TODO: comment specifications on buffer_desc
+    // Describe Buffer - Resource structure
+    D3D11_BUFFER_DESC buffer_desc = { 0 };
+    buffer_desc.ByteWidth = vertex_size * vertex_count;
+    buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
+    buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    buffer_desc.MiscFlags = 0;
+    buffer_desc.StructureByteStride = 0;
+
+    // Set data we want to initialize the buffer contents with
+    D3D11_SUBRESOURCE_DATA srd = { vertex_data, 0, 0 };
+
+    // Create Buffer
+    ID3D11Buffer* vertex_buffer;
+    if FAILED(device->CreateBuffer(&buffer_desc, &srd, &vertex_buffer))
+    {
+        MessageBoxA(nullptr, "Failed to create Vertex Buffer", 0, 0);
+        return nullptr;
+    }
+
+    return vertex_buffer;
+}
+
+ID3D11Buffer* JojRenderer::DX11Renderer::create_index_buffer(u64 index_size, u32 index_count, const void* index_data)
+{
+    // Describe index buffer
+    D3D11_BUFFER_DESC index_buffer_desc;
+    index_buffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
+    index_buffer_desc.ByteWidth = index_size * index_count;
+    index_buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    index_buffer_desc.CPUAccessFlags = 0;
+    index_buffer_desc.MiscFlags = 0;
+    index_buffer_desc.StructureByteStride = 0;
+
+    // Specify the data to initialize the index buffer.
+    D3D11_SUBRESOURCE_DATA indices_init_data;
+    indices_init_data.pSysMem =index_data;
+
+    // Create the index buffer.
+    ID3D11Buffer* index_buffer;
+    if FAILED(device->CreateBuffer(&index_buffer_desc, &indices_init_data, &index_buffer))
+    {
+        MessageBoxA(nullptr, "Failed to create Index Buffer", 0, 0);
+        return nullptr;
+    }
+
+    return index_buffer;
+}
