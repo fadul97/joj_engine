@@ -182,26 +182,6 @@ void D3D11App::init()
 	// Relase Direct3D resources
 	psBlob->Release();
 	vsBlob->Release();
-
-
-	// --------------------
-	// ---- Rasterizer ----
-	// --------------------
-
-	// TODO: comment specifications on rasterizer
-	// Describe rasterizer
-	D3D11_RASTERIZER_DESC rasterizer_desc = {};
-	ZeroMemory(&rasterizer_desc, sizeof(rasterizer_desc));
-	//rasterizer_desc.FillMode = D3D11_FILL_SOLID;
-	rasterizer_desc.FillMode = D3D11_FILL_WIREFRAME;
-	rasterizer_desc.CullMode = D3D11_CULL_BACK;
-	//rasterizer_desc.CullMode = D3D11_CULL_NONE;
-	rasterizer_desc.DepthClipEnable = true;
-
-	// Create rasterizer state
-	JojEngine::Engine::dx11_graphics->get_device()->CreateRasterizerState(&rasterizer_desc, &raster_state);
-
-	JojEngine::Engine::dx11_graphics->get_context()->RSSetState(raster_state);
 }
 
 void D3D11App::update()

@@ -8,11 +8,14 @@
 JojRenderer::DX11Renderer::DX11Renderer()
 {
     window = nullptr;
+    graphics = nullptr;
+
     device = nullptr;
     context = nullptr;
     render_target_view = nullptr;
     depth_stencil_view = nullptr;
     swap_chain = nullptr;
+    rasterizer_state = nullptr;
 
     // Background color
     bg_color[0] = 0.0f;		// Red
@@ -46,6 +49,26 @@ b8 JojRenderer::DX11Renderer::init(JojPlatform::Window* window, JojGraphics::DX1
     render_target_view = graphics->get_render_target_view();
     depth_stencil_view = graphics->get_depth_stencil_view();
     swap_chain = graphics->get_swap_chain();
+
+    // ---------------------------------------------------
+    // Rasterizer
+    // ---------------------------------------------------
+
+    // TODO: comment specifications on rasterizer
+    // Describe rasterizer
+    D3D11_RASTERIZER_DESC rasterizer_desc = {};
+    ZeroMemory(&rasterizer_desc, sizeof(rasterizer_desc));
+    //rasterizer_desc.FillMode = D3D11_FILL_SOLID;
+    rasterizer_desc.FillMode = D3D11_FILL_WIREFRAME;
+    rasterizer_desc.CullMode = D3D11_CULL_BACK;
+    //rasterizer_desc.CullMode = D3D11_CULL_NONE;
+    rasterizer_desc.DepthClipEnable = true;
+
+    // Create rasterizer state
+    device->CreateRasterizerState(&rasterizer_desc, &rasterizer_state);
+
+    // Set rasterizer state
+    context->RSSetState(rasterizer_state);
 
     return true;
 }

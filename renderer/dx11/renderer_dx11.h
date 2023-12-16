@@ -34,6 +34,7 @@ namespace JojRenderer
 		ID3D11RenderTargetView* render_target_view; // Backbuffer render target view
 		ID3D11DepthStencilView* depth_stencil_view; // Depth/Stencil view
 		IDXGISwapChain* swap_chain;					// Swap chain
+		ID3D11RasterizerState* rasterizer_state;	// Rasterizer state
 	};
 }
 
