@@ -24,7 +24,15 @@ namespace JojRenderer
 		// Create vertex buffer
 		// TODO: Check if using templates is better than using void*
 		ID3D11Buffer* create_vertex_buffer(u64 vertex_size, u32 vertex_count, const void* vertex_data);
+
+		// Create index buffer
 		ID3D11Buffer* create_index_buffer(u64 index_size, u32 index_count, const void* index_data);
+
+		// Compile and create Vertex Shader from file
+		ID3D11VertexShader* compile_and_create_vs_from_file(LPCWSTR file_path, ID3DBlob** blob, unsigned long shader_flags);
+
+		// Compile and create Pixel Shader from file
+		ID3D11PixelShader* compile_and_create_ps_from_file(LPCWSTR file_path, ID3DBlob** blob, unsigned long shader_flags);
 
 	private:
 		JojPlatform::Window* window;				// Engine window

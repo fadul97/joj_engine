@@ -69,7 +69,6 @@ void D3D11App::init()
 	// Word-View-Projection Matrix
 	DirectX::XMMATRIX WorldViewProj = W * V * P;
 
-
 	// --------------------------------
 	// Constant Buffer
 	// --------------------------------
@@ -103,25 +102,16 @@ void D3D11App::init()
 	// --------------------------------
 
 	// Compile and Create Vertex Shader
-	ID3DBlob* shaderCompileErrorsBlob;						// To get info about compilation
-
-	ID3DBlob* vsBlob;										// Vertex shader
+	ID3DBlob* vs_blob = nullptr;			// Vertex shader
 	
 	// Joj\--out\-build\-x64-debug\-joj\-Debug
-	if FAILED(D3DCompileFromFile(L"../../../../../joj/vertex.hlsl", nullptr, nullptr, "main", "vs_5_0", shaderFlags, NULL, &vsBlob, &shaderCompileErrorsBlob))
-		MessageBoxA(nullptr, "Failed to compile Vertex Shader.", 0, 0);
-
-	if FAILED(JojEngine::Engine::dx11_graphics->get_device()->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &vertexShader))
-		MessageBoxA(nullptr, "Failed to create Vertex Shader.", 0, 0);
-
+	// Compile and create Vertex Shader
+	vertex_shader = JojEngine::Engine::dx11_renderer->compile_and_create_vs_from_file(L"../../../../../joj/vertex.hlsl", &vs_blob, shaderFlags);
 
 	// Compile and Create Pixel Shader
-	ID3DBlob* psBlob;										// Pixel shader
-	if FAILED(D3DCompileFromFile(L"../../../../../joj/pixel.hlsl", nullptr, nullptr, "main", "ps_5_0", shaderFlags, NULL, &psBlob, &shaderCompileErrorsBlob))
-		MessageBoxA(nullptr, "Failed to compile Pixel Shader.", 0, 0);
+	ID3DBlob* ps_blob = nullptr;			// Pixel shader
+	pixel_shader = JojEngine::Engine::dx11_renderer->compile_and_create_ps_from_file(L"../../../../../joj/pixel.hlsl", &ps_blob, shaderFlags);
 
-	if FAILED(JojEngine::Engine::dx11_graphics->get_device()->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &pixelShader))
-		MessageBoxA(nullptr, "Failed to create Pixel Shader.", 0, 0);
 
 	// --------------------------------
 	// Input Assembler
@@ -138,7 +128,7 @@ void D3D11App::init()
 	};
 
 	// Create input layout
-	ThrowIfFailed(JojEngine::Engine::dx11_graphics->get_device()->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &inputLayout));
+	ThrowIfFailed(JojEngine::Engine::dx11_graphics->get_device()->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), vs_blob->GetBufferPointer(), vs_blob->GetBufferSize(), &inputLayout));
 
 	// Bind input layout to the Imput Assembler Stage
 	JojEngine::Engine::dx11_graphics->get_context()->IASetInputLayout(inputLayout);
@@ -148,8 +138,8 @@ void D3D11App::init()
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
 	// Relase Direct3D resources
-	psBlob->Release();
-	vsBlob->Release();
+	vs_blob->Release();
+	ps_blob->Release();
 }
 
 void D3D11App::update()
@@ -231,8 +221,8 @@ void D3D11App::draw()
 	JojEngine::Engine::dx11_graphics->get_context()->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
 
 	// Bind Vertex and Pixel Shaders
-	JojEngine::Engine::dx11_graphics->get_context()->VSSetShader(vertexShader, nullptr, 0);
-	JojEngine::Engine::dx11_graphics->get_context()->PSSetShader(pixelShader, nullptr, 0);
+	JojEngine::Engine::dx11_graphics->get_context()->VSSetShader(vertex_shader, nullptr, 0);
+	JojEngine::Engine::dx11_graphics->get_context()->PSSetShader(pixel_shader, nullptr, 0);
 
 	JojEngine::Engine::dx11_graphics->get_context()->VSSetConstantBuffers(0, 1, &constant_buffer);
 

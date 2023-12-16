@@ -132,12 +132,37 @@ ID3D11Buffer* JojRenderer::DX11Renderer::create_index_buffer(u64 index_size, u32
     indices_init_data.pSysMem =index_data;
 
     // Create the index buffer.
-    ID3D11Buffer* index_buffer;
+    ID3D11Buffer* index_buffer = nullptr;
     if FAILED(device->CreateBuffer(&index_buffer_desc, &indices_init_data, &index_buffer))
-    {
         MessageBoxA(nullptr, "Failed to create Index Buffer", 0, 0);
-        return nullptr;
-    }
 
     return index_buffer;
+}
+
+ID3D11VertexShader* JojRenderer::DX11Renderer::compile_and_create_vs_from_file(LPCWSTR file_path, ID3DBlob** blob, unsigned long shader_flags)
+{
+    ID3DBlob* compile_errors_blob;  // To get info about compilation
+
+    if FAILED(D3DCompileFromFile(file_path, nullptr, nullptr, "main", "vs_5_0", shader_flags, NULL, blob, &compile_errors_blob))
+        MessageBoxA(nullptr, "Failed to compile Vertex Shader.", 0, 0);
+
+    ID3D11VertexShader* vertex_shader = nullptr;
+    if FAILED(device->CreateVertexShader((*blob)->GetBufferPointer(), (*blob)->GetBufferSize(), nullptr, &vertex_shader))
+        MessageBoxA(nullptr, "Failed to create Vertex Shader.", 0, 0);
+
+    return vertex_shader;
+}
+
+ID3D11PixelShader* JojRenderer::DX11Renderer::compile_and_create_ps_from_file(LPCWSTR file_path, ID3DBlob** blob, unsigned long shader_flags)
+{
+    ID3DBlob* compile_errors_blob;  // To get info about compilation
+
+    if FAILED(D3DCompileFromFile(file_path, nullptr, nullptr, "main", "ps_5_0", shader_flags, NULL, blob, &compile_errors_blob))
+        MessageBoxA(nullptr, "Failed to compile Pixel Shader.", 0, 0);
+
+    ID3D11PixelShader* pixel_shader = nullptr;
+    if FAILED(device->CreatePixelShader((*blob)->GetBufferPointer(), (*blob)->GetBufferSize(), nullptr, &pixel_shader))
+        MessageBoxA(nullptr, "Failed to create Vertex Shader.", 0, 0);
+
+    return pixel_shader;
 }
