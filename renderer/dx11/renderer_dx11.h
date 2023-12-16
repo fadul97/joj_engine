@@ -22,7 +22,10 @@ namespace JojRenderer
 		void swap_buffers();
 
 	private:
-		JojPlatform::Window* window;
+		JojPlatform::Window* window;				// Engine window
+		JojGraphics::DX11Graphics* graphics;		// Graphics context
+
+		// Settings
 		f32 bg_color[4];
 		b8 vsync;
 

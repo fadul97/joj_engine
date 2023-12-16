@@ -16,7 +16,7 @@ namespace JojGraphics
 		DX11Graphics();
 		~DX11Graphics();
 
-		void init(JojPlatform::Window* window);	// Initialize Direct3D
+		void init(JojPlatform::Window* window);			// Initialize Direct3D
 		void set_vsync(b8 state);						// Vertical sync on/off
 		void clear();                                   // Clear backbuffer with background color
 		void present();                                 // Present drawing on screen

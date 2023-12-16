@@ -233,14 +233,14 @@ void JojGraphics::DX11Graphics::init(JojPlatform::Window* window)
 	ThrowIfFailed(dxgi_factory->CreateSwapChain(device, &swap_chain_desc, &swap_chain));
 
 	// ---------------------------------------------------
-	// Render Target Views
+	// Render Target View
 	// ---------------------------------------------------
 	
-	// Create Back buffer surface of a Swap Chain
+	// Get backbuffer surface of a Swap Chain
 	ID3D11Texture2D* backbuffer = nullptr;
 	ThrowIfFailed(swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backbuffer)));
 	
-	// Create render target view
+	// Create render target view for backbuffer
 	ThrowIfFailed(device->CreateRenderTargetView(backbuffer, NULL, &render_target_view));
 
 	// ---------------------------------------------------
@@ -268,21 +268,21 @@ void JojGraphics::DX11Graphics::init(JojPlatform::Window* window)
 	// Create Depth/Stencil View
 	ThrowIfFailed(device->CreateDepthStencilView(depth_stencil_buffer, 0, &depth_stencil_view));
 
-	// ---------------------------------------------------
-	//	Set Output and Viewport
-	// ---------------------------------------------------
-
-	// Bind Views to the Output Merger Stage
+	// Bind render target and depth stencil to the Output Merger stage
 	context->OMSetRenderTargets(1, &render_target_view, depth_stencil_view);
+
+	// ---------------------------------------------------
+	// Viewport
+	// ---------------------------------------------------
 
 	// Describe Viewport
 	viewport.TopLeftY = 0.0f;
 	viewport.TopLeftX = 0.0f;
-	viewport.Width = static_cast<float>(window->get_width());
-	viewport.Height = static_cast<float>(window->get_height());
+	viewport.Width = static_cast<f32>(window->get_width());
+	viewport.Height = static_cast<f32>(window->get_height());
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
-	
+
 	// Set Viewport
 	context->RSSetViewports(1, &viewport);
 
@@ -306,7 +306,7 @@ void JojGraphics::DX11Graphics::init(JojPlatform::Window* window)
 	// Create blend state
 	ThrowIfFailed(device->CreateBlendState(&blend_desc, &blend_state));
 
-	// Connect blend state to the Output-Merger stage
+	// Bind blend state to the Output Merger stage
 	context->OMSetBlendState(blend_state, nullptr, 0xffffffff);
 
 	// ---------------------------------------------------
