@@ -11,12 +11,6 @@
 
 namespace JojRenderer
 {
-	struct Vertex
-	{
-		DirectX::XMFLOAT3 pos;
-		DirectX::XMFLOAT4 color;
-	};
-
 	struct ObjectConstant
 	{
 		DirectX::XMFLOAT4X4 world_view_proj =

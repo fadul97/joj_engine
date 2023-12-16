@@ -11,6 +11,12 @@ namespace JojRenderer
 {
 	enum class GeometryType { UNKNOWN, CUBE, CYLINDER, SPHERE, GEOSPHERE, GRID, QUAD};
 
+	struct Vertex
+	{
+		DirectX::XMFLOAT3 pos;
+		DirectX::XMFLOAT4 color;
+	};
+
 	// -------------------------------------------------------------------------------
 	// Geometry
 	// -------------------------------------------------------------------------------
@@ -21,7 +27,7 @@ namespace JojRenderer
 		Geometry();
 		virtual ~Geometry();
 
-		std::vector<JojRenderer::Vertex> vertices;		// Geometry vertices
+		std::vector<Vertex> vertices;					// Geometry vertices
 		std::vector<u32> indices;						// Geometry indices
 
 		virtual f32 x() const { return position.x;  }	// Return x position of geometry

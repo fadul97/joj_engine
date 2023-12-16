@@ -23,7 +23,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		engine->window->set_on_focus(JojEngine::Engine::resume);
 
 		// Create and execute game
-		int exit_code = engine->start(new D3D11Triangle(), JojEngine::Renderer::DX11);
+		int exit_code = engine->start(new Shapes(), JojEngine::Renderer::DX12);
 
 		// Cleanup
 		delete engine;
