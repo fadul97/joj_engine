@@ -15,6 +15,11 @@ void D3D11App::init()
 
 	// Geometries
 	geo = JojRenderer::Cube(2.0f, 2.0f, 2.0f);
+	//geo = JojRenderer::Cylinder(1.0f, 0.5f, 3.0f, 10, 10);
+	//geo = JojRenderer::Sphere(1.0f, 40, 40);
+	//geo = JojRenderer::GeoSphere(1.0f, 3);
+	//geo = JojRenderer::Grid(100.0f, 20.0f, 20, 20);
+	//geo = JojRenderer::Quad(3.0f, 1.0f);
 
 	// ------------------------------------------------------------------
 	// ------->> Transformation, Visualization and Projection <<---------

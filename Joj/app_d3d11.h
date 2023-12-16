@@ -26,9 +26,14 @@ private:
 	ID3D11Buffer* index_buffer = nullptr;		// Index buffer;
 	ID3D11VertexShader* vertexShader = nullptr;	// Manages Vertex Shade Program and control Vertex Shader Stage 
 	ID3D11PixelShader* pixelShader = nullptr;	// Manages Pixel Shader Program and controls Pixel Shader Stage
+	ID3D11Buffer* constant_buffer = nullptr;
 
 	JojRenderer::Cube geo = {};
-	ID3D11Buffer* constant_buffer = nullptr;
+	//JojRenderer::Cylinder geo = {};
+	//JojRenderer::Sphere geo = {};
+	//JojRenderer::GeoSphere geo = {};
+	//JojRenderer::Grid geo = {};
+	//JojRenderer::Quad geo = {};
 
 	ID3D11RasterizerState* raster_state = nullptr;	// Rasterizer state
 };
