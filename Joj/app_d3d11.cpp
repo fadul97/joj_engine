@@ -293,7 +293,7 @@ void D3D11App::draw()
 	//JojEngine::Engine::dx11_graphics->get_context()->DrawIndexed(geo.get_index_count(), 0, 0);
 
 
-	JojEngine::Engine::dx11_renderer->present();
+	JojEngine::Engine::dx11_renderer->swap_buffers();
 }
 
 void D3D11App::shutdown()

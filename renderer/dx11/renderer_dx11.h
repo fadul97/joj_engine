@@ -17,9 +17,9 @@ namespace JojRenderer
 		~DX11Renderer();
 
 		b8 init(JojPlatform::Window* window, JojGraphics::DX11Graphics* graphics);	// Initialize renderer
-		void draw();																	// Draw
-		void clear();														// Clear backbuffer for next frame
-		void present();
+		void draw();																// Draw
+		void clear();																// Clear backbuffer for next frame
+		void swap_buffers();
 
 	private:
 		JojPlatform::Window* window;

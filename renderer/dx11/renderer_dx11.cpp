@@ -61,7 +61,7 @@ void JojRenderer::DX11Renderer::clear()
     context->ClearDepthStencilView(depth_stencil_view, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
-void JojRenderer::DX11Renderer::present()
+void JojRenderer::DX11Renderer::swap_buffers()
 {
     swap_chain->Present(vsync, NULL);
     context->OMSetRenderTargets(1, &render_target_view, depth_stencil_view);
