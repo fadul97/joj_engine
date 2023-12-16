@@ -14,48 +14,7 @@ void D3D11App::init()
     // --------------------------------
 
 	// Geometries
-	//geo = JojRenderer::Cube(0.2f, 0.2f, 0.2f);
-
-	// Geometry vertexes
-	JojRenderer::Vertex vertices[8] =
-	{
-		{ DirectX::XMFLOAT3(-1.0f, -1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
-		{ DirectX::XMFLOAT3(-1.0f, +1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
-		{ DirectX::XMFLOAT3(+1.0f, +1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
-		{ DirectX::XMFLOAT3(+1.0f, -1.0f, -1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
-		{ DirectX::XMFLOAT3(-1.0f, -1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) },
-		{ DirectX::XMFLOAT3(-1.0f, +1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
-		{ DirectX::XMFLOAT3(+1.0f, +1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Red) },
-		{ DirectX::XMFLOAT3(+1.0f, -1.0f, +1.0f), DirectX::XMFLOAT4(DirectX::Colors::Yellow) }
-	};
-
-	// Geometry indexes
-	u16 indices[36] =
-	{
-		// front face
-		0, 1, 3,
-		1, 2, 3,
-
-		// back face
-		4, 6, 5,
-		4, 7, 6,
-
-		// left face
-		4, 5, 1,
-		4, 1, 0,
-
-		// right face
-		3, 2, 6,
-		3, 6, 7,
-
-		// top face
-		1, 5, 6,
-		1, 6, 2,
-
-		// bottom face
-		4, 0, 3,
-		4, 3, 7
-	};
+	geo = JojRenderer::Cube(2.0f, 2.0f, 2.0f);
 
 	// ------------------------------------------------------------------
 	// ------->> Transformation, Visualization and Projection <<---------
@@ -69,7 +28,7 @@ void D3D11App::init()
 	DirectX::XMMATRIX W = S * Ry * Rx * T;
 
 	// View Matrix
-	DirectX::XMVECTOR pos = DirectX::XMVectorSet(0, 0, -20, 1);
+	DirectX::XMVECTOR pos = DirectX::XMVectorSet(0, 0, -6, 1);
 	DirectX::XMVECTOR target = DirectX::XMVectorZero();
 	DirectX::XMVECTOR up = DirectX::XMVectorSet(0, 1, 0, 0);
 	DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(pos, target, up);
@@ -105,7 +64,7 @@ void D3D11App::init()
 
 	// Describe Buffer - Resource structure
 	D3D11_BUFFER_DESC bufferDesc = { 0 };
-	bufferDesc.ByteWidth = sizeof(Vertex) * 8;
+	bufferDesc.ByteWidth = sizeof(Vertex) * geo.get_vertex_count();
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -113,7 +72,7 @@ void D3D11App::init()
 	bufferDesc.StructureByteStride = 0;
 
 	// Set data we want to initialize the buffer contents with
-	D3D11_SUBRESOURCE_DATA srd = { vertices, 0, 0};
+	D3D11_SUBRESOURCE_DATA srd = { geo.get_vertex_data(), 0, 0};
 
 	// Create Buffer
 	if FAILED(JojEngine::Engine::dx11_graphics->get_device()->CreateBuffer(&bufferDesc, &srd, &vertexBuffer))
@@ -122,7 +81,7 @@ void D3D11App::init()
 	// Describe index buffer
 	D3D11_BUFFER_DESC index_buffer_desc;
 	index_buffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
-	index_buffer_desc.ByteWidth = 36 * sizeof(u16);
+	index_buffer_desc.ByteWidth = geo.get_index_count() * sizeof(u32);
 	index_buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	index_buffer_desc.CPUAccessFlags = 0;
 	index_buffer_desc.MiscFlags = 0;
@@ -130,13 +89,13 @@ void D3D11App::init()
 
 	// Specify the data to initialize the index buffer.
 	D3D11_SUBRESOURCE_DATA indices_init_data;
-	indices_init_data.pSysMem = indices;
+	indices_init_data.pSysMem = geo.get_index_data();
 
 	// Create the index buffer.
 	ThrowIfFailed(JojEngine::Engine::dx11_graphics->get_device()->CreateBuffer(&index_buffer_desc, &indices_init_data, &index_buffer));
 
 	// Bind index buffer to the pipeline
-	JojEngine::Engine::dx11_graphics->get_context()->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R16_UINT, 0);
+	JojEngine::Engine::dx11_graphics->get_context()->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
 
 	DWORD shaderFlags = 0;
 #ifndef _DEBUG
@@ -206,15 +165,16 @@ void D3D11App::init()
 	// Describe rasterizer
 	D3D11_RASTERIZER_DESC rasterizer_desc = {};
 	ZeroMemory(&rasterizer_desc, sizeof(rasterizer_desc));
-	rasterizer_desc.FillMode = D3D11_FILL_SOLID;
-	//rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
-	rasterizer_desc.CullMode = D3D11_CULL_NONE;
+	//rasterizer_desc.FillMode = D3D11_FILL_SOLID;
+	rasterizer_desc.FillMode = D3D11_FILL_WIREFRAME;
+	rasterizer_desc.CullMode = D3D11_CULL_BACK;
+	//rasterizer_desc.CullMode = D3D11_CULL_NONE;
 	rasterizer_desc.DepthClipEnable = true;
 
 	// Create rasterizer state
-	//JojEngine::Engine::dx11_graphics->get_device()->CreateRasterizerState(&rasterizer_desc, &rasterState);
+	JojEngine::Engine::dx11_graphics->get_device()->CreateRasterizerState(&rasterizer_desc, &raster_state);
 
-
+	JojEngine::Engine::dx11_graphics->get_context()->RSSetState(raster_state);
 }
 
 void D3D11App::update()
@@ -235,7 +195,7 @@ void D3D11App::draw()
 	JojEngine::Engine::dx11_graphics->get_context()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
 	// Bind index buffer to the pipeline
-	JojEngine::Engine::dx11_graphics->get_context()->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R16_UINT, 0);
+	JojEngine::Engine::dx11_graphics->get_context()->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
 
 	// Bind Vertex and Pixel Shaders
 	JojEngine::Engine::dx11_graphics->get_context()->VSSetShader(vertexShader, nullptr, 0);
@@ -244,8 +204,9 @@ void D3D11App::draw()
 	JojEngine::Engine::dx11_graphics->get_context()->VSSetConstantBuffers(0, 1, &constant_buffer);
 
 	// Draw
-	u32 num_indices = 36;
-	JojEngine::Engine::dx11_graphics->get_context()->DrawIndexedInstanced(num_indices, 1, 0, 0, 0);
+	JojEngine::Engine::dx11_graphics->get_context()->DrawIndexedInstanced(geo.get_index_count(), 1, 0, 0, 0);
+	//JojEngine::Engine::dx11_graphics->get_context()->DrawIndexed(geo.get_index_count(), 0, 0);
+
 
 	JojEngine::Engine::dx11_renderer->present();
 }
