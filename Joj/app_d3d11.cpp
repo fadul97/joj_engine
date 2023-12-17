@@ -36,10 +36,10 @@ void D3D11App::init()
     // --------------------------------
 
 	// Geometries
-	geo = JojRenderer::Cube(3.0f, 3.0f, 3.0f);
+	//geo = JojRenderer::Cube(3.0f, 3.0f, 3.0f);
 	//geo = JojRenderer::Cylinder(1.0f, 0.5f, 3.0f, 20, 10);
 	//geo = JojRenderer::Sphere(1.0f, 40, 40);
-	//geo = JojRenderer::GeoSphere(1.0f, 3);
+	geo = JojRenderer::GeoSphere(1.0f, 3);
 	//geo = JojRenderer::Grid(100.0f, 20.0f, 20, 20);
 	//geo = JojRenderer::Quad(3.0f, 1.0f);
 
@@ -201,16 +201,26 @@ void D3D11App::update()
 	XMStoreFloat4x4(&obj_constant.world_view_proj, DirectX::XMMatrixTranspose(WorldViewProj));
 	constantData.pSysMem = &obj_constant.world_view_proj;
 
-	JojEngine::Engine::dx11_graphics->get_device()->CreateBuffer(&constBufferDesc, &constantData, &constant_buffer);
-	JojEngine::Engine::dx11_graphics->get_context()->VSSetConstantBuffers(0, 1, &constant_buffer);
+	//JojEngine::Engine::dx11_graphics->get_device()->CreateBuffer(&constBufferDesc, &constantData, &constant_buffer);
+	//JojEngine::Engine::dx11_graphics->get_context()->VSSetConstantBuffers(0, 1, &constant_buffer);
+
+	// Get a pointer to the constant buffer data.
+	D3D11_MAPPED_SUBRESOURCE mapped_buffer = {};
+	JojEngine::Engine::dx11_graphics->get_context()->Map(constant_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_buffer);
+
+	// Copy the new data to the constant buffer data.
+	memcpy(mapped_buffer.pData, &obj_constant, sizeof(JojRenderer::ObjectConstant));
+
+	// Release the pointer to the constant buffer data.
+	JojEngine::Engine::dx11_graphics->get_context()->Unmap(constant_buffer, 0);
 }
 
 void D3D11App::draw()
 {
 	JojEngine::Engine::dx11_renderer->clear();
 
-	UINT stride = sizeof(Vertex);													// Store size os Vertex Structure
-	UINT offset = 0;																// Pointer to where the first Vertex Buffer is in array
+	UINT stride = sizeof(Vertex);	// Store size os Vertex Structure
+	UINT offset = 0;				// Pointer to where the first Vertex Buffer is in array
 
 	// Bind Vertex Buffer to an input slot of the device
 	JojEngine::Engine::dx11_graphics->get_context()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
@@ -222,12 +232,11 @@ void D3D11App::draw()
 	JojEngine::Engine::dx11_graphics->get_context()->VSSetShader(vertex_shader, nullptr, 0);
 	JojEngine::Engine::dx11_graphics->get_context()->PSSetShader(pixel_shader, nullptr, 0);
 
+	// Bind constant buffer
 	JojEngine::Engine::dx11_graphics->get_context()->VSSetConstantBuffers(0, 1, &constant_buffer);
 
 	// Draw
 	JojEngine::Engine::dx11_graphics->get_context()->DrawIndexedInstanced(geo.get_index_count(), 1, 0, 0, 0);
-	//JojEngine::Engine::dx11_graphics->get_context()->DrawIndexed(geo.get_index_count(), 0, 0);
-
 
 	JojEngine::Engine::dx11_renderer->swap_buffers();
 }

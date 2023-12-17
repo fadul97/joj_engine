@@ -31,10 +31,10 @@ private:
 	D3D11_SUBRESOURCE_DATA constantData = { 0 };
 	D3D11_BUFFER_DESC constBufferDesc = { 0 };
 
-	JojRenderer::Cube geo = {};
+	//JojRenderer::Cube geo = {};
 	//JojRenderer::Cylinder geo = {};
 	//JojRenderer::Sphere geo = {};
-	//JojRenderer::GeoSphere geo = {};
+	JojRenderer::GeoSphere geo = {};
 	//JojRenderer::Grid geo = {};
 	//JojRenderer::Quad geo = {};
 
