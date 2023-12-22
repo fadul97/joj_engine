@@ -7,6 +7,7 @@ JojPlatform::Window* JojEngine::Engine::window = nullptr;					// Game window
 JojPlatform::Input* JojEngine::Engine::input = nullptr;						// Input device
 JojGraphics::DX12Graphics* JojEngine::Engine::dx12_graphics = nullptr;		// DX12 Graphics device
 JojGraphics::DX11Graphics* JojEngine::Engine::dx11_graphics = nullptr;		// DX11 Graphics device
+JojGraphics::GLGraphics* JojEngine::Engine::gl_graphics = nullptr;			// Opengl Graphics device
 JojEngine::Game* JojEngine::Engine::game = nullptr;							// Pointer to game
 f32 JojEngine::Engine::frametime = 0.0f;									// Current frametime
 JojPlatform::Timer JojEngine::Engine::timer;								// Time counter
@@ -57,11 +58,17 @@ i32 JojEngine::Engine::start(JojEngine::Game* game, Renderer renderer_api)
 		dx11_graphics->init(window);
 		dx11_renderer->init(window, dx11_graphics);
 	}
-	else
+	else if (renderer_api == Renderer::DX12)
 	{
 		dx12_graphics = new JojGraphics::DX12Graphics();
 		dx12_graphics->init(window);
 		renderer->init(window, dx12_graphics);
+	}
+	else
+	{
+		gl_graphics = new JojGraphics::GLGraphics();
+		if (!gl_graphics->init(window))
+			OutputDebugString("Failed to initialize OpenGL\n");
 	}
 
 	// Change window procedure to EngineProc

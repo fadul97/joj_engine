@@ -10,13 +10,14 @@
 #include "dx11/graphics_dx11.h"
 #include "dx12/renderer_dx12.h"
 #include "dx11/renderer_dx11.h"
+#include "opengl/graphics_gl.h"
 #endif	// PLATFORM_WINDOWS
 
 #include "game.h"
 
 namespace JojEngine
 {
-	enum class Renderer { DX11, DX12 };
+	enum class Renderer { DX11, DX12, OPENGL };
 
 	class Engine
 	{
@@ -28,6 +29,7 @@ namespace JojEngine
 		static JojPlatform::Input* input;
 		static JojGraphics::DX12Graphics* dx12_graphics;		// DX12 Graphics device
 		static JojGraphics::DX11Graphics* dx11_graphics;		// DX11 Graphics device
+		static JojGraphics::GLGraphics* gl_graphics;			// OpenGL Graphics device
 		static JojEngine::Game* game;							// Game to be executed
 		static f32 frametime;									// Current frametime
 
