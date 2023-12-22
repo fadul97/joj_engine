@@ -17,7 +17,7 @@ void print_window_win32(u32 n)
 	text << L"Hello from print_window_win32(" << n << ")!\n";
 	OutputDebugStringW(text.str().c_str());
 #else
-	std::cout << "Hello from print_window_win32(" << n << ")!\n";
+	OutputDebugString("Hello from print_window_win32(" << n << ")!\n";
 #endif // DEBUG
 }
 
@@ -100,32 +100,42 @@ void JojPlatform::Window::print_on_window(std::string text, i16 x, i16 y, COLORR
 
 b8 JojPlatform::Window::create()
 {
+	const char* joj_window_class = "JOJ_WINDOW_CLASS";
+
 	// Application ID
 	HINSTANCE appId = GetModuleHandle(NULL);
 
 	// Define window class
 	WNDCLASSEX wndClass = { };
-	wndClass.cbSize = sizeof(WNDCLASSEX);
-	wndClass.style = CS_DBLCLKS | CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
-	wndClass.lpfnWndProc = JojPlatform::Window::WinProc;
-	wndClass.cbClsExtra = 0;
-	wndClass.cbWndExtra = 0;
-	wndClass.hInstance = appId;
-	wndClass.hIcon = icon;
-	wndClass.hCursor = cursor;
-	wndClass.hbrBackground = (HBRUSH)CreateSolidBrush(color);
-	wndClass.lpszMenuName = NULL;
-	wndClass.lpszClassName = "WindowApp";
-	wndClass.hIconSm = icon;
 
-	// Register "WindowApp" class
-	if (!RegisterClassEx(&wndClass))
-		return false;
+	// Do not register the "JOJ_WINDOW_CLASS" class multiple times
+	if (!GetClassInfoExA(appId, joj_window_class, &wndClass))
+	{
+		wndClass.cbSize = sizeof(WNDCLASSEX);
+		wndClass.style = CS_DBLCLKS | CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
+		wndClass.lpfnWndProc = JojPlatform::Window::WinProc;
+		wndClass.cbClsExtra = 0;
+		wndClass.cbWndExtra = 0;
+		wndClass.hInstance = appId;
+		wndClass.hIcon = icon;
+		wndClass.hCursor = cursor;
+		wndClass.hbrBackground = (HBRUSH)CreateSolidBrush(color);
+		wndClass.lpszMenuName = NULL;
+		wndClass.lpszClassName = joj_window_class;
+		wndClass.hIconSm = icon;
+
+		// Register "JOJ_WINDOW_CLASS" class
+		if (!RegisterClassEx(&wndClass))
+		{
+			OutputDebugString("Failed to register window class.\n");
+			return false;
+		}
+	}
 
 	// Create a window basend on the "WindowApp" class
 	id = CreateWindowEx(
 		NULL,					// Extras styles
-		"WindowApp",			// Window class name
+		joj_window_class,		// Window class name
 		title.c_str(),			// Window title
 		style,					// Window style
 		xpos, ypos,				// Initial (x, y) position
@@ -134,6 +144,12 @@ b8 JojPlatform::Window::create()
 		NULL,					// Menu ID
 		appId,					// application ID
 		NULL);					// Creatin parameters
+
+	if (!id)
+	{
+		OutputDebugString("Could not create a window.\n");
+		return false;
+	}
 
 	/*
 	 * When using windowed mode, it is necessary to take into account that the bars
