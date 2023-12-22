@@ -197,6 +197,11 @@ LRESULT CALLBACK JojPlatform::Window::WinProc(HWND hWnd, UINT msg, WPARAM wParam
 {
 	switch (msg)
 	{
+		// Window closed
+	case WM_CLOSE:
+		PostQuitMessage(0);
+		return 0;
+
 		// Window lost focus
 	case WM_KILLFOCUS:
 		if (lost_focus)
@@ -210,10 +215,10 @@ LRESULT CALLBACK JojPlatform::Window::WinProc(HWND hWnd, UINT msg, WPARAM wParam
 		return 0;
 
 		// Window was destroyed
-	case WM_DESTROY:
-		// Send a WM_QUIT message to close application
-		PostQuitMessage(0);
-		return 0;
+	//case WM_DESTROY:
+	//	// Send a WM_QUIT message to close application
+	//	PostQuitMessage(0);
+	//	return 0;
 	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
