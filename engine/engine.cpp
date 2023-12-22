@@ -11,6 +11,7 @@ JojEngine::Game* JojEngine::Engine::game = nullptr;							// Pointer to game
 f32 JojEngine::Engine::frametime = 0.0f;									// Current frametime
 JojPlatform::Timer JojEngine::Engine::timer;								// Time counter
 b8 JojEngine::Engine::paused = false;										// Engine state
+b8 JojEngine::Engine::running = false;										// Engine is not running
 
 JojRenderer::DX12Renderer* JojEngine::Engine::renderer = nullptr;			// DX12 Renderer
 JojRenderer::DX11Renderer* JojEngine::Engine::dx11_renderer = nullptr;		// DX12 Renderer
@@ -90,6 +91,9 @@ i32 JojEngine::Engine::loop()
 	// Initialize game
 	game->init();
 
+	// Engine is running
+	running = true;
+
 	// Main loop
 	do
 	{
@@ -131,7 +135,7 @@ i32 JojEngine::Engine::loop()
 			}
 		}
 
-	} while (msg.message != WM_QUIT);
+	} while (running && msg.message != WM_QUIT);
 
 	// Shutdown game
 	game->shutdown();
