@@ -137,6 +137,10 @@ i32 JojEngine::Engine::loop()
 
 	} while (running && msg.message != WM_QUIT);
 
+	// Close window
+	if (window->get_id())
+		window->close();
+
 	// Shutdown game
 	game->shutdown();
 
