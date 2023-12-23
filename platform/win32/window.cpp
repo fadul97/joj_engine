@@ -31,8 +31,8 @@ JojPlatform::Window::Window()
 JojPlatform::Window::~Window()
 {
 	// Release rendering context
-	if (rc)
-		wglDeleteContext(rc);
+	//if (rc)
+	//	wglDeleteContext(rc);
 
 	// Release device context
 	if (hdc)
