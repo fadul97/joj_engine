@@ -3,12 +3,12 @@
 #if PLATFORM_WINDOWS
 
 // Static members
-b8 JojPlatform::Input::keys[256] = { 0 };		// Keyboard/Mouse state
-b8 JojPlatform::Input::ctrl[256] = { 0 };		// Key release control
+b8 JojPlatform::Input::keys[256] = { 0 };	// Keyboard/Mouse state
+b8 JojPlatform::Input::ctrl[256] = { 0 };	// Key release control
 
 i32	JojPlatform::Input::xmouse = 0;			// X mouse position
 i32	JojPlatform::Input::ymouse = 0;			// Y mouse position
-i16 JojPlatform::Input::mouse_wheel = 0;		// Mouse wheel value
+i16 JojPlatform::Input::mouse_wheel = 0;	// Mouse wheel value
 
 JojPlatform::Input::Input()
 {

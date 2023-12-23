@@ -22,7 +22,7 @@ namespace JojPlatform
 		i32 get_ymouse();				// Returns Y mouse position
 		i16 get_mouse_wheel();			// Returns mouse wheel rotation
 
-
+		// Handle Window events
 		static LRESULT CALLBACK InputProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	
 	private:
@@ -50,6 +50,6 @@ namespace JojPlatform
 	inline i32 Input::get_ymouse()
 	{ return ymouse; }
 
-}   // JojPlatform
+}   // namespace JojPlatform
 
 #endif	// PLATFORM_WINDOWS
