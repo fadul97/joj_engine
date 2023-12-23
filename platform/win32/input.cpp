@@ -24,7 +24,7 @@ JojPlatform::Input::~Input()
 	SetWindowLongPtr(GetActiveWindow(), GWLP_WNDPROC, (LONG_PTR)JojPlatform::Window::WinProc);
 }
 
-b8 JojPlatform::Input::is_key_press(u32 vkcode)
+b8 JojPlatform::Input::is_key_pressed(u32 vkcode)
 {
 	if (ctrl[vkcode])
 	{

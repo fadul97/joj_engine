@@ -43,7 +43,7 @@ void Shapes::init()
 void Shapes::update()
 {
     // Exit with ESCAPE key
-    if (input->is_key_press(VK_ESCAPE))
+    if (input->is_key_pressed(VK_ESCAPE))
         JojEngine::Engine::close_engine();
 
     f32 xmouse = (f32)input->get_xmouse();

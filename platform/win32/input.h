@@ -16,7 +16,7 @@ namespace JojPlatform
 
 		b8 is_key_down(u32 vkcode);		// Checks if key is pressed
 		b8 is_key_up(u32 vkcode);		// Checks if key is released
-		b8 is_key_press(u32 vkcode);	// Register press only after release
+		b8 is_key_pressed(u32 vkcode);	// Register press only after release
 
 		i32 get_xmouse();				// Returns X mouse position
 		i32 get_ymouse();				// Returns Y mouse position

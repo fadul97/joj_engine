@@ -143,7 +143,7 @@ void D3D11App::init()
 void D3D11App::update()
 {
     // Exit with ESCAPE key
-	if (input->is_key_press(VK_ESCAPE))
+	if (input->is_key_pressed(VK_ESCAPE))
 		JojEngine::Engine::close_engine();
 
 	f32 xmouse = (f32)input->get_xmouse();

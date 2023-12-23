@@ -116,7 +116,7 @@ i32 JojEngine::Engine::loop()
 			// Pause/Resume Game
 			// -----------------------------------------------
 			// P key pauses engine
-			if (input->is_key_press('P'))
+			if (input->is_key_pressed('P'))
 			{
 				if (paused)
 					resume();
