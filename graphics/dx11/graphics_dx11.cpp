@@ -225,7 +225,7 @@ void JojGraphics::DX11Graphics::init(JojPlatform::Window* window)
 	swap_chain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;							// Use surface as Render Target
 	swap_chain_desc.BufferCount = 2;														// Number of buffers (Front + Back)
 	swap_chain_desc.OutputWindow = window->get_id();										// Window ID
-	swap_chain_desc.Windowed = (window->get_mode() == JojPlatform::WINDOWED);				// Fullscreen or windowed 
+	swap_chain_desc.Windowed = (window->get_mode() == JojPlatform::WindowMode::WINDOWED);	// Fullscreen or windowed 
 	swap_chain_desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;									// Discard surface after presenting
 	swap_chain_desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;							// Use Back buffer size for Fullscreen
 

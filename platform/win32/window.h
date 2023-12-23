@@ -8,11 +8,9 @@
 #include <windowsx.h>	// Include Win32 extensions
 #include <string>
 
-void print_window_win32(u32 n);
-
 namespace JojPlatform
 {
-	enum WindowModes { FULLSCREEN, WINDOWED };
+	enum class WindowMode { FULLSCREEN, WINDOWED };
 
 	class Window
 	{
@@ -25,7 +23,7 @@ namespace JojPlatform
 		HGLRC get_rendering_context();				// Get rendering context
 		i32 get_width() const;						// Return window width
 		i32 get_height() const;						// Return window height
-		u32 get_mode() const;						// Return window mode (Full-screen, windowed or borderless mode)
+		WindowMode get_mode() const;				// Return window mode (Fullscreen, windowed or borderless mode)
 		i32 get_xcenter() const;					// Return center position in x
 		i32 get_ycenter() const;					// Return center position in y
 		std::string get_title() const;				// Return window title
@@ -37,7 +35,7 @@ namespace JojPlatform
 		void set_cursor(const u32 cursor);			// Set window cursor
 		void set_title(const std::string title);	// Set window title
 		void set_size(i32 width, i32 height);		// Set window width and height
-		void set_mode(u32 mode);					// Set window mode (Full-screen, windowed or borderless mode)
+		void set_mode(WindowMode mode);			// Set window mode (Full-screen, windowed or borderless mode)
 		void set_color(u32 r, u32 g, u32 b);		// Set window background color
 
 		void hide_cursor(b8 hide);					// Enable or disable cursor display
@@ -52,8 +50,8 @@ namespace JojPlatform
 		void clear();
 		b8 create();
 
-		void set_on_focus(void(*func)());			// Set function to be executed when regaining focus
-		void set_lost_focus(void(*func)());			// Set function to be executed when losing focus
+		void set_on_focus(void(*func)());	// Set function to be executed when regaining focus
+		void set_lost_focus(void(*func)());	// Set function to be executed when losing focus
 
 		// Handle Window events
 		static LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -70,7 +68,7 @@ namespace JojPlatform
 		COLORREF	color;							// Window background color
 		std::string	title;							// Window title
 		DWORD		style;							// Window style 
-		u32			mode;							// Full-screen, windowed or borderless mode
+		WindowMode	mode;							// Full-screen, windowed or borderless mode
 		i32			xpos;							// Initial window position on the x-axis
 		i32			ypos;							// Initial window position on the y-axis
 		i32			xcenter;						// Window center on the x-axis
@@ -100,8 +98,8 @@ namespace JojPlatform
 	inline i32 Window::get_height() const
 	{ return height; }
 
-	// Return window mode (Full-screen, windowed, or borderless mode)
-	inline u32 Window::get_mode() const
+	// Return window mode (Fullscreen, windowed, or borderless mode)
+	inline WindowMode Window::get_mode() const
 	{ return mode; }
 
 	// Return center position in x

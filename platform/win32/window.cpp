@@ -2,24 +2,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include <iostream>
-
-#define DEBUG
-
-#ifdef DEBUG
-#include <sstream>
-#endif // DEBUG
-
-void print_window_win32(u32 n)
-{
-#ifdef DEBUG
-	std::wstringstream text;
-	text << L"Hello from print_window_win32(" << n << ")!\n";
-	OutputDebugStringW(text.str().c_str());
-#else
-	OutputDebugString("Hello from print_window_win32(" << n << ")!\n";
-#endif // DEBUG
-}
+#include <string>
 
 // Static members
 void (*JojPlatform::Window::on_focus)() = nullptr;		// Do nothing when gaining focus
@@ -28,35 +11,40 @@ void (*JojPlatform::Window::lost_focus)() = nullptr;	// Do nothing when losing f
 JojPlatform::Window::Window()
 {
 	id = 0;									// Null ID because the window does not exist yet
+	rc = nullptr;							// Rendering context is NULL 
+	hdc = { 0 };                            // Device context
 	width = GetSystemMetrics(SM_CXSCREEN);  // Window occupies the entire screen (fullscreen)
 	height = GetSystemMetrics(SM_CYSCREEN); // Window occupies the entire screen (fullscreen)
 	icon = LoadIcon(NULL, IDI_APPLICATION); // Default icon for an application
 	cursor = LoadCursor(NULL, IDC_ARROW);   // Default cursor for an application
 	color = RGB(0, 0, 0);					// Default background color is black
-	title = std::string("Windows App");		// Default window title
+	title = std::string("Joj Window");		// Default window title
 	style = WS_POPUP | WS_VISIBLE;          // Style for fullscreen
-	mode = JojPlatform::FULLSCREEN;         // Default mode is fullscreen
+	mode = WindowMode::FULLSCREEN;			// Default mode is fullscreen
 	xpos = 0;                               // Initial window position on the x-axis
 	ypos = 0;                               // Initial window position on the y-axis
 	xcenter = width / 2;                    // Window center on the x-axis
 	ycenter = height / 2;                   // Window center on the y-axis
-	hdc = { 0 };                            // Device context
 	rect = { 0, 0, 0, 0 };                  // Window client area
 }
 
 JojPlatform::Window::~Window()
 {
+	// Release rendering context
+	if (rc)
+		wglDeleteContext(rc);
+
 	// Release device context
 	if (hdc)
 		ReleaseDC(id, hdc);
 }
 
-void JojPlatform::Window::set_mode(u32 mode)
+void JojPlatform::Window::set_mode(WindowMode mode)
 {
 	this->mode = mode;
 
 	// Window mode
-	if (mode == WINDOWED)
+	if (mode == WindowMode::WINDOWED)
 	{
 		style = WS_OVERLAPPED | WS_SYSMENU | WS_VISIBLE;
 	}
@@ -100,23 +88,32 @@ void JojPlatform::Window::print_on_window(std::string text, i16 x, i16 y, COLORR
 
 b8 JojPlatform::Window::create()
 {
+	// Window class name
 	const char* joj_window_class = "JOJ_WINDOW_CLASS";
 
 	// Application ID
-	HINSTANCE appId = GetModuleHandle(NULL);
+	HINSTANCE app_id = GetModuleHandle(NULL);
+
+	// Failed to get application ID
+	if (!app_id)
+	{
+		// TODO: Use own logger
+		OutputDebugString("Failed to get module handle.\n");
+		return false;
+	}
 
 	// Define window class
 	WNDCLASSEX wndClass = { };
 
 	// Do not register the "JOJ_WINDOW_CLASS" class multiple times
-	if (!GetClassInfoExA(appId, joj_window_class, &wndClass))
+	if (!GetClassInfoExA(app_id, joj_window_class, &wndClass))
 	{
 		wndClass.cbSize = sizeof(WNDCLASSEX);
 		wndClass.style = CS_DBLCLKS | CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
 		wndClass.lpfnWndProc = JojPlatform::Window::WinProc;
 		wndClass.cbClsExtra = 0;
 		wndClass.cbWndExtra = 0;
-		wndClass.hInstance = appId;
+		wndClass.hInstance = app_id;
 		wndClass.hIcon = icon;
 		wndClass.hCursor = cursor;
 		wndClass.hbrBackground = (HBRUSH)CreateSolidBrush(color);
@@ -127,6 +124,7 @@ b8 JojPlatform::Window::create()
 		// Register "JOJ_WINDOW_CLASS" class
 		if (!RegisterClassEx(&wndClass))
 		{
+			// TODO: Use own logger
 			OutputDebugString("Failed to register window class.\n");
 			return false;
 		}
@@ -142,11 +140,12 @@ b8 JojPlatform::Window::create()
 		width, height,			// Window width and height
 		NULL,					// Parent window ID
 		NULL,					// Menu ID
-		appId,					// application ID
+		app_id,					// application ID
 		NULL);					// Creatin parameters
 
 	if (!id)
 	{
+		// TODO: Use own logger
 		OutputDebugString("Could not create a window.\n");
 		return false;
 	}
@@ -158,36 +157,57 @@ b8 JojPlatform::Window::create()
 	 * (width x height)
 	*/
 
-	if (mode == WINDOWED)
+	if (mode == WindowMode::WINDOWED)
 	{
 		// Rectangle with the desired size
 		RECT new_rect = { 0, 0, width, height };
 
 		// Adjusts rectangle size
-		AdjustWindowRectEx(&new_rect,
+		if (!AdjustWindowRectEx(&new_rect,
 			GetWindowStyle(id),
 			GetMenu(id) != NULL,
-			GetWindowExStyle(id));
+			GetWindowExStyle(id)))
+		{
+			// TODO: Use own logger
+			OutputDebugString("Could not adjust window rect ex.\n");
+		}
 
 		// Updated window position
 		xpos = (GetSystemMetrics(SM_CXSCREEN) / 2) - ((new_rect.right - new_rect.left) / 2);
 		ypos = (GetSystemMetrics(SM_CYSCREEN) / 2) - ((new_rect.bottom - new_rect.top) / 2);
 
 		// Resize window with a call to MoveWindow
-		MoveWindow(
+		if (!MoveWindow(
 			id,									// Window ID
 			xpos,								// X position
 			ypos,								// Y position
 			new_rect.right - new_rect.left,		// Width
 			new_rect.bottom - new_rect.top,		// Height
-			TRUE);								// Repaint
+			TRUE))								// Repaint
+		{
+			// TODO: Use own logger
+			OutputDebugString("Could not move window.\n");
+		}
 	}
 
 	// Get device context
 	hdc = GetDC(id);
 
+	// Failed to get device context
+	if (!hdc)
+	{
+		// TODO: Use own logger
+		OutputDebugString("Could not get device context.\n");
+		return false;
+	}
+
 	// Get client area size
-	GetClientRect(id, &rect);
+	if (!GetClientRect(id, &rect))
+	{
+		// TODO: Use own logger
+		OutputDebugString("Could not get client area size.\n");
+		return false;
+	}
 
 	// Returns initialization status (successful or not)
 	return (id ? true : false);
@@ -197,18 +217,18 @@ LRESULT CALLBACK JojPlatform::Window::WinProc(HWND hWnd, UINT msg, WPARAM wParam
 {
 	switch (msg)
 	{
-		// Window closed
+	// Window closed
 	case WM_CLOSE:
 		PostQuitMessage(0);
 		return 0;
 
-		// Window lost focus
+	// Window lost focus
 	case WM_KILLFOCUS:
 		if (lost_focus)
 			lost_focus();
 		return 0;
 
-		// Window regained focus
+	// Window regained focus
 	case WM_SETFOCUS:
 		if (on_focus)
 			on_focus();

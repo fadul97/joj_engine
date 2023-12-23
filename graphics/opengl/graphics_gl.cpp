@@ -30,7 +30,7 @@ b8 JojGraphics::GLGraphics::init(JojPlatform::Window* window)
     // -----------------------------------------------------
 
     auto dummy_window = new JojPlatform::Window();
-    dummy_window->set_mode(JojPlatform::WINDOWED);
+    dummy_window->set_mode(JojPlatform::WindowMode::WINDOWED);
     dummy_window->set_size(800, 600);
     dummy_window->set_color(60, 60, 60);
     dummy_window->set_title("Joj Engine");
