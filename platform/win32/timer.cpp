@@ -59,6 +59,7 @@ void JojPlatform::Timer::stop()
 
 f32 JojPlatform::Timer::reset()
 {
+	// To keep track of time elapsed
 	i64 elapsed;
 
 	if (stopped)
@@ -90,6 +91,7 @@ f32 JojPlatform::Timer::reset()
 
 f32 JojPlatform::Timer::elapsed()
 {
+	// To keep track of time elapsed
 	i64 elapsed;
 
 	if (stopped)

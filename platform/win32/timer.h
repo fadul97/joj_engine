@@ -28,14 +28,19 @@ namespace JojPlatform
 		LARGE_INTEGER freq;				// Counter frequency
 		b8 stopped;						// Counter state
 	};
+
+	// Checks if "secs" seconds have passed
 	inline b8 Timer::was_elapsed(f32 secs)
 	{ return (elapsed() >= secs ? true : false); }
 
+	// Adjust sleep resolution to 1 millisecond
 	inline void Timer::time_begin_period()
 	{ timeBeginPeriod(1); }
 
+	// Return sleep resolution to original value
 	inline void Timer::time_end_period()
 	{ timeEndPeriod(1); }
-}
+
+}	// namespace JojPlatform
 
 #endif  // PLATFORM_WINDOWS

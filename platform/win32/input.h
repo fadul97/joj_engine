@@ -18,8 +18,8 @@ namespace JojPlatform
 		b8 is_key_up(u32 vkcode);		// Checks if key is released
 		b8 is_key_pressed(u32 vkcode);	// Register press only after release
 
-		i32 get_xmouse();				// Returns X mouse position
-		i32 get_ymouse();				// Returns Y mouse position
+		i32 get_xmouse();				// Returns X-axis mouse position
+		i32 get_ymouse();				// Returns Y-axis mouse position
 		i16 get_mouse_wheel();			// Returns mouse wheel rotation
 
 		// Handle Window events
@@ -42,11 +42,11 @@ namespace JojPlatform
 	inline b8 Input::is_key_up(u32 vkcode)
 	{ return !(keys[vkcode]); }
 
-	// retorna a posição do mouse no eixo x
+	// Returns X-axis mouse position
 	inline i32 Input::get_xmouse()
 	{ return xmouse; }
 
-	// retorna a posição do mouse no eixo y
+	// Returns Y-axis mouse position
 	inline i32 Input::get_ymouse()
 	{ return ymouse; }
 
