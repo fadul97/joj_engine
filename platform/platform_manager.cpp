@@ -22,7 +22,9 @@ b8 JojPlatform::PlatformManager::init(i32 width, i32 height, std::string title)
     window->set_color(60, 60, 60);
     window->set_title(title);
 
-    window->create();
+    // Create window
+    if (!window->create())
+        return false;
 
     // ATTENTION: input must be initialized after window creation
     input = std::make_unique<Input>();

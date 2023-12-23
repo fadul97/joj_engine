@@ -113,4 +113,4 @@ f32 JojPlatform::Timer::elapsed()
 	return float(elapsed / f64(freq.QuadPart));
 }
 
-#endif	// PLATFORM_WINDOWS
+#endif // PLATFORM_WINDOWS

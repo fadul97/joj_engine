@@ -19,7 +19,9 @@ namespace JojPlatform
 		~PlatformManager();
 
 		b8 init(i32 width = 1366, i32 height = 768, std::string title = "Joj Engine");	// Initialize platform specifics
+#if PLATFORM_WINDOWS
 		void process_events(MSG msg);													// Process Window events
+#endif // PLATFORM_WINDOWS
 		void swap_buffers();															// Change back and front buffers
 		void shutdown();																// Finalize PlatformManager resources
 
@@ -136,4 +138,4 @@ namespace JojPlatform
 	{ SetWindowLongPtr(window_id, index, new_win_proc); }
 #endif // PLATFORM_WINDOWS
 
-}
+} // namespace JojPlatform

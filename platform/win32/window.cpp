@@ -11,21 +11,21 @@ void (*JojPlatform::Window::lost_focus)() = nullptr;	// Do nothing when losing f
 JojPlatform::Window::Window()
 {
 	id = 0;									// Null ID because the window does not exist yet
-	rc = nullptr;							// Rendering context is NULL 
 	hdc = { 0 };                            // Device context
+	rc = nullptr;							// Rendering context is NULL 
 	width = GetSystemMetrics(SM_CXSCREEN);  // Window occupies the entire screen (fullscreen)
 	height = GetSystemMetrics(SM_CYSCREEN); // Window occupies the entire screen (fullscreen)
+	title = std::string("Joj Window");		// Default window title
+	rect = { 0, 0, 0, 0 };                  // Window client area
 	icon = LoadIcon(NULL, IDI_APPLICATION); // Default icon for an application
 	cursor = LoadCursor(NULL, IDC_ARROW);   // Default cursor for an application
 	color = RGB(0, 0, 0);					// Default background color is black
-	title = std::string("Joj Window");		// Default window title
 	style = WS_POPUP | WS_VISIBLE;          // Style for fullscreen
 	mode = WindowMode::FULLSCREEN;			// Default mode is fullscreen
 	xpos = 0;                               // Initial window position on the x-axis
 	ypos = 0;                               // Initial window position on the y-axis
 	xcenter = width / 2;                    // Window center on the x-axis
 	ycenter = height / 2;                   // Window center on the y-axis
-	rect = { 0, 0, 0, 0 };                  // Window client area
 }
 
 JojPlatform::Window::~Window()
@@ -146,7 +146,7 @@ b8 JojPlatform::Window::create()
 	if (!id)
 	{
 		// TODO: Use own logger
-		OutputDebugString("Could not create a window.\n");
+		OutputDebugString("Failed to create a window.\n");
 		return false;
 	}
 
@@ -197,7 +197,7 @@ b8 JojPlatform::Window::create()
 	if (!hdc)
 	{
 		// TODO: Use own logger
-		OutputDebugString("Could not get device context.\n");
+		OutputDebugString("Failed to get device context.\n");
 		return false;
 	}
 
@@ -205,7 +205,7 @@ b8 JojPlatform::Window::create()
 	if (!GetClientRect(id, &rect))
 	{
 		// TODO: Use own logger
-		OutputDebugString("Could not get client area size.\n");
+		OutputDebugString("Failed to get client area size.\n");
 		return false;
 	}
 
@@ -244,4 +244,4 @@ LRESULT CALLBACK JojPlatform::Window::WinProc(HWND hWnd, UINT msg, WPARAM wParam
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
-#endif	// PLATFORM_WINDOWS
+#endif // PLATFORM_WINDOWS

@@ -43,4 +43,4 @@ namespace JojPlatform
 
 }	// namespace JojPlatform
 
-#endif  // PLATFORM_WINDOWS
+#endif // PLATFORM_WINDOWS

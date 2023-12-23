@@ -111,4 +111,4 @@ LRESULT CALLBACK JojPlatform::Input::InputProc(HWND hWnd, UINT msg, WPARAM wPara
 	return CallWindowProc(JojPlatform::Window::WinProc, hWnd, msg, wParam, lParam);
 }
 
-#endif	// PLATFORM_WINDOWS
+#endif // PLATFORM_WINDOWS

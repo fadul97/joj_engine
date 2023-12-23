@@ -57,16 +57,16 @@ namespace JojPlatform
 		static LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 	private:
+		HWND		id;								// Window ID
 		HDC			hdc;    						// Device context
 		HGLRC		rc;								// Rendering context
-		RECT		rect;							// Window client area
-		HWND		id;								// Window ID
 		i32			width;							// Window width
 		i32			height;							// Window heigh
+		std::string	title;							// Window title
+		RECT		rect;							// Window client area
 		HICON		icon;							// Window icon
 		HCURSOR		cursor;							// Window cursor
 		COLORREF	color;							// Window background color
-		std::string	title;							// Window title
 		DWORD		style;							// Window style 
 		WindowMode	mode;							// Full-screen, windowed or borderless mode
 		i32			xpos;							// Initial window position on the x-axis
@@ -164,4 +164,4 @@ namespace JojPlatform
 
 }	// namespace JojPlatform
 
-#endif	// PLATFORM_WINDOWS
+#endif // PLATFORM_WINDOWS
