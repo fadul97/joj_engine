@@ -4,7 +4,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include "window.h"
+#include "platform_manager.h"
 #include <gl/gl.h>
 
 /////////////

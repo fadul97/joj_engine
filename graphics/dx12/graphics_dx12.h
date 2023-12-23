@@ -6,7 +6,7 @@
 
 #include <dxgi1_6.h>    // DirectX graphics infrastructure
 #include <d3d12.h>      // Main Direct3D functions
-#include "window.h"
+#include "platform_manager.h"
 
 namespace JojGraphics
 {

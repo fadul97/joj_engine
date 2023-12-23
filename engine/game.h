@@ -3,8 +3,7 @@
 #include "defines.h"
 
 #if PLATFORM_WINDOWS
-#include "window.h"
-#include "input.h"
+#include "platform_manager.h"
 #endif	// PLATFORM_WINDOWS
 
 namespace JojEngine

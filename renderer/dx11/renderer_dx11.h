@@ -4,7 +4,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include "window.h"
+#include "platform_manager.h"
 #include "dx11/graphics_dx11.h"
 #include <DirectXColors.h>
 
