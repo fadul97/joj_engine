@@ -16,14 +16,15 @@ namespace JojGraphics
 		DX11Graphics();
 		~DX11Graphics();
 
-		void init(JojPlatform::Window* window);			// Initialize Direct3D
-		void set_vsync(b8 state);						// Vertical sync on/off
-		void clear();                                   // Clear backbuffer with background color
-		void present();                                 // Present drawing on screen
+		void init(std::unique_ptr<JojPlatform::Window>& window);			// Initialize Direct3D
 
-		ID3D11Device* get_device();						// Return graphics device
-		ID3D11DeviceContext* get_context();				// Return graphics device context
-		D3D11_VIEWPORT get_viewport();					// Return viewport
+		void set_vsync(b8 state);	// Vertical sync on/off
+		void clear();               // Clear backbuffer with background color
+		void present();             // Present drawing on screen
+
+		ID3D11Device* get_device();			// Return graphics device
+		ID3D11DeviceContext* get_context();	// Return graphics device context
+		D3D11_VIEWPORT get_viewport();		// Return viewport
 
 		ID3D11RenderTargetView* get_render_target_view();	// Return backbuffer render target view
 		ID3D11DepthStencilView* get_depth_stencil_view();	// Return depth/stencil view

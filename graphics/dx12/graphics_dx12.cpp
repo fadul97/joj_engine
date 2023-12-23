@@ -221,7 +221,7 @@ void JojGraphics::DX12Graphics::log_hardware_info()
 	if (output) output->Release();
 }
 
-void JojGraphics::DX12Graphics::init(JojPlatform::Window* window)
+void JojGraphics::DX12Graphics::init(std::unique_ptr<JojPlatform::Window>& window)
 {
 	// ---------------------------------------------------
 	// Create DXGI infrastructure and D3D device

@@ -19,6 +19,10 @@ I'll add more information.
 [ ] Make it so when including window.h in file, type #include "platform/window.h"  
 [ ] Think about a better place to put Geometry and an eventual Mesh class  
 
+### TODO
+
+[ ] OpenGL initialization allocates memory continuously
+
 ### Resources
 
 [Kohi Game Engine](https://github.com/travisvroman/kohi.git) from Travis Vroman.  

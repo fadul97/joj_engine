@@ -5,7 +5,7 @@ JojPlatform::PlatformManager::PlatformManager()
     window = std::make_unique<Window>();
 
     // ATTENTION: input must be initialized after window creation
-    input = std::make_unique<Input>();
+    input = nullptr;
 
     timer = std::make_unique<Timer>();
 }
@@ -21,6 +21,11 @@ b8 JojPlatform::PlatformManager::init(i32 width, i32 height, std::string title)
     window->set_size(width, height);
     window->set_color(60, 60, 60);
     window->set_title(title);
+
+    window->create();
+
+    // ATTENTION: input must be initialized after window creation
+    input = std::make_unique<Input>();
 
     return true;
 }

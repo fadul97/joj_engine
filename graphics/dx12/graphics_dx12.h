@@ -16,7 +16,7 @@ namespace JojGraphics
 		DX12Graphics();
 		~DX12Graphics();
 
-		void init(JojPlatform::Window* window);	// Initialize Direct3D
+		void init(std::unique_ptr<JojPlatform::Window>& window);	// Initialize Direct3D
 
 		void draw();									// Draw
 		void present();									// Present

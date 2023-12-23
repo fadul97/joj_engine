@@ -3,8 +3,8 @@
 #include <sstream>
 
 // Static members
-JojPlatform::Window* JojEngine::Engine::window = nullptr;					// Game window
-JojPlatform::Input* JojEngine::Engine::input = nullptr;						// Input device
+std::unique_ptr <JojPlatform::PlatformManager> JojEngine::Engine::pm = nullptr;	// Platform Manager
+
 JojGraphics::DX12Graphics* JojEngine::Engine::dx12_graphics = nullptr;		// DX12 Graphics device
 JojGraphics::DX11Graphics* JojEngine::Engine::dx11_graphics = nullptr;		// DX11 Graphics device
 JojGraphics::GLGraphics* JojEngine::Engine::gl_graphics = nullptr;			// Opengl Graphics device
@@ -19,7 +19,7 @@ JojRenderer::DX11Renderer* JojEngine::Engine::dx11_renderer = nullptr;		// DX12 
 
 JojEngine::Engine::Engine()
 {
-	window = new JojPlatform::Window();
+	pm = std::make_unique<JojPlatform::PlatformManager>();
 	renderer = new JojRenderer::DX12Renderer();
 	dx11_renderer = new JojRenderer::DX11Renderer();
 }
@@ -36,52 +36,49 @@ JojEngine::Engine::~Engine()
 
 	delete renderer;
 	delete dx11_renderer;
-	
-	delete input;
-	delete window;
 }
 
 i32 JojEngine::Engine::start(JojEngine::Game* game, Renderer renderer_api)
 {
 	this->game = game;
 
-	// Create window game
-	window->create();
-
-	// ATTENTION: input must be initialized after window creation
-	input = new JojPlatform::Input();
+	pm->init(800, 600);
 
 	// Initialize graphics device
 	if (renderer_api == Renderer::DX11)
 	{
 		dx11_graphics = new JojGraphics::DX11Graphics();
-		dx11_graphics->init(window);
-		dx11_renderer->init(window, dx11_graphics);
+		dx11_graphics->init(pm->get_window());
+		dx11_renderer->init(pm->get_window(), dx11_graphics);
 	}
 	else if (renderer_api == Renderer::DX12)
 	{
 		dx12_graphics = new JojGraphics::DX12Graphics();
-		dx12_graphics->init(window);
-		renderer->init(window, dx12_graphics);
+		dx12_graphics->init(pm->get_window());
+		renderer->init(pm->get_window(), dx12_graphics);
 	}
 	else
 	{
 		gl_graphics = new JojGraphics::GLGraphics();
-		if (!gl_graphics->init(window))
+		if (!gl_graphics->init(pm->get_window()))
 			OutputDebugString("Failed to initialize OpenGL\n");
 	}
 
 	// Change window procedure to EngineProc
-	SetWindowLongPtr(window->get_id(), GWLP_WNDPROC, (LONG_PTR)EngineProc);
+	pm->change_window_procedure(pm->get_window()->get_id(), GWLP_WNDPROC, (LONG_PTR)EngineProc);
 
 	// Adjust sleep resolution to 1 millisecond
-	timer.time_begin_period();
+	pm->begin_period();
+
+	// Game pauses/resumes when losing/gaining focus
+	pm->set_lost_focus(JojEngine::Engine::pause);
+	pm->set_on_focus(JojEngine::Engine::resume);
 
 	// Run main loop
 	i32 exit_code = loop();
 
 	// Return sleep resolution to original value
-	timer.time_end_period();
+	pm->end_period();
 
 	// Close engine
 	return exit_code;
@@ -90,7 +87,7 @@ i32 JojEngine::Engine::start(JojEngine::Game* game, Renderer renderer_api)
 i32 JojEngine::Engine::loop()
 {
 	// Start time counter
-	timer.start();
+	pm->start_timer();
 
 	// Windows messages
 	MSG msg = { 0 };
@@ -116,7 +113,7 @@ i32 JojEngine::Engine::loop()
 			// Pause/Resume Game
 			// -----------------------------------------------
 			// P key pauses engine
-			if (input->is_key_pressed('P'))
+			if (pm->is_key_pressed('P'))
 			{
 				if (paused)
 					resume();
@@ -144,9 +141,7 @@ i32 JojEngine::Engine::loop()
 
 	} while (running && msg.message != WM_QUIT);
 
-	// Close window
-	if (window->get_id())
-		window->close();
+	pm->shutdown();
 
 	// Shutdown game
 	game->shutdown();
@@ -164,7 +159,7 @@ f32 JojEngine::Engine::get_frametime()
 #endif
 
 	// Current frame time
-	frametime = timer.reset();
+	frametime = pm->reset_timer();
 
 #ifdef _DEBUG
 	// Accumulated frametime
@@ -180,11 +175,11 @@ f32 JojEngine::Engine::get_frametime()
 		text << std::fixed;			// Always show the fractional part
 		text.precision(3);			// three numbers after comma
 
-		text << window->get_title().c_str() << "    "
+		text << pm->get_window()->get_title().c_str() << "    "
 			<< "FPS: " << frame_count << "    "
 			<< "Frametime: " << frametime * 1000 << " (ms)";
 
-		SetWindowText(window->get_id(), text.str().c_str());
+		SetWindowText(pm->get_window()->get_id(), text.str().c_str());
 
 		frame_count = 0;
 		total_time -= 1.0f;

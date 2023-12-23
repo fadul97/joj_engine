@@ -145,7 +145,7 @@ void JojGraphics::DX11Graphics::log_hardware_info()
 	if (output) output->Release();
 }
 
-void JojGraphics::DX11Graphics::init(JojPlatform::Window* window)
+void JojGraphics::DX11Graphics::init(std::unique_ptr<JojPlatform::Window>& window)
 {
 	// ---------------------------------------------------
 	// Creates DXGI infrastructure and D3D device
@@ -154,16 +154,16 @@ void JojGraphics::DX11Graphics::init(JojPlatform::Window* window)
 	u32 factory_flags = 0;
 	u32 create_device_flags = 0;
 
-#ifndef _DEBUG
+#if defined _DEBUG
 	// Enable DXGI debug layer
 	factory_flags = DXGI_CREATE_FACTORY_DEBUG;
 
 	create_device_flags |= D3D11_CREATE_DEVICE_DEBUG;
 
 	// Enable D3D11 debug layer
-	ID3D11Debug* debug_controller;
-	ThrowIfFailed(D3D11GetDebugInterface(IID_PPV_ARGS(&debug_controller)));
-	debug_controller->EnableDebugLayer();
+	//ID3D11Debug* debug_controller;
+	//ThrowIfFailed(D3D11GetDebugInterface(IID_PPV_ARGS(&debug_controller)));
+	//debug_controller->EnableDebugLayer();
 #endif // !_DEBUG
 
 	// Create object for DirectX graphics infrastructure (DXGI)
@@ -199,8 +199,8 @@ void JojGraphics::DX11Graphics::init(JojPlatform::Window* window)
 	
 
 	// Get pointer to adapter DXGIFactory
-	IDXGIFactory* dxgi_factory = nullptr;
-	ThrowIfFailed(dxgi_adapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgi_factory));
+	IDXGIFactory2* dxgi_factory = nullptr;
+	ThrowIfFailed(dxgi_adapter->GetParent(__uuidof(IDXGIFactory2), (void**)&dxgi_factory));
 
 	// Display graphics hardware information in Visual Studio Output
 #ifdef _DEBUG
@@ -212,14 +212,28 @@ void JojGraphics::DX11Graphics::init(JojPlatform::Window* window)
 	// ---------------------------------------------------
 
 	// Describe Swap Chain
+	//DXGI_SWAP_CHAIN_DESC1 swapChainDesc = { 0 };
+	//swapChainDesc.Width = 800; // Use the window's client width
+	//swapChainDesc.Height = 600; // Use the window's client height
+	//swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // This is the most common swap chain format
+	//swapChainDesc.Stereo = false;
+	//swapChainDesc.SampleDesc.Count = 1; // Don't use multi-sampling
+	//swapChainDesc.SampleDesc.Quality = 0;
+	//swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	//swapChainDesc.BufferCount = 2; // Use double-buffering to minimize latency
+	//swapChainDesc.Scaling = DXGI_SCALING_NONE; // Doesnt stretch to fit the entire window
+	//swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL; // All Windows Store apps must use this SwapEffect
+	//swapChainDesc.Flags = 0;
+
+	// Describe Swap Chain
 	DXGI_SWAP_CHAIN_DESC swap_chain_desc = { 0 };
 	swap_chain_desc.BufferDesc.Width = u32(window->get_width());							// Back buffer width
 	swap_chain_desc.BufferDesc.Height = u32(window->get_height());							// Back buffer height
 	swap_chain_desc.BufferDesc.RefreshRate.Numerator = 60;									// Refresh rate in hertz 
 	swap_chain_desc.BufferDesc.RefreshRate.Numerator = 1;									// Numerator is an int
 	swap_chain_desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;							// Color format - RGBA 8 bits
-	//swap_chain_desc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;	// Default value for Flags
-	//swap_chain_desc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;					// Default mode for scaling
+	swap_chain_desc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;	// Default value for Flags
+	swap_chain_desc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;					// Default mode for scaling
 	swap_chain_desc.SampleDesc.Count = antialiasing;										// Samples per pixel (antialiasing)
 	swap_chain_desc.SampleDesc.Quality = quality;											// Level of image quality
 	swap_chain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;							// Use surface as Render Target
@@ -231,6 +245,7 @@ void JojGraphics::DX11Graphics::init(JojPlatform::Window* window)
 
 	// Create Swap Chain
 	ThrowIfFailed(dxgi_factory->CreateSwapChain(device, &swap_chain_desc, &swap_chain));
+	//ThrowIfFailed(dxgi_factory->CreateSwapChainForHwnd(device, window->get_id(), &swapChainDesc, nullptr, nullptr, &swap_chain));
 
 	// ---------------------------------------------------
 	// Render Target View

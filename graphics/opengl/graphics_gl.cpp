@@ -15,10 +15,8 @@ JojGraphics::GLGraphics::~GLGraphics()
 
 }
 
-b8 JojGraphics::GLGraphics::init(JojPlatform::Window* window)
+b8 JojGraphics::GLGraphics::init(std::unique_ptr<JojPlatform::Window>& window)
 {
-    this->window = window;
-
     int colorBits = 32;
     int depthBits = 24;
 
@@ -324,8 +322,6 @@ void JojGraphics::GLGraphics::clear()
     glUseProgram(shader_program);
     glBindVertexArray(vao);         // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
     glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    SwapBuffers(window->get_device_context());
 }
 
 void JojGraphics::GLGraphics::swap_buffers()

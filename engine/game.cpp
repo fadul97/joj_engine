@@ -8,10 +8,11 @@ JojPlatform::Input* JojEngine::Game::input = nullptr;		// Pointer to input
 
 JojEngine::Game::Game()
 {
+	// FIXME: Refactor attributes
 	if (!window)
 	{
-		window = JojEngine::Engine::window;
-		input = JojEngine::Engine::input;
+		//window = JojEngine::Engine::window;
+		//input = JojEngine::Engine::input;
 	}
 }
 

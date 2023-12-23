@@ -30,7 +30,7 @@ namespace JojRenderer
 		DX12Renderer();
 		~DX12Renderer();
 
-		b8 init(JojPlatform::Window* window, JojGraphics::DX12Graphics* graphics);	// Initialize renderer
+		b8 init(std::unique_ptr<JojPlatform::Window>& window, JojGraphics::DX12Graphics* graphics);	// Initialize renderer
 		void draw();																	// Draw
 		void present();																	// Present
 		void clear(ID3D12PipelineState* pso);											// Clear backbuffer for next frame

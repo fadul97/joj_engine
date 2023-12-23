@@ -28,7 +28,7 @@ void D3D11App::init()
 	// inicializa a matriz de projeção
 	XMStoreFloat4x4(&Proj, DirectX::XMMatrixPerspectiveFovLH(
 		DirectX::XMConvertToRadians(45.0f),
-		window->get_aspect_ratio(),
+		JojEngine::Engine::pm->get_window()->get_aspect_ratio(),
 		1.0f, 100.0f));
 
     // --------------------------------
@@ -63,7 +63,7 @@ void D3D11App::init()
 	// Projection Matrix
 	DirectX::XMMATRIX P = DirectX::XMMatrixPerspectiveFovLH(
 		DirectX::XMConvertToRadians(45),
-		window->get_aspect_ratio(),
+		JojEngine::Engine::pm->get_window()->get_aspect_ratio(),
 		1.0f, 100.0f);
 
 	// Word-View-Projection Matrix
@@ -143,7 +143,7 @@ void D3D11App::init()
 void D3D11App::update()
 {
     // Exit with ESCAPE key
-	if (input->is_key_pressed(VK_ESCAPE))
+	if (JojEngine::Engine::pm->is_key_pressed(VK_ESCAPE))
 		JojEngine::Engine::close_engine();
 
 	f32 xmouse = (f32)input->get_xmouse();

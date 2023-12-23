@@ -14,17 +14,9 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	{
 		// Create Engine and setup window
 		auto engine = new JojEngine::Engine();
-		engine->window->set_mode(JojPlatform::WindowMode::WINDOWED);
-		engine->window->set_size(800, 600);
-		engine->window->set_color(60, 60, 60);
-		engine->window->set_title("Joj Engine");
-
-		// Game pauses/resumes when losing/gaining focus
-		engine->window->set_lost_focus(JojEngine::Engine::pause);
-		engine->window->set_on_focus(JojEngine::Engine::resume);
 
 		// Create and execute game
-		int exit_code = engine->start(new D3D11App(), JojEngine::Renderer::DX11);
+		int exit_code = engine->start(new Shapes(), JojEngine::Renderer::DX12);
 
 		// Cleanup
 		delete engine;

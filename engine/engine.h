@@ -11,6 +11,7 @@
 #include "opengl/graphics_gl.h"
 #endif	// PLATFORM_WINDOWS
 
+#include <memory>
 #include "game.h"
 
 namespace JojEngine
@@ -23,8 +24,8 @@ namespace JojEngine
 		Engine();
 		~Engine();
 
-		static JojPlatform::Window* window;
-		static JojPlatform::Input* input;
+		static std::unique_ptr<JojPlatform::PlatformManager> pm;	// Platform Manager
+
 		static JojGraphics::DX12Graphics* dx12_graphics;		// DX12 Graphics device
 		static JojGraphics::DX11Graphics* dx11_graphics;		// DX11 Graphics device
 		static JojGraphics::GLGraphics* gl_graphics;			// OpenGL Graphics device

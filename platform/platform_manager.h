@@ -20,14 +20,19 @@ namespace JojPlatform
 
 		b8 init(i32 width = 1366, i32 height = 768, std::string title = "Joj Engine");	// Initialize platform specifics
 		void process_events(MSG msg);													// Process Window events
+		void swap_buffers();															// Change back and front buffers
+		void shutdown();																// Finalize PlatformManager resources
+
+		std::unique_ptr<Window>& get_window();	// Pass refence of Window but keep ownership after function
+		std::unique_ptr<Input>& get_input();	// Pass refence of Input but keep ownership after function
 
 		b8 is_key_down(u32 key_code);		// Check if key is pressed
 		b8 is_key_up(u32 key_code);			// Check if key is released
 		b8 is_key_pressed(u32 key_code);	// Register press only after release
 
-		i32 get_xmouse();				// Return X-axis mouse position
-		i32 get_ymouse();				// Return Y-axis mouse position
-		i16 get_mouse_wheel();			// Return mouse wheel rotation
+		i32 get_xmouse();		// Return X-axis mouse position
+		i32 get_ymouse();		// Return Y-axis mouse position
+		i16 get_mouse_wheel();	// Return mouse wheel rotation
 
 		void begin_period();	// Adjust sleep resolution to 1 millisecond
 		void end_period();		// Return sleep resolution to original value
@@ -47,6 +52,14 @@ namespace JojPlatform
 		std::unique_ptr<Input> input;
 		std::unique_ptr<Timer> timer;
 	};
+
+	// Pass refence of Window but keep ownership after function
+	inline std::unique_ptr<Window>& PlatformManager::get_window()
+	{ return window; }
+
+	// Pass refence of Input but keep ownership after function
+	inline std::unique_ptr<Input>& PlatformManager::get_input()
+	{ return input; }
 
 	// Check if key is pressed
 	inline b8 PlatformManager::is_key_down(u32 key_code)
@@ -86,7 +99,7 @@ namespace JojPlatform
 
 	// Restarts timer counter and returns elapsed time
 	inline f32 PlatformManager::reset_timer()
-	{ timer.reset(); }
+	{ return timer->reset(); }
 
 	// Set function to be executed when wubdiw regains focus
 	inline void PlatformManager::set_on_focus(void(*func)())
@@ -108,8 +121,19 @@ namespace JojPlatform
 		}
 	}
 
+	// Change back and front buffers
+	inline void PlatformManager::swap_buffers()
+	{ SwapBuffers(window->get_device_context()); }
+
+	// Finalize PlatformManager resources
+	inline void PlatformManager::shutdown()
+	{
+		window->close();
+	}
+
 	// Change window procedure to new_win_proc
 	inline void PlatformManager::change_window_procedure(HWND window_id, u32 index, LONG_PTR new_win_proc)
 	{ SetWindowLongPtr(window_id, index, new_win_proc); }
 #endif // PLATFORM_WINDOWS
+
 }

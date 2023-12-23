@@ -87,12 +87,12 @@ namespace JojGraphics
 		GLGraphics();
 		~GLGraphics();
 
-		b8 init(JojPlatform::Window* window);			// Initialize OpenGL
+		// FIXME: Allocating infinite memory
+		b8 init(std::unique_ptr<JojPlatform::Window>& window);			// Initialize OpenGL
 		void clear();                                   // Clear backbuffer with background color
 		void swap_buffers();                            // Present drawing on screen
 
 	private:
-		JojPlatform::Window* window;
 		f32 bg_color[4];								// Backbuffer background color
 
 		PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB;

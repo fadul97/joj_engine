@@ -30,11 +30,8 @@ JojRenderer::DX11Renderer::~DX11Renderer()
 {
 }
 
-b8 JojRenderer::DX11Renderer::init(JojPlatform::Window* window, JojGraphics::DX11Graphics* graphics)
+b8 JojRenderer::DX11Renderer::init(std::unique_ptr<JojPlatform::Window>& window, JojGraphics::DX11Graphics* graphics)
 {
-    // Set window
-    this->window = window;
-
     // Background color of the backbuffer = window background color
     COLORREF color = window->get_color();
 

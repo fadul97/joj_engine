@@ -25,7 +25,7 @@ void Shapes::init()
     // inicializa a matriz de projeção
     XMStoreFloat4x4(&Proj, DirectX::XMMatrixPerspectiveFovLH(
         DirectX::XMConvertToRadians(45.0f),
-        window->get_aspect_ratio(),
+        JojEngine::Engine::pm->get_window()->get_aspect_ratio(),
         1.0f, 100.0f));
 
     JojEngine::Engine::renderer->reset_commands();
@@ -43,13 +43,13 @@ void Shapes::init()
 void Shapes::update()
 {
     // Exit with ESCAPE key
-    if (input->is_key_pressed(VK_ESCAPE))
+    if (JojEngine::Engine::pm->is_key_pressed(VK_ESCAPE))
         JojEngine::Engine::close_engine();
 
     f32 xmouse = (f32)input->get_xmouse();
     f32 ymouse = (f32)input->get_ymouse();
 
-    if (input->is_key_down(VK_LBUTTON))
+    if (JojEngine::Engine::pm->is_key_down(VK_LBUTTON))
     {
         // cada pixel corresponde a 1/4 de grau
         f32 dx = DirectX::XMConvertToRadians(0.4f * (xmouse - last_xmouse));
@@ -63,7 +63,7 @@ void Shapes::update()
         // restringe o ângulo de phi ]0-180[ graus
         phi = phi < 0.1f ? 0.1f : (phi > (DirectX::XM_PI - 0.1f) ? DirectX::XM_PI - 0.1f : phi);
     }
-    else if (input->is_key_down(VK_RBUTTON))
+    else if (JojEngine::Engine::pm->is_key_down(VK_RBUTTON))
     {
         // cada pixel corresponde a 0.05 unidades
         f32 dx = 0.05f * (xmouse - last_xmouse);

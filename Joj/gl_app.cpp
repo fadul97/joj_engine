@@ -10,7 +10,7 @@ void GLApp::init()
 void GLApp::update()
 {
     // Exit with ESCAPE key
-	if (input->is_key_pressed(VK_ESCAPE))
+	if (JojEngine::Engine::pm->is_key_pressed(VK_ESCAPE))
 		JojEngine::Engine::close_engine();
 }
 

@@ -58,10 +58,9 @@ JojRenderer::DX12Renderer::~DX12Renderer()
 		//factory->Release();
 }
 
-b8 JojRenderer::DX12Renderer::init(JojPlatform::Window* window, JojGraphics::DX12Graphics* graphics)
+b8 JojRenderer::DX12Renderer::init(std::unique_ptr<JojPlatform::Window>& window, JojGraphics::DX12Graphics* graphics)
 {
     // Set window
-    this->window = window;
     this->graphics = graphics;
 
     // Get objects created from graphics
