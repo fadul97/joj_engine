@@ -5,7 +5,7 @@
 
 JojRenderer::DX11Renderer::DX11Renderer()
 {
-	context = nullptr;
+	context = std::make_unique<JojGraphics::DX11Context>();
 
 	device = nullptr;
 	device_context = nullptr;
@@ -74,10 +74,6 @@ JojRenderer::DX11Renderer::~DX11Renderer()
 		device->Release();
 		device = nullptr;
 	}
-
-	// Release Dx11 Context
-	if (context)
-		delete context;
 }
 
 b8 JojRenderer::DX11Renderer::init(std::unique_ptr<JojPlatform::Window>& window)
@@ -90,15 +86,10 @@ b8 JojRenderer::DX11Renderer::init(std::unique_ptr<JojPlatform::Window>& window)
 	bg_color[2] = GetBValue(color) / 255.0f;	// Blue
 	bg_color[3] = 1.0f;							// Alpha (1 = solid)
 
-	//context = std::make_unique<JojGraphics::DX11Context>();
-	context = new JojGraphics::DX11Context();
-
+	// Initialize DX11 context
 	context->init(window);
 
-	// Get device and device context ownership
-	//device.reset(context->get_device());
-	//device_context.reset(context->get_context());
-
+	// Get pointers to D3D11 Device and D3D11 Device Context
 	device = context->get_device();
 	device_context = context->get_context();
 
@@ -253,7 +244,12 @@ b8 JojRenderer::DX11Renderer::init(std::unique_ptr<JojPlatform::Window>& window)
 	rasterizer_desc.DepthClipEnable = true;
 
 	// Create rasterizer state
-	device->CreateRasterizerState(&rasterizer_desc, &rasterizer_state);
+	if FAILED(device->CreateRasterizerState(&rasterizer_desc, &rasterizer_state))
+	{
+		// TODO: Use own logger
+		OutputDebugString("Failed to CreateRasterizerState.\n");
+		return false;
+	}
 
 	// Set rasterizer state
 	device_context->RSSetState(rasterizer_state);

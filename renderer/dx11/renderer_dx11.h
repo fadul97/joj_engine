@@ -56,9 +56,7 @@ namespace JojRenderer
 		void set_primitive_topology(D3D11_PRIMITIVE_TOPOLOGY topology);
 
 	private:
-		//std::unique_ptr<JojGraphics::DX11Context> context;
-		JojGraphics::DX11Context* context;
-
+		std::unique_ptr<JojGraphics::DX11Context> context;
 
 		ID3D11Device* device;					// Graphics device
 		ID3D11DeviceContext* device_context;	// Graphics device context
