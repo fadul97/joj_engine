@@ -81,15 +81,15 @@ void D3D11App::init()
 	XMMATRIX world_view_proj = XMMatrixTranspose(WorldViewProj);
 	constantData.pSysMem = &world_view_proj;
 
-	JojEngine::Engine::dx11_graphics->get_device()->CreateBuffer(&constBufferDesc, &constantData, &constant_buffer);
+	JojEngine::Engine::renderer->get_device()->CreateBuffer(&constBufferDesc, &constantData, &constant_buffer);
 
-	JojEngine::Engine::dx11_graphics->get_context()->VSSetConstantBuffers(0, 1, &constant_buffer);
+	JojEngine::Engine::renderer->get_device_context()->VSSetConstantBuffers(0, 1, &constant_buffer);
 
 	// Create vertex buffer
-	vertexBuffer = JojEngine::Engine::dx11_renderer->create_vertex_buffer(sizeof(Vertex), geo.get_vertex_count(), geo.get_vertex_data());
+	vertexBuffer = JojEngine::Engine::renderer->create_vertex_buffer(sizeof(Vertex), geo.get_vertex_count(), geo.get_vertex_data());
 
 	// Create index buffer
-	index_buffer = JojEngine::Engine::dx11_renderer->create_index_buffer(sizeof(u32), geo.get_index_count(), geo.get_index_data());
+	index_buffer = JojEngine::Engine::renderer->create_index_buffer(sizeof(u32), geo.get_index_count(), geo.get_index_data());
 
 	DWORD shaderFlags = 0;
 #ifndef _DEBUG
@@ -106,11 +106,11 @@ void D3D11App::init()
 	
 	// Joj\--out\-build\-x64-debug\-joj\-Debug
 	// Compile and create Vertex Shader
-	vertex_shader = JojEngine::Engine::dx11_renderer->compile_and_create_vs_from_file(L"../../../../../joj/vertex.hlsl", vs_blob, shaderFlags);
+	vertex_shader = JojEngine::Engine::renderer->compile_and_create_vs_from_file(L"../../../../../joj/vertex.hlsl", vs_blob, shaderFlags);
 
 	// Compile and Create Pixel Shader
 	ID3DBlob* ps_blob = nullptr;			// Pixel shader
-	pixel_shader = JojEngine::Engine::dx11_renderer->compile_and_create_ps_from_file(L"../../../../../joj/pixel.hlsl", ps_blob, shaderFlags);
+	pixel_shader = JojEngine::Engine::renderer->compile_and_create_ps_from_file(L"../../../../../joj/pixel.hlsl", ps_blob, shaderFlags);
 
 
 	// --------------------------------
@@ -128,11 +128,11 @@ void D3D11App::init()
 	};
 
 	// Create and bind input layout to Input Assembler Stage
-	if (!JojEngine::Engine::dx11_renderer->create_and_set_input_layout(input_desc, ARRAYSIZE(input_desc), vs_blob, input_layout))
+	if (!JojEngine::Engine::renderer->create_and_set_input_layout(input_desc, ARRAYSIZE(input_desc), vs_blob, input_layout))
 		OutputDebugString("Failed to create and set input layout\n");
 
 	// Tell how Direct3D will form geometric primitives from vertex data
-	JojEngine::Engine::dx11_renderer->set_primitive_topology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	JojEngine::Engine::renderer->set_primitive_topology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
 	// Relase Direct3D resources
@@ -201,48 +201,65 @@ void D3D11App::update()
 	XMStoreFloat4x4(&obj_constant.world_view_proj, DirectX::XMMatrixTranspose(WorldViewProj));
 	constantData.pSysMem = &obj_constant.world_view_proj;
 
-	//JojEngine::Engine::dx11_graphics->get_device()->CreateBuffer(&constBufferDesc, &constantData, &constant_buffer);
-	//JojEngine::Engine::dx11_graphics->get_context()->VSSetConstantBuffers(0, 1, &constant_buffer);
+	//JojEngine::Engine::renderer->get_device()->CreateBuffer(&constBufferDesc, &constantData, &constant_buffer);
+	//JojEngine::Engine::renderer->get_device_context()->VSSetConstantBuffers(0, 1, &constant_buffer);
 
 	// Get a pointer to the constant buffer data.
 	D3D11_MAPPED_SUBRESOURCE mapped_buffer = {};
-	JojEngine::Engine::dx11_graphics->get_context()->Map(constant_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_buffer);
+	JojEngine::Engine::renderer->get_device_context()->Map(constant_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_buffer);
 
 	// Copy the new data to the constant buffer data.
 	memcpy(mapped_buffer.pData, &obj_constant, sizeof(JojRenderer::ObjectConstant));
 
 	// Release the pointer to the constant buffer data.
-	JojEngine::Engine::dx11_graphics->get_context()->Unmap(constant_buffer, 0);
+	JojEngine::Engine::renderer->get_device_context()->Unmap(constant_buffer, 0);
 }
 
 void D3D11App::draw()
 {
-	JojEngine::Engine::dx11_renderer->clear();
+	JojEngine::Engine::renderer->clear();
 
 	UINT stride = sizeof(Vertex);	// Store size os Vertex Structure
 	UINT offset = 0;				// Pointer to where the first Vertex Buffer is in array
 
 	// Bind Vertex Buffer to an input slot of the device
-	JojEngine::Engine::dx11_graphics->get_context()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+	JojEngine::Engine::renderer->get_device_context()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
 	// Bind index buffer to the pipeline
-	JojEngine::Engine::dx11_graphics->get_context()->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
+	JojEngine::Engine::renderer->get_device_context()->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
 
 	// Bind Vertex and Pixel Shaders
-	JojEngine::Engine::dx11_graphics->get_context()->VSSetShader(vertex_shader, nullptr, 0);
-	JojEngine::Engine::dx11_graphics->get_context()->PSSetShader(pixel_shader, nullptr, 0);
+	JojEngine::Engine::renderer->get_device_context()->VSSetShader(vertex_shader, nullptr, 0);
+	JojEngine::Engine::renderer->get_device_context()->PSSetShader(pixel_shader, nullptr, 0);
 
 	// Bind constant buffer
-	JojEngine::Engine::dx11_graphics->get_context()->VSSetConstantBuffers(0, 1, &constant_buffer);
+	JojEngine::Engine::renderer->get_device_context()->VSSetConstantBuffers(0, 1, &constant_buffer);
 
 	// Draw
-	JojEngine::Engine::dx11_graphics->get_context()->DrawIndexedInstanced(geo.get_index_count(), 1, 0, 0, 0);
+	JojEngine::Engine::renderer->get_device_context()->DrawIndexedInstanced(geo.get_index_count(), 1, 0, 0, 0);
 
-	JojEngine::Engine::dx11_renderer->swap_buffers();
+	JojEngine::Engine::renderer->swap_buffers();
 }
 
 void D3D11App::shutdown()
 {
+	// Release constant buffer
 	if (constant_buffer)
 		constant_buffer->Release();
+
+	// Release Buffer resource
+	if (vertexBuffer)
+		vertexBuffer->Release();
+
+	// Release Index buffer;
+	if (index_buffer)
+		index_buffer->Release();
+
+	// Release Vertex Shader
+	if (vertex_shader)
+		vertex_shader->Release();
+
+	// Release Pixel Shader
+	if (pixel_shader)
+		pixel_shader->Release();
 }

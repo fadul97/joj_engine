@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(JojRenderer)
 
-add_library(JojRenderer geometry.cpp)
+add_library(JojRenderer geometry.cpp renderer.cpp)
 
 # Include engine folder
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../engine/)

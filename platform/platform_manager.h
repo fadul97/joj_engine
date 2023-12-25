@@ -39,6 +39,7 @@ namespace JojPlatform
 		void begin_period();	// Adjust sleep resolution to 1 millisecond
 		void end_period();		// Return sleep resolution to original value
 		void start_timer();		// Start/resume counting time
+		void stop_timer();		// Stop counting time
 		f32 reset_timer();		// Restarts timer counter and returns elapsed time
 
 		void set_on_focus(void(*func)());	// Set function to be executed when wubdiw regains focus
@@ -99,6 +100,10 @@ namespace JojPlatform
 	inline void PlatformManager::start_timer()
 	{ timer->start(); }
 
+	// Stop counting time
+	inline void PlatformManager::stop_timer()
+	{ timer->stop(); }
+
 	// Restarts timer counter and returns elapsed time
 	inline f32 PlatformManager::reset_timer()
 	{ return timer->reset(); }
@@ -130,6 +135,8 @@ namespace JojPlatform
 	// Finalize PlatformManager resources
 	inline void PlatformManager::shutdown()
 	{
+		// returns to use the Window Procedure of the Window class
+		change_window_procedure(window->get_id(), GWLP_WNDPROC, (LONG_PTR)JojPlatform::Window::WinProc);
 		window->close();
 	}
 

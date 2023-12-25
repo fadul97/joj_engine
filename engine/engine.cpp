@@ -3,66 +3,77 @@
 #include <sstream>
 
 // Static members
-std::unique_ptr <JojPlatform::PlatformManager> JojEngine::Engine::pm = nullptr;	// Platform Manager
+std::unique_ptr<JojPlatform::PlatformManager> JojEngine::Engine::pm = nullptr;		// Platform Manager
+std::unique_ptr<JojRenderer::DX11Renderer> JojEngine::Engine::renderer = nullptr;	// Renderer
 
 JojGraphics::DX12Graphics* JojEngine::Engine::dx12_graphics = nullptr;		// DX12 Graphics device
-JojGraphics::DX11Graphics* JojEngine::Engine::dx11_graphics = nullptr;		// DX11 Graphics device
+JojRenderer::DX12Renderer* JojEngine::Engine::dx12_renderer = nullptr;		// DX12 Graphics device
 JojGraphics::GLGraphics* JojEngine::Engine::gl_graphics = nullptr;			// Opengl Graphics device
+
 JojEngine::Game* JojEngine::Engine::game = nullptr;							// Pointer to game
 f32 JojEngine::Engine::frametime = 0.0f;									// Current frametime
-JojPlatform::Timer JojEngine::Engine::timer;								// Time counter
 b8 JojEngine::Engine::paused = false;										// Engine state
 b8 JojEngine::Engine::running = false;										// Engine is not running
 
-JojRenderer::DX12Renderer* JojEngine::Engine::renderer = nullptr;			// DX12 Renderer
-JojRenderer::DX11Renderer* JojEngine::Engine::dx11_renderer = nullptr;		// DX12 Renderer
+std::string JojEngine::Engine::renderer_name = "";
 
 JojEngine::Engine::Engine()
 {
 	pm = std::make_unique<JojPlatform::PlatformManager>();
-	renderer = new JojRenderer::DX12Renderer();
-	dx11_renderer = new JojRenderer::DX11Renderer();
 }
 
 JojEngine::Engine::~Engine()
 {
 	delete game;
-
-	if (dx11_graphics)
-		delete dx11_graphics;
-	
-	if (dx12_graphics)
-		delete dx12_graphics;
-
-	delete renderer;
-	delete dx11_renderer;
 }
 
-i32 JojEngine::Engine::start(JojEngine::Game* game, Renderer renderer_api)
+i32 JojEngine::Engine::start(JojEngine::Game* game, RendererBackend renderer_backend)
 {
 	this->game = game;
 
-	pm->init(800, 600);
+	if (!pm->init(800, 600))
+	{
+		// TODO: Use own logger
+		OutputDebugString("Failed to initialize platform manager.\n");
+		return -1;
+	}
 
 	// Initialize graphics device
-	if (renderer_api == Renderer::DX11)
+	if (renderer_backend == RendererBackend::DX11)
 	{
-		dx11_graphics = new JojGraphics::DX11Graphics();
-		dx11_graphics->init(pm->get_window());
-		dx11_renderer->init(pm->get_window(), dx11_graphics);
+		renderer = std::make_unique<JojRenderer::DX11Renderer>();
+		if (!renderer->init(pm->get_window()))
+		{
+			// TODO: Use own logger
+			OutputDebugString("Failed to initialize Renderer::DX11.\n");
+			return -1;
+		}
 	}
-	else if (renderer_api == Renderer::DX12)
+	else if (renderer_backend == RendererBackend::DX12)
 	{
 		dx12_graphics = new JojGraphics::DX12Graphics();
 		dx12_graphics->init(pm->get_window());
-		renderer->init(pm->get_window(), dx12_graphics);
+
+		dx12_renderer = new JojRenderer::DX12Renderer();
+		if (!dx12_renderer->init(pm->get_window(), dx12_graphics))
+		{
+			// TODO: Use own logger
+			OutputDebugString("Failed to initialize Renderer::DX12.\n");
+			return -1;
+		}
 	}
 	else
 	{
 		gl_graphics = new JojGraphics::GLGraphics();
 		if (!gl_graphics->init(pm->get_window()))
+		{
+			// TODO: Use own logger
 			OutputDebugString("Failed to initialize OpenGL\n");
+			return -1;
+		}
 	}
+
+	renderer_name = renderer_to_string(renderer_backend);
 
 	// Change window procedure to EngineProc
 	pm->change_window_procedure(pm->get_window()->get_id(), GWLP_WNDPROC, (LONG_PTR)EngineProc);
@@ -176,6 +187,7 @@ f32 JojEngine::Engine::get_frametime()
 		text.precision(3);			// three numbers after comma
 
 		text << pm->get_window()->get_title().c_str() << "    "
+			<< "Renderer Backend: " << renderer_name.c_str() << "    "
 			<< "FPS: " << frame_count << "    "
 			<< "Frametime: " << frametime * 1000 << " (ms)";
 

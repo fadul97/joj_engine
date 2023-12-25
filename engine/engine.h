@@ -5,7 +5,6 @@
 #if PLATFORM_WINDOWS
 #include "platform_manager.h"
 #include "dx12/graphics_dx12.h"
-#include "dx11/graphics_dx11.h"
 #include "dx12/renderer_dx12.h"
 #include "dx11/renderer_dx11.h"
 #include "opengl/graphics_gl.h"
@@ -16,7 +15,9 @@
 
 namespace JojEngine
 {
-	enum class Renderer { DX11, DX12, OPENGL };
+	enum class RendererBackend { DX11, DX12, OPENGL };
+
+	std::string renderer_to_string(RendererBackend renderer_backend);
 
 	class Engine
 	{
@@ -25,17 +26,19 @@ namespace JojEngine
 		~Engine();
 
 		static std::unique_ptr<JojPlatform::PlatformManager> pm;	// Platform Manager
+		static std::unique_ptr<JojRenderer::DX11Renderer> renderer;	// DX11 Renderer
 
+		static JojRenderer::DX12Renderer* dx12_renderer;		// DX12 Renderer
 		static JojGraphics::DX12Graphics* dx12_graphics;		// DX12 Graphics device
-		static JojGraphics::DX11Graphics* dx11_graphics;		// DX11 Graphics device
+
 		static JojGraphics::GLGraphics* gl_graphics;			// OpenGL Graphics device
+
 		static JojEngine::Game* game;							// Game to be executed
 		static f32 frametime;									// Current frametime
 
-		static JojRenderer::DX12Renderer* renderer;				// DX12 Renderer
-		static JojRenderer::DX11Renderer* dx11_renderer;		// DX11 Renderer
+		static std::string renderer_name;	// Hold current Renderer backend name
 
-		i32 start(JojEngine::Game* game, Renderer renderer_api);	// Initializes game execution
+		i32 start(JojEngine::Game* game, RendererBackend renderer_backend);	// Initializes game execution
 
 		static void close_engine();									// Close Engine
 
@@ -47,7 +50,6 @@ namespace JojEngine
 
 	private:
 		static b8 running;						// Control wether engine is running
-		static JojPlatform::Timer timer;		// Time counter
 		static b8 paused;						// Engine state
 
 		f32 get_frametime();					// Calculate frametime
@@ -59,8 +61,27 @@ namespace JojEngine
 	{ running = false; }
 
 	inline void Engine::pause()
-	{ paused = true; timer.stop(); }
+	{ paused = true; pm->stop_timer(); }
 
 	inline void Engine::resume()
-	{ paused = false; timer.start(); }
+	{ paused = false; pm->start_timer(); }
+
+	inline std::string renderer_to_string(RendererBackend renderer_backend)
+	{
+		switch (renderer_backend)
+		{
+		case JojEngine::RendererBackend::DX11:
+			return "DirectX 11";
+			break;
+		case JojEngine::RendererBackend::DX12:
+			return "DirectX 12";
+			break;
+		case JojEngine::RendererBackend::OPENGL:
+			return "OpenGL";
+			break;
+		default:
+			return "Default";
+			break;
+		}
+	};
 }

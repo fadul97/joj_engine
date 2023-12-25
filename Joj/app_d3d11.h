@@ -1,7 +1,6 @@
 #pragma once
 
 #include "game.h"
-#include "dx12/renderer_dx12.h"
 #include "DirectXMath.h"
 #include <d3d11.h>
 

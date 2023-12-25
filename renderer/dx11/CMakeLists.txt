@@ -5,6 +5,9 @@ project(JojRendererD3D11)
 
 add_library(JojRendererD3D11 renderer_dx11.cpp)
 
+# Include renderer folder
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+
 # Link DXGI, D3D11 and JojPlatform to JojGraphics
 target_link_libraries(JojRendererD3D11 PRIVATE dxgi.lib d3d11.lib JojPlatform)
 

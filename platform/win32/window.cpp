@@ -35,8 +35,8 @@ JojPlatform::Window::~Window()
 	//	wglDeleteContext(rc);
 
 	// Release device context
-	if (hdc)
-		ReleaseDC(id, hdc);
+	//if (hdc)
+	//	ReleaseDC(id, hdc);
 }
 
 void JojPlatform::Window::set_mode(WindowMode mode)

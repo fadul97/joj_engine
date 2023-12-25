@@ -21,7 +21,7 @@ JojPlatform::Input::Input()
 JojPlatform::Input::~Input()
 {
 	// returns to use the Window Procedure of the Window class
-	SetWindowLongPtr(GetActiveWindow(), GWLP_WNDPROC, (LONG_PTR)JojPlatform::Window::WinProc);
+	//SetWindowLongPtr(GetActiveWindow(), GWLP_WNDPROC, (LONG_PTR)JojPlatform::Window::WinProc);
 }
 
 b8 JojPlatform::Input::is_key_pressed(u32 vkcode)

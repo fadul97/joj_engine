@@ -28,7 +28,7 @@ void Shapes::init()
         JojEngine::Engine::pm->get_window()->get_aspect_ratio(),
         1.0f, 100.0f));
 
-    JojEngine::Engine::renderer->reset_commands();
+    JojEngine::Engine::dx12_renderer->reset_commands();
 
     // Build geometry and initialize pipeline
     build_descriptor_heaps();
@@ -37,7 +37,7 @@ void Shapes::init()
     build_root_signature();
     build_pipeline_state();
 
-    JojEngine::Engine::renderer->submit_commands();
+    JojEngine::Engine::dx12_renderer->submit_commands();
 }
 
 void Shapes::update()
@@ -104,7 +104,7 @@ void Shapes::update()
 
 void Shapes::draw()
 {
-    JojEngine::Engine::renderer->clear(pipeline_state);
+    JojEngine::Engine::dx12_renderer->clear(pipeline_state);
 
     // Submit pipeline configuration commands
     ID3D12DescriptorHeap* descriptor_heaps[] = { constant_buffer_heap };
@@ -129,7 +129,7 @@ void Shapes::draw()
     // Submit Drawing Commands
     JojEngine::Engine::dx12_graphics->get_command_list()->DrawIndexedInstanced(geo.get_index_count() , 1, 0, 0, 0);
 
-    JojEngine::Engine::renderer->present();
+    JojEngine::Engine::dx12_renderer->present();
 }
 
 void Shapes::shutdown()
@@ -151,7 +151,7 @@ void Shapes::build_descriptor_heaps()
     constant_buffer_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
     // Create descriptor for constant buffer
-    JojEngine::Engine::renderer->get_device()->CreateDescriptorHeap(&constant_buffer_heap_desc, IID_PPV_ARGS(&constant_buffer_heap));
+    JojEngine::Engine::dx12_renderer->get_device()->CreateDescriptorHeap(&constant_buffer_heap_desc, IID_PPV_ARGS(&constant_buffer_heap));
 }
 
 void Shapes::build_constant_buffers()
@@ -183,7 +183,7 @@ void Shapes::build_constant_buffers()
     upload_buffer_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
     // Create an upload buffer for the constant buffer
-    JojEngine::Engine::renderer->get_device()->CreateCommittedResource(
+    JojEngine::Engine::dx12_renderer->get_device()->CreateCommittedResource(
         &upload_heap_properties,
         D3D12_HEAP_FLAG_NONE,
         &upload_buffer_desc,
@@ -200,7 +200,7 @@ void Shapes::build_constant_buffers()
     cbv_desc.SizeInBytes = constant_buffer_size;
 
     // Create a view for constant buffer
-    JojEngine::Engine::renderer->get_device()->CreateConstantBufferView(
+    JojEngine::Engine::dx12_renderer->get_device()->CreateConstantBufferView(
         &cbv_desc,
         constant_buffer_heap->GetCPUDescriptorHandleForHeapStart());
 
@@ -237,22 +237,22 @@ void Shapes::build_geometry()
     index_buffer_size = ib_size;
 
     // Allocate resources to the Vertex Buffer
-    JojEngine::Engine::renderer->allocate_resource_in_cpu(vb_size, &vertex_buffer_cpu);
-    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::UPLOAD, vb_size, &vertex_buffer_upload);
-    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::GPU, vb_size, &vertex_buffer_gpu);
+    JojEngine::Engine::dx12_renderer->allocate_resource_in_cpu(vb_size, &vertex_buffer_cpu);
+    JojEngine::Engine::dx12_renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::UPLOAD, vb_size, &vertex_buffer_upload);
+    JojEngine::Engine::dx12_renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::GPU, vb_size, &vertex_buffer_gpu);
 
     // Allocate resources to the Index Buffer
-    JojEngine::Engine::renderer->allocate_resource_in_cpu(ib_size, &index_buffer_cpu);
-    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::UPLOAD, ib_size, &index_buffer_upload);
-    JojEngine::Engine::renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::GPU, ib_size, &index_buffer_gpu);
+    JojEngine::Engine::dx12_renderer->allocate_resource_in_cpu(ib_size, &index_buffer_cpu);
+    JojEngine::Engine::dx12_renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::UPLOAD, ib_size, &index_buffer_upload);
+    JojEngine::Engine::dx12_renderer->allocate_resource_in_gpu(JojRenderer::AllocationType::GPU, ib_size, &index_buffer_gpu);
 
     // Save a copy of the vertices and indexes in the 'mesh'
-    JojEngine::Engine::renderer->copy_verts_to_cpu_blob(geo.get_vertex_data(), vb_size, vertex_buffer_cpu);
-    JojEngine::Engine::renderer->copy_verts_to_cpu_blob(geo.get_index_data(), ib_size, index_buffer_cpu);
+    JojEngine::Engine::dx12_renderer->copy_verts_to_cpu_blob(geo.get_vertex_data(), vb_size, vertex_buffer_cpu);
+    JojEngine::Engine::dx12_renderer->copy_verts_to_cpu_blob(geo.get_index_data(), ib_size, index_buffer_cpu);
 
     // Copy vertices and indexes to the GPU using the Upload buffer
-    JojEngine::Engine::renderer->copy_verts_to_gpu(geo.get_vertex_data(), vb_size, vertex_buffer_upload, vertex_buffer_gpu);
-    JojEngine::Engine::renderer->copy_verts_to_gpu(geo.get_index_data(), ib_size, index_buffer_upload, index_buffer_gpu);
+    JojEngine::Engine::dx12_renderer->copy_verts_to_gpu(geo.get_vertex_data(), vb_size, vertex_buffer_upload, vertex_buffer_gpu);
+    JojEngine::Engine::dx12_renderer->copy_verts_to_gpu(geo.get_index_data(), ib_size, index_buffer_upload, index_buffer_gpu);
 }
 
 void Shapes::build_root_signature()
@@ -298,7 +298,7 @@ void Shapes::build_root_signature()
 
     /* Create a root signature with a single slot that points to
      a range of descriptors consisting of a single constant buffer */
-    ThrowIfFailed(JojEngine::Engine::renderer->get_device()->CreateRootSignature(
+    ThrowIfFailed(JojEngine::Engine::dx12_renderer->get_device()->CreateRootSignature(
         0,
         serialized_root_sig->GetBufferPointer(),
         serialized_root_sig->GetBufferSize(),
