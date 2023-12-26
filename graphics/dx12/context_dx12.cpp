@@ -1,37 +1,30 @@
 #include "context_dx12.h"
 
-#include "context_dx11.h"
-
 #include <sstream>
 #include "logger.h"
 #include <stdlib.h>
+#include <DXGIDebug.h>
 
 JojGraphics::DX12Context::DX12Context()
 {
 	device = nullptr;	// Graphics device
-
 	factory = nullptr;	// Main DXGI interface
-
-	//#if defined _DEBUG
-	debug = nullptr;
-	//#endif // _DEBUG
+	debug = nullptr;	// D3D12 debug
 }
 
 JojGraphics::DX12Context::~DX12Context()
 {
-	// Released in DX11Renderer destructor
-	//if (context) context->Release();
+	OutputDebugString("\n");
+	debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
+	OutputDebugString("\n\n");
 
-	// Released in DX11Renderer destructor
-	//if (device) device->Release();
+	// Release D3D12 debug
+	if (debug)
+		debug->Release();
 
 	// Main DXGI interface
 	if (factory)
 		factory->Release();
-
-	//#if defined _DEBUG
-	//debug->Release();
-	//#endif // _DEBUG
 }
 
 b8 JojGraphics::DX12Context::init(std::unique_ptr<JojPlatform::Window>& window)
@@ -99,6 +92,9 @@ b8 JojGraphics::DX12Context::init(std::unique_ptr<JojPlatform::Window>& window)
 
 	// Display graphics hardware information
 #ifdef _DEBUG
+	if FAILED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))
+		FDEBUG("Failed to get debuf interface for D3D12.");
+
 	log_hardware_info();
 #endif 
 

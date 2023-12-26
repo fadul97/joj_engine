@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.8)
 project(JojGraphics)
 
 # Build a library for D3D11 and D3D12
-add_library(JojGraphics context.cpp)
+add_library(JojGraphics graphics_context.cpp)
 
 # Include engine folder
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../engine/)

@@ -7,33 +7,25 @@ JojRenderer::DX12Renderer::DX12Renderer()
 {
     context = std::make_unique<JojGraphics::DX12Context>();
 
+    // Graphics Infrastructure
+    device = nullptr;
+    backbuffer_index = 0;   // 0 is the first
+
     // Configuration
     backbuffer_count = 2;	// Double buffering
     antialiasing = 1;		// No antialising
     quality = 0;			// Default quality
     vsync = false;			// No vertical sync
-
-    // Background color
+    
+    // Backbuffer background color
     bg_color[0] = 0.0f;		// Red
     bg_color[1] = 0.0f;		// Green
     bg_color[2] = 0.0f;		// Blue
     bg_color[3] = 0.0f;		// Alpha (0 = transparent, 1 = solid)
 
-    // Graphics Infrastructure
-    device = nullptr;
-    factory = nullptr;
-    swapchain = nullptr;
-    backbuffer_index = 0;   // 0 is the first
-
-    // Pipeline
-    render_targets = new ID3D12Resource * [backbuffer_count] {nullptr};
-    depth_stencil = nullptr;
-    render_target_heap = nullptr;
-    depth_stencil_heap = nullptr;
-    rt_descriptor_size = 0;
-    ZeroMemory(&viewport, sizeof(viewport));
-    ZeroMemory(&scissor_rect, sizeof(scissor_rect));
-
+    // ---------------------------------------------------
+    // Pipeline members
+    // ---------------------------------------------------
     command_queue = nullptr;
     command_list = nullptr;
     command_list_alloc = nullptr;
@@ -41,21 +33,75 @@ JojRenderer::DX12Renderer::DX12Renderer()
     // CPU/GPU Synchronization
     fence = nullptr;
     current_fence = 0;
+   
+    swapchain = nullptr;
+    render_target_heap = nullptr;
+    rt_descriptor_size = 0;
+    render_targets = new ID3D12Resource * [backbuffer_count] {nullptr};
+    
+    depth_stencil = nullptr;
+    depth_stencil_heap = nullptr;
+    
+    ZeroMemory(&viewport, sizeof(viewport));
+    ZeroMemory(&scissor_rect, sizeof(scissor_rect));
+
 }
 
-/* ATTENTION: Call DX12RendererOld destructor before DX12Graphics destructor */
 JojRenderer::DX12Renderer::~DX12Renderer()
 {
     // Wait for GPU to finish queued commands
     wait_command_queue();
 
+    // Release depth stencil buffer
+    if (depth_stencil)
+        depth_stencil->Release();
+
+    // Release render targets buffers
+    if (render_targets)
+    {
+        for (u32 i = 0; i < backbuffer_count; ++i)
+        {
+            if (render_targets[i])
+                render_targets[i]->Release();
+        }
+        delete[] render_targets;
+    }
+
+    // Release fence
+    if (fence)
+        fence->Release();
+
+    // Release depth stencil heap
+    if (depth_stencil_heap)
+        depth_stencil_heap->Release();
+
+    // Release render target heap
+    if (render_target_heap)
+        render_target_heap->Release();
+
+    // Release swap chain
+    if (swapchain)
+    {
+        // Direct3D is unable to close when in fullscreen
+        swapchain->SetFullscreenState(false, NULL);
+        swapchain->Release();
+    }
+
+    // Release command list
+    if (command_list)
+        command_list->Release();
+
+    // Release command allocator
+    if (command_list_alloc)
+        command_list_alloc->Release();
+
+    // Release command queue
+    if (command_queue)
+        command_queue->Release();
+
     // Release graphics device
     if (device)
         device->Release();
-
-    // Release main interface
-    //if (factory)
-        //factory->Release();
 }
 
 b8 JojRenderer::DX12Renderer::init(std::unique_ptr<JojPlatform::Window>& window)

@@ -8,8 +8,6 @@ std::unique_ptr<JojPlatform::PlatformManager> JojEngine::Engine::pm = nullptr;		
 std::unique_ptr<JojRenderer::DX11Renderer> JojEngine::Engine::renderer = nullptr;	// Renderer
 std::unique_ptr<JojRenderer::DX12Renderer> JojEngine::Engine::dx12_renderer = nullptr;	// Renderer
 
-//JojGraphics::DX12Graphics* JojEngine::Engine::dx12_graphics = nullptr;		// DX12 Graphics device
-//JojRenderer::DX12RendererOld* JojEngine::Engine::dx12_renderer = nullptr;	// DX12 Graphics renderer
 JojGraphics::GLGraphics* JojEngine::Engine::gl_graphics = nullptr;			// Opengl Graphics device
 
 JojEngine::Game* JojEngine::Engine::game = nullptr;							// Pointer to game

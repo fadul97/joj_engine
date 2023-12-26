@@ -4,10 +4,11 @@
 
 #if PLATFORM_WINDOWS
 
-#include "context.h"
+#include "graphics_context.h"
 #include <dxgi1_6.h>	// DirectX graphics infrastructure
 #include <d3d12.h>      // Main Direct3D functions
 #include <dxgidebug.h>
+
 
 namespace JojGraphics
 {
@@ -17,13 +18,12 @@ namespace JojGraphics
 		DX12Context();
 		~DX12Context();
 
+		IDXGIDebug1* debug;	// D3D12 debug
+
 		b8 init(std::unique_ptr<JojPlatform::Window>& window);	// Initialize context
 
 		ID3D12Device4* get_device();			// Return Graphics device
 		IDXGIFactory6* get_factory() const;		// Return DXGI factory interface
-
-		//IDXGIDebug* debug_dev;
-		ID3D12Debug* debug;
 
 	private:
 		ID3D12Device4* device;			// Graphics device
@@ -32,8 +32,6 @@ namespace JojGraphics
 
 
 		void log_hardware_info();	// Show hardware information
-		b8 wait_command_queue();	// Wait for command queue execution
-		void submit_commands();		// Submit pending commands for execution
 	};
 
 	// Return Graphics device

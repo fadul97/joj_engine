@@ -1,4 +1,4 @@
-#include "context.h"
+#include "graphics_context.h"
 
 JojGraphics::GraphicsContext::GraphicsContext()
 {

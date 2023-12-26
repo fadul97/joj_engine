@@ -134,9 +134,32 @@ void Shapes::draw()
 
 void Shapes::shutdown()
 {
-    constant_buffer_upload->Unmap(0, nullptr);
-    constant_buffer_upload->Release();
-    constant_buffer_heap->Release();
+    if (vertex_buffer_cpu)
+        vertex_buffer_cpu->Release();
+
+    if (index_buffer_cpu)
+        index_buffer_cpu->Release();
+
+    if (constant_buffer_upload)
+    {
+        constant_buffer_upload->Unmap(0, nullptr);
+        constant_buffer_upload->Release();
+    }
+
+    if (constant_buffer_heap)
+        constant_buffer_heap->Release();
+
+    if (vertex_buffer_upload)
+        vertex_buffer_upload->Release();
+
+    if (index_buffer_upload)
+        index_buffer_upload->Release();
+
+    if (vertex_buffer_gpu)
+        vertex_buffer_gpu->Release();
+            
+    if (index_buffer_gpu)
+        index_buffer_gpu->Release();
 
     root_signature->Release();
     pipeline_state->Release();
