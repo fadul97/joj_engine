@@ -45,6 +45,9 @@ namespace JojPlatform
 		void set_on_focus(void(*func)());	// Set function to be executed when wubdiw regains focus
 		void set_lost_focus(void(*func)());	// Set function to be executed when wubdiw loses focus
 
+		// Create console for window
+		static void create_console();
+
 #if PLATFORM_WINDOWS
 		// Change window procedure to new_win_proc
 		void change_window_procedure(HWND window_id, u32 index, LONG_PTR new_win_proc);
@@ -138,6 +141,15 @@ namespace JojPlatform
 		// returns to use the Window Procedure of the Window class
 		change_window_procedure(window->get_id(), GWLP_WNDPROC, (LONG_PTR)JojPlatform::Window::WinProc);
 		window->close();
+	}
+
+	// Create console for window
+	inline void PlatformManager::create_console()
+	{
+		AllocConsole();
+		freopen("CONIN$", "r", stdin);
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
 	}
 
 	// Change window procedure to new_win_proc
