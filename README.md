@@ -12,17 +12,9 @@ I'll add more information.
 ### TODO
 
 [ ] Remove try/catch and handle errors in a better way  
-[ ] Add comments to DX12Graphics and DX12Renderer  
-[ ] Refactor DX12Graphics so it just initializes Direct3D  
-[ ] Fix DX12Graphics and DX12Renderer destructors  
-[ ] Fix reference count for DX12 - ReportLiveDeviceObjects or ReportLiveObjects may help  
 [ ] Make it so when including window.h in file, type #include "platform/window.h"  
 [ ] Think about a better place to put Geometry and an eventual Mesh class  
-[ ] Refactor DX12Renderer to be a child of Renderer
-
-### FIXME
-
-[ ] OpenGL initialization allocates memory continuously
+[ ] Refactor hacky workaround to get OpenGL function pointers
 
 ### Resources
 
