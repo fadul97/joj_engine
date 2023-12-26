@@ -6,7 +6,7 @@
 #include "platform_manager.h"
 #include "dx12/renderer_dx12.h"
 #include "dx11/renderer_dx11.h"
-#include "opengl/graphics_gl.h"
+#include "opengl/graphics_glold.h"
 #endif	// PLATFORM_WINDOWS
 
 #include <memory>
