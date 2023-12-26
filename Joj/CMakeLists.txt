@@ -1,6 +1,10 @@
 ﻿# CMakeList.txt : CMake project for Joj, include source and define
 # project specific logic here.
 
+if(WIN32 AND MSVC)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup")
+endif()
+
 # Add source to this project's executable.
 add_executable(${PROJECT_NAME} main.cpp Joj.h shapes.cpp app_d3d11.cpp gl_app.cpp)
 
