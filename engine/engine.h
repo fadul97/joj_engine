@@ -6,6 +6,7 @@
 #include "platform_manager.h"
 #include "dx12/graphics_dx12.h"
 #include "dx12/renderer_dx12old.h"
+#include "dx12/renderer_dx12.h"
 #include "dx11/renderer_dx11.h"
 #include "opengl/graphics_gl.h"
 #endif	// PLATFORM_WINDOWS
@@ -27,9 +28,10 @@ namespace JojEngine
 
 		static std::unique_ptr<JojPlatform::PlatformManager> pm;	// Platform Manager
 		static std::unique_ptr<JojRenderer::DX11Renderer> renderer;	// DX11 Renderer
+		static std::unique_ptr<JojRenderer::DX12Renderer> dx12_renderer;	// DX12 Renderer
 
-		static JojRenderer::DX12RendererOld* dx12_renderer;		// DX12 Renderer
-		static JojGraphics::DX12Graphics* dx12_graphics;		// DX12 Graphics device
+		//static JojRenderer::DX12RendererOld* dx12_renderer;		// DX12 Renderer
+		//static JojGraphics::DX12Graphics* dx12_graphics;		// DX12 Graphics device
 
 		static JojGraphics::GLGraphics* gl_graphics;			// OpenGL Graphics device
 

@@ -104,32 +104,32 @@ void Shapes::update()
 
 void Shapes::draw()
 {
-    JojEngine::Engine::dx12_renderer->clear(pipeline_state);
+    JojEngine::Engine::dx12_renderer->custom_clear(pipeline_state);
 
     // Submit pipeline configuration commands
     ID3D12DescriptorHeap* descriptor_heaps[] = { constant_buffer_heap };
-    JojEngine::Engine::dx12_graphics->get_command_list()->SetDescriptorHeaps(_countof(descriptor_heaps), descriptor_heaps);
+    JojEngine::Engine::dx12_renderer->get_command_list()->SetDescriptorHeaps(_countof(descriptor_heaps), descriptor_heaps);
 
-    JojEngine::Engine::dx12_graphics->get_command_list()->SetGraphicsRootSignature(root_signature);
+    JojEngine::Engine::dx12_renderer->get_command_list()->SetGraphicsRootSignature(root_signature);
 
     vertex_buffer_view.BufferLocation = vertex_buffer_gpu->GetGPUVirtualAddress();
     vertex_buffer_view.StrideInBytes = vertex_byte_stride;
     vertex_buffer_view.SizeInBytes = vertex_buffer_size;
-    JojEngine::Engine::dx12_graphics->get_command_list()->IASetVertexBuffers(0, 1, &vertex_buffer_view);
+    JojEngine::Engine::dx12_renderer->get_command_list()->IASetVertexBuffers(0, 1, &vertex_buffer_view);
 
     index_buffer_view.BufferLocation = index_buffer_gpu->GetGPUVirtualAddress();
     index_buffer_view.Format = index_format;
     index_buffer_view.SizeInBytes = index_buffer_size;
-    JojEngine::Engine::dx12_graphics->get_command_list()->IASetIndexBuffer(&index_buffer_view);
+    JojEngine::Engine::dx12_renderer->get_command_list()->IASetIndexBuffer(&index_buffer_view);
 
-    JojEngine::Engine::dx12_graphics->get_command_list()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    JojEngine::Engine::dx12_renderer->get_command_list()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    JojEngine::Engine::dx12_graphics->get_command_list()->SetGraphicsRootDescriptorTable(0, constant_buffer_heap->GetGPUDescriptorHandleForHeapStart());
+    JojEngine::Engine::dx12_renderer->get_command_list()->SetGraphicsRootDescriptorTable(0, constant_buffer_heap->GetGPUDescriptorHandleForHeapStart());
 
     // Submit Drawing Commands
-    JojEngine::Engine::dx12_graphics->get_command_list()->DrawIndexedInstanced(geo.get_index_count() , 1, 0, 0, 0);
+    JojEngine::Engine::dx12_renderer->get_command_list()->DrawIndexedInstanced(geo.get_index_count() , 1, 0, 0, 0);
 
-    JojEngine::Engine::dx12_renderer->present();
+    JojEngine::Engine::dx12_renderer->swap_buffers();
 }
 
 void Shapes::shutdown()
@@ -423,9 +423,9 @@ void Shapes::build_pipeline_state()
     pso.NumRenderTargets = 1;
     pso.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
     pso.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    pso.SampleDesc.Count = JojEngine::Engine::dx12_graphics->get_antialiasing();
-    pso.SampleDesc.Quality = JojEngine::Engine::dx12_graphics->get_quality();
-    JojEngine::Engine::dx12_graphics->get_device()->CreateGraphicsPipelineState(&pso, IID_PPV_ARGS(&pipeline_state));
+    pso.SampleDesc.Count = JojEngine::Engine::dx12_renderer->get_antialiasing();
+    pso.SampleDesc.Quality = JojEngine::Engine::dx12_renderer->get_quality();
+    JojEngine::Engine::dx12_renderer->get_device()->CreateGraphicsPipelineState(&pso, IID_PPV_ARGS(&pipeline_state));
 
     vertex_shader->Release();
     pixel_shader->Release();

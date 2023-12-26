@@ -8,22 +8,10 @@
 #include "dx12/graphics_dx12.h"
 #include <DirectXColors.h>
 #include <d3d12.h>
+#include "renderer_dx12.h"
 
 namespace JojRenderer
 {
-	struct ObjectConstant
-	{
-		DirectX::XMFLOAT4X4 world_view_proj =
-		{
-			1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 1.0f
-		};
-	};
-
-	enum class AllocationType { GPU, UPLOAD };
-
 	class DX12RendererOld
 	{
 	public:

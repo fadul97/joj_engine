@@ -26,13 +26,13 @@ JojRenderer::DX12Renderer::DX12Renderer()
     backbuffer_index = 0;   // 0 is the first
 
     // Pipeline
-    render_targets = nullptr;
+    render_targets = new ID3D12Resource * [backbuffer_count] {nullptr};
     depth_stencil = nullptr;
     render_target_heap = nullptr;
     depth_stencil_heap = nullptr;
     rt_descriptor_size = 0;
-    viewport = { 0 };
-    scissor_rect = { 0 };
+    ZeroMemory(&viewport, sizeof(viewport));
+    ZeroMemory(&scissor_rect, sizeof(scissor_rect));
 
     command_queue = nullptr;
     command_list = nullptr;
@@ -46,6 +46,9 @@ JojRenderer::DX12Renderer::DX12Renderer()
 /* ATTENTION: Call DX12RendererOld destructor before DX12Graphics destructor */
 JojRenderer::DX12Renderer::~DX12Renderer()
 {
+    // Wait for GPU to finish queued commands
+    wait_command_queue();
+
     // Release graphics device
     if (device)
         device->Release();
@@ -131,7 +134,7 @@ b8 JojRenderer::DX12Renderer::init(std::unique_ptr<JojPlatform::Window>& window)
     swapchain_desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 
     // Create swap chain
-    if FAILED(factory->CreateSwapChainForHwnd(
+    if FAILED(context->get_factory()->CreateSwapChainForHwnd(
         command_queue,                          // GPU Command Queue
         window->get_id(),                       // Window ID
         &swapchain_desc,                        // Swap chain descriptor
@@ -319,6 +322,42 @@ void JojRenderer::DX12Renderer::swap_buffers()
 
 void JojRenderer::DX12Renderer::shutdown()
 {
+}
+
+void JojRenderer::DX12Renderer::custom_clear(ID3D12PipelineState* pso)
+{
+    /* Reuses the memory associated with the command list
+       The list of commands should have finished running on the GPU */
+    command_list_alloc->Reset();
+
+    /* A list of commands can be reinitialized after added to
+     GPU command queue (via ExecuteCommandList) */
+    command_list->Reset(command_list_alloc, pso);
+
+    // TODO: comment specifications on barrier
+    // Indicate that the backbuffer will be used as a render target
+    D3D12_RESOURCE_BARRIER barrier = {};
+    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+    barrier.Transition.pResource = render_targets[backbuffer_index];
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    command_list->ResourceBarrier(1, &barrier);
+
+    // Adjust viewport and clipping rectangles
+    command_list->RSSetViewports(1, &viewport);
+    command_list->RSSetScissorRects(1, &scissor_rect);
+
+    // Clear backbuffer and depth/stencil buffer
+    D3D12_CPU_DESCRIPTOR_HANDLE ds_handle = depth_stencil_heap->GetCPUDescriptorHandleForHeapStart();
+    D3D12_CPU_DESCRIPTOR_HANDLE rt_handle = render_target_heap->GetCPUDescriptorHandleForHeapStart();
+    rt_handle.ptr += SIZE_T(backbuffer_index) * SIZE_T(rt_descriptor_size);
+    command_list->ClearRenderTargetView(rt_handle, bg_color, 0, nullptr);
+    command_list->ClearDepthStencilView(ds_handle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
+    // Specify which buffers will be used in rendering
+    command_list->OMSetRenderTargets(1, &rt_handle, true, &ds_handle);
 }
 
 b8 JojRenderer::DX12Renderer::wait_command_queue()

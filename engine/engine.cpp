@@ -1,13 +1,15 @@
 #include "engine.h"
 
 #include <sstream>
+#include "logger.h"
 
 // Static members
 std::unique_ptr<JojPlatform::PlatformManager> JojEngine::Engine::pm = nullptr;		// Platform Manager
 std::unique_ptr<JojRenderer::DX11Renderer> JojEngine::Engine::renderer = nullptr;	// Renderer
+std::unique_ptr<JojRenderer::DX12Renderer> JojEngine::Engine::dx12_renderer = nullptr;	// Renderer
 
-JojGraphics::DX12Graphics* JojEngine::Engine::dx12_graphics = nullptr;		// DX12 Graphics device
-JojRenderer::DX12RendererOld* JojEngine::Engine::dx12_renderer = nullptr;	// DX12 Graphics renderer
+//JojGraphics::DX12Graphics* JojEngine::Engine::dx12_graphics = nullptr;		// DX12 Graphics device
+//JojRenderer::DX12RendererOld* JojEngine::Engine::dx12_renderer = nullptr;	// DX12 Graphics renderer
 JojGraphics::GLGraphics* JojEngine::Engine::gl_graphics = nullptr;			// Opengl Graphics device
 
 JojEngine::Game* JojEngine::Engine::game = nullptr;							// Pointer to game
@@ -51,13 +53,11 @@ i32 JojEngine::Engine::start(JojEngine::Game* game, RendererBackend renderer_bac
 	}
 	else if (renderer_backend == RendererBackend::DX12)
 	{
-		dx12_graphics = new JojGraphics::DX12Graphics();
-		dx12_graphics->init(pm->get_window());
-
-		dx12_renderer = new JojRenderer::DX12RendererOld();
-		if (!dx12_renderer->init(pm->get_window(), dx12_graphics))
+		dx12_renderer = std::make_unique<JojRenderer::DX12Renderer>();
+		if (!dx12_renderer->init(pm->get_window()))
 		{
 			// TODO: Use own logger
+			FFATAL(ERR_RENDERER, "Failed to initialize D3D12 renderer.");
 			OutputDebugString("Failed to initialize Renderer::DX12.\n");
 			return -1;
 		}

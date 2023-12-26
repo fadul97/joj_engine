@@ -36,8 +36,12 @@ namespace JojRenderer
 		void swap_buffers();									// Change front and back buffers
 		void shutdown();										// Clear resources
 
+		void custom_clear(ID3D12PipelineState* pso);			// Clear backbuffer for next frame
+
 		// Return Graphics Infrastructure
 		ID3D12Device* get_device();		// Return graphics device
+		u32 get_antialiasing();			// Return number of samples for each pixel on the screen
+		u32 get_quality();				// Return antialiasing sampling quality
 
 		void reset_commands();          // reinicia lista para receber novos comandos
 		void submit_commands();			// Submit pending commands for execution
@@ -53,6 +57,10 @@ namespace JojRenderer
 
 		// Copy vertices to GPU
 		void copy_verts_to_gpu(const void* vertices, u32 size_in_bytes, ID3D12Resource* buffer_upload, ID3D12Resource* buffer_gpu);
+
+		ID3D12CommandQueue* get_command_queue();			// Return GPU command queue
+		ID3D12GraphicsCommandList* get_command_list();      // Return list of commands to submit to GPU
+		ID3D12CommandAllocator* get_command_list_alloc();   // Return memory used by the command list
 
 	private:
 		std::unique_ptr<JojGraphics::DX12Context> context;
@@ -93,6 +101,26 @@ namespace JojRenderer
 	// Return graphics device
 	inline ID3D12Device* DX12Renderer::get_device()
 	{ return device; }
+
+	// Return number of samples for each pixel on the screen
+	inline u32 DX12Renderer::get_antialiasing()
+	{ return antialiasing; }
+
+	// Return antialiasing sampling quality
+	inline u32 DX12Renderer::get_quality()
+	{ return quality; }
+
+	// Return GPU command queue
+	inline ID3D12CommandQueue* DX12Renderer::get_command_queue()
+	{ return command_queue; }
+
+	// Return list of commands to submit to GPU
+	inline ID3D12GraphicsCommandList* DX12Renderer::get_command_list()
+	{ return command_list; }
+
+	// Return memory used by the command list
+	inline ID3D12CommandAllocator* DX12Renderer::get_command_list_alloc()
+	{ return command_list_alloc; }
 }
 
 #endif  // PLATFORM_WINDOWS

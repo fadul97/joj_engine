@@ -28,7 +28,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		auto engine = new JojEngine::Engine();
 
 		// Create and execute game
-		int exit_code = engine->start(new D3D11App(), JojEngine::RendererBackend::DX11);
+		int exit_code = engine->start(new Shapes(), JojEngine::RendererBackend::DX12);
 
 		// Cleanup
 		delete engine;

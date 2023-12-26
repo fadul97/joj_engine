@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(JojRendererD3D12)
 
-add_library(JojRendererD3D12 renderer_dx12old.cpp renderer_dx12.cpp)
+add_library(JojRendererD3D12 renderer_dx12.cpp)
 
 # Include renderer folder
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)

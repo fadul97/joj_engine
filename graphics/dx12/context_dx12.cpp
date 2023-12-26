@@ -30,7 +30,7 @@ JojGraphics::DX12Context::~DX12Context()
 		factory->Release();
 
 	//#if defined _DEBUG
-	debug->Release();
+	//debug->Release();
 	//#endif // _DEBUG
 }
 

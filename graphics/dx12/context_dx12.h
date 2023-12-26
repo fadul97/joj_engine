@@ -20,7 +20,6 @@ namespace JojGraphics
 		b8 init(std::unique_ptr<JojPlatform::Window>& window);	// Initialize context
 
 		ID3D12Device4* get_device();			// Return Graphics device
-
 		IDXGIFactory6* get_factory() const;		// Return DXGI factory interface
 
 		//IDXGIDebug* debug_dev;
