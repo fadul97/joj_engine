@@ -2,6 +2,43 @@
 
 #include "logger.h"
 
+PFNGLATTACHSHADERPROC JojGraphics::GLContext::glAttachShader = nullptr;
+PFNGLBINDBUFFERPROC JojGraphics::GLContext::glBindBuffer = nullptr;
+PFNGLBINDVERTEXARRAYPROC JojGraphics::GLContext::glBindVertexArray = nullptr;
+PFNGLBUFFERDATAPROC JojGraphics::GLContext::glBufferData = nullptr;
+PFNGLCOMPILESHADERPROC JojGraphics::GLContext::glCompileShader = nullptr;
+PFNGLCREATEPROGRAMPROC JojGraphics::GLContext::glCreateProgram = nullptr;
+PFNGLCREATESHADERPROC JojGraphics::GLContext::glCreateShader = nullptr;
+PFNGLDELETEBUFFERSPROC JojGraphics::GLContext::glDeleteBuffers = nullptr;
+PFNGLDELETEPROGRAMPROC JojGraphics::GLContext::glDeleteProgram = nullptr;
+PFNGLDELETESHADERPROC JojGraphics::GLContext::glDeleteShader = nullptr;
+PFNGLDELETEVERTEXARRAYSPROC JojGraphics::GLContext::glDeleteVertexArrays = nullptr;
+PFNGLDETACHSHADERPROC JojGraphics::GLContext::glDetachShader = nullptr;
+PFNGLENABLEVERTEXATTRIBARRAYPROC JojGraphics::GLContext::glEnableVertexAttribArray = nullptr;
+PFNGLGENBUFFERSPROC JojGraphics::GLContext::glGenBuffers = nullptr;
+PFNGLGENVERTEXARRAYSPROC JojGraphics::GLContext::glGenVertexArrays = nullptr;
+PFNGLGETATTRIBLOCATIONPROC JojGraphics::GLContext::glGetAttribLocation = nullptr;
+PFNGLGETPROGRAMINFOLOGPROC JojGraphics::GLContext::glGetProgramInfoLog = nullptr;
+PFNGLGETPROGRAMIVPROC JojGraphics::GLContext::glGetProgramiv = nullptr;
+PFNGLGETSHADERINFOLOGPROC JojGraphics::GLContext::glGetShaderInfoLog = nullptr;
+PFNGLGETSHADERIVPROC JojGraphics::GLContext::glGetShaderiv = nullptr;
+PFNGLLINKPROGRAMPROC JojGraphics::GLContext::glLinkProgram = nullptr;
+PFNGLSHADERSOURCEPROC JojGraphics::GLContext::glShaderSource = nullptr;
+PFNGLUSEPROGRAMPROC JojGraphics::GLContext::glUseProgram = nullptr;
+PFNGLVERTEXATTRIBPOINTERPROC JojGraphics::GLContext::glVertexAttribPointer = nullptr;
+PFNGLBINDATTRIBLOCATIONPROC JojGraphics::GLContext::glBindAttribLocation = nullptr;
+PFNGLGETUNIFORMLOCATIONPROC JojGraphics::GLContext::glGetUniformLocation = nullptr;
+PFNGLUNIFORMMATRIX4FVPROC JojGraphics::GLContext::glUniformMatrix4fv = nullptr;
+PFNGLACTIVETEXTUREPROC JojGraphics::GLContext::glActiveTexture = nullptr;
+PFNGLUNIFORM1IPROC JojGraphics::GLContext::glUniform1i = nullptr;
+PFNGLGENERATEMIPMAPPROC JojGraphics::GLContext::glGenerateMipmap = nullptr;
+PFNGLDISABLEVERTEXATTRIBARRAYPROC JojGraphics::GLContext::glDisableVertexAttribArray = nullptr;
+PFNGLUNIFORM3FVPROC JojGraphics::GLContext::glUniform3fv = nullptr;
+PFNGLUNIFORM4FVPROC JojGraphics::GLContext::glUniform4fv = nullptr;
+PFNGLCLEARCOLORPROC JojGraphics::GLContext::glClearColor = nullptr;
+PFNGLCLEARPROC JojGraphics::GLContext::glClear = nullptr;
+PFNGLDRAWARRAYSPROC JojGraphics::GLContext::glDrawArrays = nullptr;
+
 JojGraphics::GLContext::GLContext()
 {
     rc = nullptr;
@@ -184,6 +221,14 @@ b8 JojGraphics::GLContext::init(std::unique_ptr<JojPlatform::Window>& window)
         return false;
     }
 
+    glDrawArrays = (PFNGLDRAWARRAYSPROC)GetProcAddress(opengl32Dll, "glDrawArrays");
+    if (!glDrawArrays)
+    {
+        OutputDebugString("Failed to GetProcAddress of glDrawArrays.\n");
+        FFATAL(ERR_CONTEXT, "Failed to GetProcAddress of glDrawArrays function.");
+        return false;
+    }
+
     glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -194,7 +239,6 @@ b8 JojGraphics::GLContext::init(std::unique_ptr<JojPlatform::Window>& window)
 #endif // _DEBUG
     return true;
 }
-
 void JojGraphics::GLContext::log_hardware_info()
 {
     FDEBUG("OpenGL Version: %s.", glGetString(GL_VERSION));

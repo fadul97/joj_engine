@@ -79,6 +79,7 @@ typedef void (APIENTRY* PFNGLUNIFORM3FVPROC) (GLint location, GLsizei count, con
 typedef void (APIENTRY* PFNGLUNIFORM4FVPROC) (GLint location, GLsizei count, const GLfloat* value);
 typedef void (APIENTRY* PFNGLCLEARCOLORPROC) (GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
 typedef void (APIENTRY* PFNGLCLEARPROC) (GLbitfield mask);
+typedef void (APIENTRY* PFNGLDRAWARRAYSPROC) (GLenum mode, GLint first, GLsizei count);
 
 namespace JojGraphics
 {
@@ -89,6 +90,7 @@ namespace JojGraphics
 		~GLContext();
 
 		b8 init(std::unique_ptr<JojPlatform::Window>& window);	// Initialize context
+		void swap_buffers();
 
 	private:
 		HGLRC rc;		// Rendering context for Win32 Window
@@ -109,41 +111,42 @@ namespace JojGraphics
 		b8 load_extension_list();
 
 	public:
-		PFNGLATTACHSHADERPROC glAttachShader;
-		PFNGLBINDBUFFERPROC glBindBuffer;
-		PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
-		PFNGLBUFFERDATAPROC glBufferData;
-		PFNGLCOMPILESHADERPROC glCompileShader;
-		PFNGLCREATEPROGRAMPROC glCreateProgram;
-		PFNGLCREATESHADERPROC glCreateShader;
-		PFNGLDELETEBUFFERSPROC glDeleteBuffers;
-		PFNGLDELETEPROGRAMPROC glDeleteProgram;
-		PFNGLDELETESHADERPROC glDeleteShader;
-		PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
-		PFNGLDETACHSHADERPROC glDetachShader;
-		PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
-		PFNGLGENBUFFERSPROC glGenBuffers;
-		PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
-		PFNGLGETATTRIBLOCATIONPROC glGetAttribLocation;
-		PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
-		PFNGLGETPROGRAMIVPROC glGetProgramiv;
-		PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
-		PFNGLGETSHADERIVPROC glGetShaderiv;
-		PFNGLLINKPROGRAMPROC glLinkProgram;
-		PFNGLSHADERSOURCEPROC glShaderSource;
-		PFNGLUSEPROGRAMPROC glUseProgram;
-		PFNGLVERTEXATTRIBPOINTERPROC glVertexAttribPointer;
-		PFNGLBINDATTRIBLOCATIONPROC glBindAttribLocation;
-		PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
-		PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv;
-		PFNGLACTIVETEXTUREPROC glActiveTexture;
-		PFNGLUNIFORM1IPROC glUniform1i;
-		PFNGLGENERATEMIPMAPPROC glGenerateMipmap;
-		PFNGLDISABLEVERTEXATTRIBARRAYPROC glDisableVertexAttribArray;
-		PFNGLUNIFORM3FVPROC glUniform3fv;
-		PFNGLUNIFORM4FVPROC glUniform4fv;
-		PFNGLCLEARCOLORPROC glClearColor;
-		PFNGLCLEARPROC glClear;
+		static PFNGLATTACHSHADERPROC glAttachShader;
+		static PFNGLBINDBUFFERPROC glBindBuffer;
+		static PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
+		static PFNGLBUFFERDATAPROC glBufferData;
+		static PFNGLCOMPILESHADERPROC glCompileShader;
+		static PFNGLCREATEPROGRAMPROC glCreateProgram;
+		static PFNGLCREATESHADERPROC glCreateShader;
+		static PFNGLDELETEBUFFERSPROC glDeleteBuffers;
+		static PFNGLDELETEPROGRAMPROC glDeleteProgram;
+		static PFNGLDELETESHADERPROC glDeleteShader;
+		static PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
+		static PFNGLDETACHSHADERPROC glDetachShader;
+		static PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
+		static PFNGLGENBUFFERSPROC glGenBuffers;
+		static PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
+		static PFNGLGETATTRIBLOCATIONPROC glGetAttribLocation;
+		static PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
+		static PFNGLGETPROGRAMIVPROC glGetProgramiv;
+		static PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
+		static PFNGLGETSHADERIVPROC glGetShaderiv;
+		static PFNGLLINKPROGRAMPROC glLinkProgram;
+		static PFNGLSHADERSOURCEPROC glShaderSource;
+		static PFNGLUSEPROGRAMPROC glUseProgram;
+		static PFNGLVERTEXATTRIBPOINTERPROC glVertexAttribPointer;
+		static PFNGLBINDATTRIBLOCATIONPROC glBindAttribLocation;
+		static PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
+		static PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv;
+		static PFNGLACTIVETEXTUREPROC glActiveTexture;
+		static PFNGLUNIFORM1IPROC glUniform1i;
+		static PFNGLGENERATEMIPMAPPROC glGenerateMipmap;
+		static PFNGLDISABLEVERTEXATTRIBARRAYPROC glDisableVertexAttribArray;
+		static PFNGLUNIFORM3FVPROC glUniform3fv;
+		static PFNGLUNIFORM4FVPROC glUniform4fv;
+		static PFNGLCLEARCOLORPROC glClearColor;
+		static PFNGLCLEARPROC glClear;
+		static PFNGLDRAWARRAYSPROC glDrawArrays;
 	};
 }
 
