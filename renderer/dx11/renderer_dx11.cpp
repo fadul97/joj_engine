@@ -2,6 +2,7 @@
 
 #include <dxgi.h>
 #include <d3dcompiler.h>
+#include "logger.h"
 
 JojRenderer::DX11Renderer::DX11Renderer()
 {
@@ -66,7 +67,7 @@ JojRenderer::DX11Renderer::~DX11Renderer()
 	}
 
 	context->debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
-	OutputDebugString("\n\n\n");
+	OutputDebugString("\n\n");
 
 	// Release graphics device
 	if (device)
@@ -122,8 +123,7 @@ b8 JojRenderer::DX11Renderer::init(std::unique_ptr<JojPlatform::Window>& window)
 	// Create Swap Chain
 	if FAILED(context->get_factory()->CreateSwapChain(device, &swap_chain_desc, &swap_chain))
 	{
-		// TODO: Use own logger
-		OutputDebugString("Failed to CreateSwapChain.\n");
+		FFATAL(ERR_RENDERER, "Failed to CreateSwapChain.");
 		return false;
 	}
 
@@ -135,16 +135,14 @@ b8 JojRenderer::DX11Renderer::init(std::unique_ptr<JojPlatform::Window>& window)
 	ID3D11Texture2D* backbuffer = nullptr;
 	if FAILED(swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backbuffer)))
 	{
-		// TODO: Use own logger
-		OutputDebugString("Failed to Get backbuffer surface of a Swap Chain.\n");
+		FFATAL(ERR_RENDERER, "Failed to Get backbuffer surface of a Swap Chain.");
 		return false;
 	}
 
 	// Create render target view for backbuffer
 	if FAILED(device->CreateRenderTargetView(backbuffer, NULL, &render_target_view))
 	{
-		// TODO: Use own logger
-		OutputDebugString("Failed to CreateRenderTargetView.\n");
+		FFATAL(ERR_RENDERER, "Failed to CreateRenderTargetView.");
 		return false;
 	}
 
@@ -170,16 +168,14 @@ b8 JojRenderer::DX11Renderer::init(std::unique_ptr<JojPlatform::Window>& window)
 	ID3D11Texture2D* depth_stencil_buffer;
 	if FAILED(device->CreateTexture2D(&depth_stencil_desc, 0, &depth_stencil_buffer))
 	{
-		// TODO: Use own logger
-		OutputDebugString("Failed to CreateTexture2D.\n");
+		FFATAL(ERR_RENDERER, "Failed to CreateTexture2D.");
 		return false;
 	}
 
 	// Create Depth/Stencil View
 	if FAILED(device->CreateDepthStencilView(depth_stencil_buffer, 0, &depth_stencil_view))
 	{
-		// TODO: Use own logger
-		OutputDebugString("Failed to CreateDepthStencilView.\n");
+		FFATAL(ERR_RENDERER, "Failed to CreateDepthStencilView.");
 		return false;
 	}
 
@@ -221,8 +217,7 @@ b8 JojRenderer::DX11Renderer::init(std::unique_ptr<JojPlatform::Window>& window)
 	// Create blend state
 	if FAILED(device->CreateBlendState(&blend_desc, &blend_state))
 	{
-		// TODO: Use own logger
-		OutputDebugString("Failed to CreateBlendState.\n");
+		FFATAL(ERR_RENDERER, "Failed to CreateBlendState.");
 		return false;
 	}
 
@@ -246,8 +241,7 @@ b8 JojRenderer::DX11Renderer::init(std::unique_ptr<JojPlatform::Window>& window)
 	// Create rasterizer state
 	if FAILED(device->CreateRasterizerState(&rasterizer_desc, &rasterizer_state))
 	{
-		// TODO: Use own logger
-		OutputDebugString("Failed to CreateRasterizerState.\n");
+		FFATAL(ERR_RENDERER, "Failed to CreateRasterizerState.");
 		return false;
 	}
 

@@ -4,8 +4,9 @@ const char* error_names[] = {
     "OK",
     "Failed",
     "Window error",
-    "Context error",
     "Input error",
+    "Context error",
+    "Renderer error",
     "Platform error"
 };
 
@@ -13,7 +14,8 @@ const char* error_strings[] = {
     "",
     "[Failed]: ",
     "[Window error]: ",
-    "[Context error]: ",
     "[Input error]: ",
+    "[Context error]: ",
+    "[Renderer error]: "
     "[Platform error]: "
 };

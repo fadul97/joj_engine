@@ -5,8 +5,9 @@ enum Error
     OK,
     FAILED,
     ERR_WINDOW,
-    ERR_CONTEXT,
     ERR_INPUT,
+    ERR_CONTEXT,
+    ERR_RENDERER,
     ERR_PLATFORM
 };
 
