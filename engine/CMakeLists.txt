@@ -1,7 +1,7 @@
 ﻿cmake_minimum_required(VERSION 3.8)
 project(JojEngine)
 
-add_library(JojEngine engine.cpp game.cpp error.h error.cpp)
+add_library(JojEngine engine.cpp game.cpp error.h error.cpp error_list.c)
 
 if(CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET JojEngine PROPERTY CXX_STANDARD 20)
