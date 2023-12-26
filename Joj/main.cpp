@@ -6,6 +6,10 @@
 #include "gl_app.h"
 #include "error.h"
 
+#include "logger.h"
+
+#include <iostream>
+
 #if PLATFORM_WINDOWS
 
 int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
@@ -17,6 +21,11 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	freopen("CONOUT$", "w", stdout);
 	freopen("CONOUT$", "w", stderr);
 #endif
+	FFATAL(ERR_PLATFORM, "PlatformManager is NULL.");
+	FERROR(ERR_PLATFORM, "PlatformManager is NULL.");
+	FWARN("PlatformManager is NULL.");
+	FDEBUG("PlatformManager is NULL.");
+	FINFO("PlatformManager is NULL.");
 
 	try
 	{
