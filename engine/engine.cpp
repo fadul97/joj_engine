@@ -4,11 +4,11 @@
 #include "logger.h"
 
 // Static members
-std::unique_ptr<JojPlatform::PlatformManager> JojEngine::Engine::pm = nullptr;		// Platform Manager
-std::unique_ptr<JojRenderer::DX11Renderer> JojEngine::Engine::renderer = nullptr;	// Renderer
-std::unique_ptr<JojRenderer::DX12Renderer> JojEngine::Engine::dx12_renderer = nullptr;	// Renderer
+std::unique_ptr<JojPlatform::PlatformManager> JojEngine::Engine::pm = nullptr;			// Platform Manager
+std::unique_ptr<JojRenderer::DX11Renderer> JojEngine::Engine::renderer = nullptr;		// D3D11 Renderer
+std::unique_ptr<JojRenderer::DX12Renderer> JojEngine::Engine::dx12_renderer = nullptr;	// D3D12 Renderer
 
-JojGraphics::GLGraphics* JojEngine::Engine::gl_graphics = nullptr;			// Opengl Graphics device
+std::unique_ptr<JojGraphics::GLContext> JojEngine::Engine::gl_context = nullptr;		// Opengl context
 
 JojEngine::Game* JojEngine::Engine::game = nullptr;							// Pointer to game
 f32 JojEngine::Engine::frametime = 0.0f;									// Current frametime
@@ -44,8 +44,8 @@ i32 JojEngine::Engine::start(JojEngine::Game* game, RendererBackend renderer_bac
 		renderer = std::make_unique<JojRenderer::DX11Renderer>();
 		if (!renderer->init(pm->get_window()))
 		{
-			// TODO: Use own logger
-			OutputDebugString("Failed to initialize Renderer::DX11.\n");
+			FFATAL(ERR_RENDERER, "Failed to initialize D3D11 renderer.");
+			OutputDebugString("-----> Failed to initialize Renderer::DX11.\n");
 			return -1;
 		}
 	}
@@ -54,19 +54,18 @@ i32 JojEngine::Engine::start(JojEngine::Game* game, RendererBackend renderer_bac
 		dx12_renderer = std::make_unique<JojRenderer::DX12Renderer>();
 		if (!dx12_renderer->init(pm->get_window()))
 		{
-			// TODO: Use own logger
 			FFATAL(ERR_RENDERER, "Failed to initialize D3D12 renderer.");
-			OutputDebugString("Failed to initialize Renderer::DX12.\n");
+			OutputDebugString("-----> Failed to initialize Renderer::DX12.\n");
 			return -1;
 		}
 	}
 	else
 	{
-		gl_graphics = new JojGraphics::GLGraphics();
-		if (!gl_graphics->init(pm->get_window()))
+		gl_context = std::make_unique<JojGraphics::GLContext>();
+		if (!gl_context->init(pm->get_window()))
 		{
-			// TODO: Use own logger
-			OutputDebugString("Failed to initialize OpenGL\n");
+			FFATAL(ERR_RENDERER, "Failed to initialize OpenGL renderer.");
+			OutputDebugString("-----> Failed to initialize OpenGL\n");
 			return -1;
 		}
 	}

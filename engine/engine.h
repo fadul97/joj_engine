@@ -6,7 +6,7 @@
 #include "platform_manager.h"
 #include "dx12/renderer_dx12.h"
 #include "dx11/renderer_dx11.h"
-#include "opengl/graphics_glold.h"
+#include "opengl/context_gl.h"
 #endif	// PLATFORM_WINDOWS
 
 #include <memory>
@@ -24,11 +24,12 @@ namespace JojEngine
 		Engine();
 		~Engine();
 
-		static std::unique_ptr<JojPlatform::PlatformManager> pm;	// Platform Manager
-		static std::unique_ptr<JojRenderer::DX11Renderer> renderer;	// DX11 Renderer
+		static std::unique_ptr<JojPlatform::PlatformManager> pm;			// Platform Manager
+		static std::unique_ptr<JojRenderer::DX11Renderer> renderer;			// DX11 Renderer
 		static std::unique_ptr<JojRenderer::DX12Renderer> dx12_renderer;	// DX12 Renderer
 
-		static JojGraphics::GLGraphics* gl_graphics;			// OpenGL Graphics device
+		static std::unique_ptr<JojGraphics::GLContext> gl_context;			// OpenGL context
+
 
 		static JojEngine::Game* game;							// Game to be executed
 		static f32 frametime;									// Current frametime

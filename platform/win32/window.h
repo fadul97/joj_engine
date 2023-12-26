@@ -20,7 +20,6 @@ namespace JojPlatform
 
 		HWND get_id() const;						// Return window ID
 		HDC get_device_context() const;				// Return device context
-		HGLRC get_rendering_context();				// Get rendering context
 		i32 get_width() const;						// Return window width
 		i32 get_height() const;						// Return window height
 		WindowMode get_mode() const;				// Return window mode (Fullscreen, windowed or borderless mode)
@@ -30,7 +29,6 @@ namespace JojPlatform
 		COLORREF get_color() const;					// Return window background color
 		f32 get_aspect_ratio() const;				// Return window aspect ratio
 
-		void set_rendering_context(HGLRC new_rc);	// Set rendering context
 		void set_icon(const u32 icon);				// Set window icon
 		void set_cursor(const u32 cursor);			// Set window cursor
 		void set_title(const std::string title);	// Set window title
@@ -59,7 +57,6 @@ namespace JojPlatform
 	private:
 		HWND		id;								// Window ID
 		HDC			hdc;    						// Device context
-		HGLRC		rc;								// Rendering context
 		i32			width;							// Window width
 		i32			height;							// Window heigh
 		std::string	title;							// Window title
@@ -85,10 +82,6 @@ namespace JojPlatform
 	// Return device context
 	inline HDC Window::get_device_context() const
 	{ return hdc; }
-
-	// Get rendering context
-	inline HGLRC Window::get_rendering_context()
-	{ return rc; }
 
 	// Return window width
 	inline i32 Window::get_width() const
@@ -121,10 +114,6 @@ namespace JojPlatform
 	// Return window aspect ratio
 	inline f32 Window::get_aspect_ratio() const
 	{ return width / f32(height); }
-
-	// Set rendering context
-	inline void Window::set_rendering_context(HGLRC new_rc)
-	{ rc = new_rc; }
 
 	// Set window icon
 	inline void Window::set_icon(const u32 icon)

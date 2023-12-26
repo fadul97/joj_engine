@@ -4,7 +4,7 @@
 
 #if PLATFORM_WINDOWS
 
-#include "platform_manager.h"
+#include "graphics_context.h"
 #include <gl/gl.h>
 
 /////////////
@@ -25,6 +25,7 @@
 #define WGL_CONTEXT_MAJOR_VERSION_ARB  0x2091
 #define WGL_CONTEXT_MINOR_VERSION_ARB  0x2092
 #define WGL_CONTEXT_FLAGS_ARB             0x2094
+#define WGL_CONTEXT_DEBUG_BIT_ARB         0x00000001
 #define WGL_CONTEXT_CORE_PROFILE_BIT_ARB  0x00000001
 #define GL_ARRAY_BUFFER                   0x8892
 #define GL_STATIC_DRAW                    0x88E4
@@ -81,47 +82,32 @@ typedef void (APIENTRY* PFNGLCLEARPROC) (GLbitfield mask);
 
 namespace JojGraphics
 {
-	class GLGraphics
+	class GLContext : public GraphicsContext
 	{
 	public:
-		GLGraphics();
-		~GLGraphics();
+		GLContext();
+		~GLContext();
 
-		// FIXME: Allocating infinite memory
-		b8 init(std::unique_ptr<JojPlatform::Window>& window);			// Initialize OpenGL
-		void clear();                                   // Clear backbuffer with background color
-		void swap_buffers();                            // Present drawing on screen
+		b8 init(std::unique_ptr<JojPlatform::Window>& window);	// Initialize context
 
 	private:
-		f32 bg_color[4];								// Backbuffer background color
+		HGLRC rc;		// Rendering context for Win32 Window
+		u32 color_bits;
+		u32 depth_bits;
+		u32 pixel_format_attrib_list[16];
+		u32 context_attribs[16];
+
+		u32 gl_version_major;
+		u32 gl_version_minor;
 
 		PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB;
 		PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
 		PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;
-		
+
+		void log_hardware_info();	// Show hardware information
+
 		b8 load_extension_list();
 
-		// HELLO, TRIANGLE
-		// Define the vertex shader source code
-		const char* vertexShaderSource = "#version 330 core\n"
-			"layout (location = 0) in vec3 position;\n"
-			"void main()\n"
-			"{\n"
-			"gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
-			"}\0";
-
-		// Define the fragment shader source code
-		const char* fragmentShaderSource = "#version 330 core\n"
-			"out vec4 color;\n"
-			"void main()\n"
-			"{\n"
-			"color = vec4(1.0f, 0.2f, 0.6f, 1.0f);\n"
-			"}\n\0";
-
-		u32 vbo = 0;
-		u32 vao = 0;
-		u32 shader_program = 0;
-		
 	public:
 		PFNGLATTACHSHADERPROC glAttachShader;
 		PFNGLBINDBUFFERPROC glBindBuffer;
@@ -161,4 +147,4 @@ namespace JojGraphics
 	};
 }
 
-#endif	// PLATFORM_WINDOWS
+#endif // PLATFORM_WINDOWS

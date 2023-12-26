@@ -16,7 +16,6 @@ void GLApp::update()
 
 void GLApp::draw()
 {
-	JojEngine::Engine::gl_graphics->clear();
 }
 
 void GLApp::shutdown()

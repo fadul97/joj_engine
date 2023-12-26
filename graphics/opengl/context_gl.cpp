@@ -1,37 +1,51 @@
-#include "graphics_glold.h"
+#include "context_gl.h"
 
-#include <iostream>
+#include "logger.h"
 
-JojGraphics::GLGraphics::GLGraphics()
+JojGraphics::GLContext::GLContext()
 {
-    bg_color[0] = 0.0f;
-    bg_color[1] = 0.0f;
-    bg_color[2] = 0.0f;
-    bg_color[3] = 1.0f;
+    rc = nullptr;
+    color_bits = 32;
+    depth_bits = 24;
+
+    const u32 pxf_attrib_list[] =
+    {
+      WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+      WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+      WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
+      WGL_COLOR_BITS_ARB, color_bits,
+      WGL_DEPTH_BITS_ARB, depth_bits,
+      0
+    };
+
+    memcpy(pixel_format_attrib_list, pxf_attrib_list, sizeof(pxf_attrib_list));
+
+    gl_version_major = 4;
+    gl_version_minor = 6;
+
+    const int ctx_attribs[] =
+    {
+      WGL_CONTEXT_MAJOR_VERSION_ARB, gl_version_major,
+      WGL_CONTEXT_MINOR_VERSION_ARB, gl_version_minor,
+      WGL_CONTEXT_FLAGS_ARB,
+#ifdef _DEBUG
+      WGL_CONTEXT_DEBUG_BIT_ARB |
+#endif // _DEBUG
+        WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+      0
+    };
+
+    memcpy(context_attribs, ctx_attribs, sizeof(ctx_attribs));
 }
 
-JojGraphics::GLGraphics::~GLGraphics()
+JojGraphics::GLContext::~GLContext()
 {
 
 }
 
-b8 JojGraphics::GLGraphics::init(std::unique_ptr<JojPlatform::Window>& window)
+b8 JojGraphics::GLContext::init(std::unique_ptr<JojPlatform::Window>& window)
 {
-    int colorBits = 32;
-    int depthBits = 24;
-
-    int glVersionMajor = 4;
-    int glVersionMinor = 6;
-
-    // -----------------------------------------------------
-    // Create Temporary Window
-    // -----------------------------------------------------
-
     auto dummy_window = new JojPlatform::Window();
-    dummy_window->set_mode(JojPlatform::WindowMode::WINDOWED);
-    dummy_window->set_size(800, 600);
-    dummy_window->set_color(60, 60, 60);
-    dummy_window->set_title("Joj Engine");
     dummy_window->create();
 
     // TODO: Add comments about pfd
@@ -42,13 +56,13 @@ b8 JojGraphics::GLGraphics::init(std::unique_ptr<JojPlatform::Window>& window)
         1,
         PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
         PFD_TYPE_RGBA,
-        (BYTE)depthBits,
+        (BYTE)depth_bits,
         0, 0, 0, 0, 0, 0,
         0,
         0,
         0,
         0, 0, 0, 0,
-        (BYTE)colorBits,
+        (BYTE)color_bits,
         0,
         0,
         PFD_MAIN_PLANE,
@@ -56,33 +70,32 @@ b8 JojGraphics::GLGraphics::init(std::unique_ptr<JojPlatform::Window>& window)
         0, 0, 0
     };
 
-    int pixel_format = ChoosePixelFormat(dummy_window->get_device_context(), &pfd);
+    u32 pixel_format = ChoosePixelFormat(dummy_window->get_device_context(), &pfd);
     if (!pixel_format)
     {
-        OutputDebugString("Failed to ChoosePixelFormat for dummy_window.\n");
+        FFATAL(ERR_CONTEXT, "Failed to ChoosePixelFormat for dummy_window.");
         DestroyWindow(dummy_window->get_id());
         return false;
     }
 
     if (!SetPixelFormat(dummy_window->get_device_context(), pixel_format, &pfd))
     {
-        OutputDebugString("Failed to SetPixelFormat for dummy_window.\n");
+        FFATAL(ERR_CONTEXT, "Failed to SetPixelFormat for dummy_window.");
         DestroyWindow(dummy_window->get_id());
         return false;
     }
 
-    HGLRC rc = wglCreateContext(dummy_window->get_device_context());
-    if (!rc)
+    HGLRC new_rc = wglCreateContext(dummy_window->get_device_context());
+    if (!new_rc)
     {
-        OutputDebugString("Failed to wglCreateContext for dummy_window.\n");
+        FFATAL(ERR_CONTEXT, "Failed to wglCreateContext for dummy_window.");
         DestroyWindow(dummy_window->get_id());
         return false;
     }
 
-    dummy_window->set_rendering_context(rc);
-    if (!wglMakeCurrent(dummy_window->get_device_context(), dummy_window->get_rendering_context()))
+    if (!wglMakeCurrent(dummy_window->get_device_context(), new_rc))
     {
-        OutputDebugString("Failed to wglMakeCurrent for dummy_window.\n");
+        OutputDebugString("Failed to wglMakeCurrent for dummy_window.");
         DestroyWindow(dummy_window->get_id());
         return false;
     }
@@ -101,78 +114,48 @@ b8 JojGraphics::GLGraphics::init(std::unique_ptr<JojPlatform::Window>& window)
         return false;
     }
 
-    if (!wglMakeCurrent(0, 0))
-    {
-        OutputDebugString("Failed to wglMakeCurrent of dummy_window.\n");
-        return false;
-    }
+    wglMakeCurrent(0, 0);
+    wglDeleteContext(new_rc);
+    DestroyWindow(dummy_window->get_id());
 
-    if (!wglDeleteContext(dummy_window->get_rendering_context()))
-    {
-        OutputDebugString("Failed to wglDeleteContext of dummy_window.\n");
-        return false;
-    }
-
-    if (!DeleteDC(dummy_window->get_device_context()))
-    {
-        OutputDebugString("Failed to DeleteDC of dummy_window.\n");
-        return false;
-    }
-
-    if (!DestroyWindow(dummy_window->get_id()))
-    {
-        OutputDebugString("Failed to DestroyWindow of dummy_window.\n");
-        return false;
-    }
-
-    const int pixelFormatAttribList[] =
-    {
-      WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
-      WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
-      WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
-      WGL_COLOR_BITS_ARB, colorBits,
-      WGL_DEPTH_BITS_ARB, depthBits,
-      0
-    };
-
+    int new_pixel_format;
     int num_pixel_formats = 0;
-    wglChoosePixelFormatARB(window->get_device_context(), pixelFormatAttribList, nullptr, 1, &pixel_format, (UINT*)&num_pixel_formats);
+    PIXELFORMATDESCRIPTOR new_pfd;
+
+    const int* pxf_attrib_list = (const int*)pixel_format_attrib_list;
+    const int* context_attrib_list = (const int*)context_attribs;
+
+    wglChoosePixelFormatARB(window->get_device_context(), pxf_attrib_list, nullptr, 1, &new_pixel_format, (UINT*)&num_pixel_formats);
     if (num_pixel_formats <= 0)
     {
-        OutputDebugString("Failed to wglChoosePixelFormatARB.\n");
+        FFATAL(ERR_CONTEXT, "Failed to wglChoosePixelFormatARB.");
         return false;
     }
 
-    if (!SetPixelFormat(window->get_device_context(), pixel_format, &pfd))
+    if (!SetPixelFormat(window->get_device_context(), new_pixel_format, &new_pfd))
     {
-        OutputDebugString("Failed to SetPixelFormat.\n");
+        FFATAL(ERR_CONTEXT, "Failed to SetPixelFormat.");
         return false;
     }
 
-    const int context_attribs[] =
+    new_rc = wglCreateContextAttribsARB(window->get_device_context(), 0, context_attrib_list);
+    if (!new_rc)
     {
-      WGL_CONTEXT_MAJOR_VERSION_ARB, glVersionMajor,
-      WGL_CONTEXT_MINOR_VERSION_ARB, glVersionMinor,
-      WGL_CONTEXT_FLAGS_ARB,
-#if DEBUG
-      WGL_CONTEXT_DEBUG_BIT_ARB |
-#endif // DEBUG
-        WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-      0
-    };
-
-    rc = wglCreateContextAttribsARB(window->get_device_context(), 0, context_attribs);
-    if (!rc)
-    {
-        OutputDebugString("Failed to wglCreateContextAttribsARB.\n");
+        FFATAL(ERR_CONTEXT, "Failed to wglCreateContextAttribsARB.");
         return false;
     }
 
-    window->set_rendering_context(rc);
+    rc = new_rc;
 
-    if (!wglMakeCurrent(window->get_device_context(), window->get_rendering_context()))
+    if (!wglMakeCurrent(window->get_device_context(), rc))
     {
-        OutputDebugString("Failed to wglMakeCurrent.\n");
+        FFATAL(ERR_CONTEXT, "Failed to wglMakeCurrent of window.");
+        return false;
+    }
+
+    if (!load_extension_list())
+    {
+        FFATAL(ERR_CONTEXT, "Failed to load OpenGL extensions.");
         return false;
     }
 
@@ -181,6 +164,7 @@ b8 JojGraphics::GLGraphics::init(std::unique_ptr<JojPlatform::Window>& window)
     if (!opengl32Dll)
     {
         OutputDebugString("Failed to GetModuleHandleA of OpenGL32.dll.\n");
+        FFATAL(ERR_CONTEXT, "Failed to GetModuleHandleA of OpenGL32.dll.");
         return false;
     }
 
@@ -188,6 +172,7 @@ b8 JojGraphics::GLGraphics::init(std::unique_ptr<JojPlatform::Window>& window)
     if (!glClearColor)
     {
         OutputDebugString("Failed to GetProcAddress of glClearColor.\n");
+        FFATAL(ERR_CONTEXT, "Failed to GetProcAddress of glClearColor function.");
         return false;
     }
 
@@ -195,141 +180,29 @@ b8 JojGraphics::GLGraphics::init(std::unique_ptr<JojPlatform::Window>& window)
     if (!glClear)
     {
         OutputDebugString("Failed to GetProcAddress of glClear.\n");
+        FFATAL(ERR_CONTEXT, "Failed to GetProcAddress of glClear function.");
         return false;
     }
 
-    b8 result = load_extension_list();
-    if (!result)
-    {
-        OutputDebugString("Failed to load_extension_list.\n");
-        return false;
-    }
-
-    const GLubyte* version = glGetString(GL_VERSION);
-    if (version)
-    {
-        const char* versionString = reinterpret_cast<const char*>(version);
-        OutputDebugString("OpenGL Version: ");
-        OutputDebugString(versionString);
-    }
-    else
-    {
-        OutputDebugString("Failed to get OpenGL version.\n");
-    }
-
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+
     SwapBuffers(window->get_device_context());
 
-    // Define the vertex data for the triangle
-    f32 vertices[] = {
-        -0.5f, -0.5f, 0.0f, // Left
-         0.5f, -0.5f, 0.0f, // Right
-         0.0f,  0.5f, 0.0f  // Top
-    };
-
-
-    // Create a vbo and a vao
-    glGenBuffers(1, &vbo);
-    glGenVertexArrays(1, &vao);
-
-    // Bind the vbo and the vao
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-    // Fill the vbo with the vertex data
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // Specify the layout of the vertex data
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
-
-    // Unbind the vbo and the vao
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    // Create a vertex shader object
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-    // Attach the vertex shader source code to the shader object
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-
-    // Compile the vertex shader
-    glCompileShader(vertexShader);
-
-    // Check for vertex shader compilation errors
-    GLint success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        OutputDebugString("ERROR::SHADER::VERTEX::COMPILATION_FAILED:\n");
-        OutputDebugString(infoLog);
-    }
-
-    // Create a fragment shader object
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-    // Attach the fragment shader source code to the shader object
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-
-    // Compile the fragment shader
-    glCompileShader(fragmentShader);
-
-    // Check for fragment shader compilation errors
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        OutputDebugString("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED:\n");
-        OutputDebugString(infoLog);
-    }
-
-    // Create a shader program object
-    shader_program = glCreateProgram();
-
-    // Attach the vertex and fragment shaders to the shader program
-    glAttachShader(shader_program, vertexShader);
-    glAttachShader(shader_program, fragmentShader);
-
-    // Link the shader program
-    glLinkProgram(shader_program);
-
-    // Check for shader program linking errors
-    glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shader_program, 512, NULL, infoLog);
-        OutputDebugString("ERROR::SHADER::PROGRAM::COMPILATION_FAILED:\n");
-        OutputDebugString(infoLog);
-    }
-
-    // Delete the vertex and fragment shaders as they are no longer needed
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    // Use the shader program
-    glUseProgram(shader_program);
-
+#if _DEBUG
+    log_hardware_info();
+#endif // _DEBUG
     return true;
 }
 
-void JojGraphics::GLGraphics::clear()
+void JojGraphics::GLContext::log_hardware_info()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
-
-    glUseProgram(shader_program);
-    glBindVertexArray(vao);         // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    FDEBUG("OpenGL Version: %s.", glGetString(GL_VERSION));
+    FDEBUG("OpenGL Renderer: %s.", glGetString(GL_RENDERER));
+    //FDEBUG("OpenGL GLSL Version: %s.", glGetString(GL_SHADING_LANGUAGE_VERSION));
 }
 
-void JojGraphics::GLGraphics::swap_buffers()
-{
-
-}
-
-b8 JojGraphics::GLGraphics::load_extension_list()
+b8 JojGraphics::GLContext::load_extension_list()
 {
     // Load the OpenGL extensions that this application will be using.
     wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress("wglChoosePixelFormatARB");

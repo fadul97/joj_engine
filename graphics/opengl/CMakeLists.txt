@@ -3,7 +3,10 @@
 cmake_minimum_required(VERSION 3.8)
 project(JojGraphicsGL)
 
-add_library(JojGraphicsGL "graphics_glold.cpp")
+add_library(JojGraphicsGL context_gl.cpp)
+
+# Include graphics folder
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 
 if(CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET JojGraphicsGL PROPERTY CXX_STANDARD 20)

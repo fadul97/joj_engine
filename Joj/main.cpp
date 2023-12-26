@@ -25,7 +25,7 @@ int main()
 		auto engine = new JojEngine::Engine();
 
 		// Create and execute game
-		int exit_code = engine->start(new D3D11App(), JojEngine::RendererBackend::DX11);
+		int exit_code = engine->start(new GLApp(), JojEngine::RendererBackend::OPENGL);
 
 		// Cleanup
 		delete engine;
