@@ -1,6 +1,8 @@
 #include "context_dx11.h"
 
 #include <sstream>
+#include "logger.h"
+#include <stdlib.h>
 
 JojGraphics::DX11Context::DX11Context()
 {
@@ -55,7 +57,7 @@ b8 JojGraphics::DX11Context::init(std::unique_ptr<JojPlatform::Window>& window)
 	//if FAILED(device->QueryInterface(IID_PPV_ARGS(&debug)))
 	//{
 	//	// TODO: Use own logger
-	//	OutputDebugString("--> Failed to DXGIGetDebugInterface1.\n");
+	//	FFATAL(ERR_CONTEXT, "Failed to DXGIGetDebugInterface1.");
 	//}
 
 	//debug_dev->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
@@ -63,8 +65,7 @@ b8 JojGraphics::DX11Context::init(std::unique_ptr<JojPlatform::Window>& window)
 
 	if FAILED(CreateDXGIFactory2(factory_flags, IID_PPV_ARGS(&factory)))
 	{
-		// TODO: Use own logger
-		OutputDebugString("--> Failed to CreateDXGIFactory2.\n");
+		FFATAL(ERR_CONTEXT, "Failed to CreateDXGIFactory2.");
 		return false;
 	}
 
@@ -92,16 +93,14 @@ b8 JojGraphics::DX11Context::init(std::unique_ptr<JojPlatform::Window>& window)
 			NULL, create_device_flags, NULL, 0, D3D11_SDK_VERSION,
 			&device, &feature_level, &context))
 		{
-			// TODO: Use own logger
-			OutputDebugString("--> Failed to create device, using WARP Adapter\n");
+			FWARN("Failed to create device, using WARP Adapter");
 		}
 	}
 
 #if defined _DEBUG
 	if FAILED(device->QueryInterface(__uuidof(ID3D11Debug), (void**)&debug))
 	{
-		// TODO: Use own logger
-		OutputDebugString("--> Failed to QueryInterface of ID3D11Debug\n");
+		FWARN("Failed to QueryInterface of ID3D11Debug.");
 	}
 #endif // _DEBUG
 
@@ -113,8 +112,7 @@ b8 JojGraphics::DX11Context::init(std::unique_ptr<JojPlatform::Window>& window)
 	IDXGIDevice* dxgi_device = nullptr;
 	if FAILED(device->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgi_device))
 	{
-		// TODO: Use own logger
-		OutputDebugString("--> Failed to QueryInterface of device\n");
+		FFATAL(ERR_CONTEXT, "Failed to QueryInterface of device.");
 		return false;
 	}
 
@@ -122,8 +120,7 @@ b8 JojGraphics::DX11Context::init(std::unique_ptr<JojPlatform::Window>& window)
 	IDXGIAdapter* dxgi_adapter = nullptr;
 	if FAILED(dxgi_device->GetParent(__uuidof(IDXGIAdapter), (void**)&dxgi_adapter))
 	{
-		// TODO: Use own logger
-		OutputDebugString("--> Failed to GetParent of dxgi_device\n");
+		FFATAL(ERR_CONTEXT, "Failed to GetParent of dxgi_device.");
 		return false;
 	}
 
@@ -131,8 +128,7 @@ b8 JojGraphics::DX11Context::init(std::unique_ptr<JojPlatform::Window>& window)
 	IDXGIFactory2* dxgi_factory = nullptr;
 	if FAILED(dxgi_adapter->GetParent(__uuidof(IDXGIFactory2), (void**)&dxgi_factory))
 	{
-		// TODO: Use own logger
-		OutputDebugString("--> Failed to GetParent of dxgi_adapter\n");
+		FFATAL(ERR_CONTEXT, "Failed to GetParent of dxgi_adapter");
 		return false;
 	}
 
@@ -163,10 +159,10 @@ void JojGraphics::DX11Context::log_hardware_info()
 		DXGI_ADAPTER_DESC desc;
 		adapter->GetDesc(&desc);
 
-		// TODO: Use own logger
-		std::wstringstream text;
-		text << L"---> Graphics card: " << desc.Description << L"\n";
-		OutputDebugStringW(text.str().c_str());
+		char graphics_card[128];
+		size_t converted_chars = 0;
+		wcstombs_s(&converted_chars, graphics_card, sizeof(graphics_card), desc.Description, _TRUNCATE);
+		FINFO("---> Graphics card: %s.", graphics_card);
 	}
 
 	IDXGIAdapter4* adapter4 = nullptr;
@@ -175,11 +171,8 @@ void JojGraphics::DX11Context::log_hardware_info()
 		DXGI_QUERY_VIDEO_MEMORY_INFO mem_info;
 		adapter4->QueryVideoMemoryInfo(0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &mem_info);
 
-		// TODO: Use own logger
-		std::wstringstream text;
-		text << L"---> Video memory (free): " << mem_info.Budget / bytes_in_megabyte << L"MB\n";
-		text << L"---> Video memory (used): " << mem_info.CurrentUsage / bytes_in_megabyte << L"MB\n";
-		OutputDebugStringW(text.str().c_str());
+		FINFO("---> Video memory (free): %dMB.", mem_info.Budget / bytes_in_megabyte);
+		FINFO("---> Video memory(used) : % dMB.", mem_info.CurrentUsage / bytes_in_megabyte);
 
 		adapter4->Release();
 	}
@@ -190,10 +183,7 @@ void JojGraphics::DX11Context::log_hardware_info()
 
 	// Instructions block
 	{
-		// TODO: Use own logger
-		std::wstringstream text;
-		text << L"---> Feature Level: 11_0\n";
-		OutputDebugStringW(text.str().c_str());
+		FINFO("---> Feature Level: 11_0");
 	}
 
 	// -----------------------------------------
@@ -206,10 +196,10 @@ void JojGraphics::DX11Context::log_hardware_info()
 		DXGI_OUTPUT_DESC desc;
 		output->GetDesc(&desc);
 
-		// TODO: Use own logger
-		std::wstringstream text;
-		text << L"---> Monitor: " << desc.DeviceName << L"\n";
-		OutputDebugStringW(text.str().c_str());
+		char device_name[32];
+		size_t converted_chars = 0;
+		wcstombs_s(&converted_chars, device_name, sizeof(device_name), desc.DeviceName, _TRUNCATE);
+		FINFO("---> Monitor: %s.", device_name);
 	}
 
 	// ------------------------------------------
@@ -227,10 +217,7 @@ void JojGraphics::DX11Context::log_hardware_info()
 	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dev_mode);
 	u32 refresh = dev_mode.dmDisplayFrequency;
 
-	// TODO: Use own logger
-	std::wstringstream text;
-	text << L"---> Resolution: " << screen_width << L"x" << screen_height << L" " << refresh << L" Hz\n";
-	OutputDebugStringW(text.str().c_str());
+	FINFO("---> Resolution: %dx%d %d Hz.", screen_width, screen_height, refresh);
 
 	// Release used DXGI interfaces
 	if (adapter) adapter->Release();

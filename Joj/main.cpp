@@ -21,11 +21,6 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	freopen("CONOUT$", "w", stdout);
 	freopen("CONOUT$", "w", stderr);
 #endif
-	FFATAL(ERR_PLATFORM, "PlatformManager is NULL.");
-	FERROR(ERR_PLATFORM, "PlatformManager is NULL.");
-	FWARN("PlatformManager is NULL.");
-	FDEBUG("PlatformManager is NULL.");
-	FINFO("PlatformManager is NULL.");
 
 	try
 	{
