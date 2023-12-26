@@ -7,7 +7,7 @@ std::unique_ptr<JojPlatform::PlatformManager> JojEngine::Engine::pm = nullptr;		
 std::unique_ptr<JojRenderer::DX11Renderer> JojEngine::Engine::renderer = nullptr;	// Renderer
 
 JojGraphics::DX12Graphics* JojEngine::Engine::dx12_graphics = nullptr;		// DX12 Graphics device
-JojRenderer::DX12Renderer* JojEngine::Engine::dx12_renderer = nullptr;		// DX12 Graphics device
+JojRenderer::DX12RendererOld* JojEngine::Engine::dx12_renderer = nullptr;	// DX12 Graphics renderer
 JojGraphics::GLGraphics* JojEngine::Engine::gl_graphics = nullptr;			// Opengl Graphics device
 
 JojEngine::Game* JojEngine::Engine::game = nullptr;							// Pointer to game
@@ -54,7 +54,7 @@ i32 JojEngine::Engine::start(JojEngine::Game* game, RendererBackend renderer_bac
 		dx12_graphics = new JojGraphics::DX12Graphics();
 		dx12_graphics->init(pm->get_window());
 
-		dx12_renderer = new JojRenderer::DX12Renderer();
+		dx12_renderer = new JojRenderer::DX12RendererOld();
 		if (!dx12_renderer->init(pm->get_window(), dx12_graphics))
 		{
 			// TODO: Use own logger

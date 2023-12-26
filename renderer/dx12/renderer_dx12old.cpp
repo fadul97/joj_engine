@@ -1,4 +1,4 @@
-#include "renderer_dx12.h"
+#include "renderer_dx12old.h"
 
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
@@ -7,7 +7,7 @@
 
 #include <sstream>
 
-JojRenderer::DX12Renderer::DX12Renderer()
+JojRenderer::DX12RendererOld::DX12RendererOld()
 {
     window = nullptr;
     graphics = nullptr;
@@ -46,8 +46,8 @@ JojRenderer::DX12Renderer::DX12Renderer()
     current_fence = 0;
 }
 
-/* ATTENTION: Call DX12Renderer destructor before DX12Graphics destructor */
-JojRenderer::DX12Renderer::~DX12Renderer()
+/* ATTENTION: Call DX12RendererOld destructor before DX12Graphics destructor */
+JojRenderer::DX12RendererOld::~DX12RendererOld()
 {
 	// Release graphics device
 	if (device)
@@ -58,7 +58,7 @@ JojRenderer::DX12Renderer::~DX12Renderer()
 		//factory->Release();
 }
 
-b8 JojRenderer::DX12Renderer::init(std::unique_ptr<JojPlatform::Window>& window, JojGraphics::DX12Graphics* graphics)
+b8 JojRenderer::DX12RendererOld::init(std::unique_ptr<JojPlatform::Window>& window, JojGraphics::DX12Graphics* graphics)
 {
     // Set window
     this->graphics = graphics;
@@ -94,12 +94,12 @@ b8 JojRenderer::DX12Renderer::init(std::unique_ptr<JojPlatform::Window>& window,
     return true;
 }
 
-void JojRenderer::DX12Renderer::draw()
+void JojRenderer::DX12RendererOld::draw()
 {
 
 }
 
-void JojRenderer::DX12Renderer::present()
+void JojRenderer::DX12RendererOld::present()
 {
     // indica que o backbuffer será usado para apresentação
     D3D12_RESOURCE_BARRIER barrier = {};
@@ -119,7 +119,7 @@ void JojRenderer::DX12Renderer::present()
     backbuffer_index = (backbuffer_index + 1) % backbuffer_count;
 }
 
-void JojRenderer::DX12Renderer::clear(ID3D12PipelineState* pso)
+void JojRenderer::DX12RendererOld::clear(ID3D12PipelineState* pso)
 {
     /* Reuses the memory associated with the command list
        The list of commands should have finished running on the GPU */
@@ -155,7 +155,7 @@ void JojRenderer::DX12Renderer::clear(ID3D12PipelineState* pso)
     command_list->OMSetRenderTargets(1, &rt_handle, true, &ds_handle);
 }
 
-b8 JojRenderer::DX12Renderer::wait_command_queue()
+b8 JojRenderer::DX12RendererOld::wait_command_queue()
 {
     // Advance fence value to mark new commands from that point
     current_fence++;
@@ -185,13 +185,13 @@ b8 JojRenderer::DX12Renderer::wait_command_queue()
     return true;
 }
 
-void JojRenderer::DX12Renderer::reset_commands()
+void JojRenderer::DX12RendererOld::reset_commands()
 {
     // Restart list of commands to prepare for the startup commands
     command_list->Reset(command_list_alloc, nullptr);
 }
 
-void JojRenderer::DX12Renderer::submit_commands()
+void JojRenderer::DX12RendererOld::submit_commands()
 {
     // submits the commands recorded in the list for execution on the GPU
     command_list->Close();
@@ -202,12 +202,12 @@ void JojRenderer::DX12Renderer::submit_commands()
     wait_command_queue();
 }
 
-void JojRenderer::DX12Renderer::allocate_resource_in_cpu(u32 size_in_bytes, ID3DBlob** resource)
+void JojRenderer::DX12RendererOld::allocate_resource_in_cpu(u32 size_in_bytes, ID3DBlob** resource)
 {
     D3DCreateBlob(size_in_bytes, resource);
 }
 
-void JojRenderer::DX12Renderer::allocate_resource_in_gpu(AllocationType alloc_type, u32 size_in_bytes, ID3D12Resource** resource)
+void JojRenderer::DX12RendererOld::allocate_resource_in_gpu(AllocationType alloc_type, u32 size_in_bytes, ID3D12Resource** resource)
 {
     // TODO: comment specifications on buffer_prop
     // Buffer heap properties
@@ -251,7 +251,7 @@ void JojRenderer::DX12Renderer::allocate_resource_in_gpu(AllocationType alloc_ty
         IID_PPV_ARGS(resource)));
 }
 
-void JojRenderer::DX12Renderer::copy_verts_to_cpu_blob(const void* vertices, u32 size_in_bytes, ID3DBlob* buffer_cpu)
+void JojRenderer::DX12RendererOld::copy_verts_to_cpu_blob(const void* vertices, u32 size_in_bytes, ID3DBlob* buffer_cpu)
 {
     CopyMemory(buffer_cpu->GetBufferPointer(), vertices, size_in_bytes);
 }
@@ -261,7 +261,7 @@ void JojRenderer::DX12Renderer::copy_verts_to_cpu_blob(const void* vertices, u32
  *  - First, copy the data to the intermediate upload heap
  *  - Then, ID3D12CommandList::CopyBufferRegion copies itself from upload to GPU
  */
-void JojRenderer::DX12Renderer::copy_verts_to_gpu(const void* vertices, u32 size_in_bytes, ID3D12Resource* buffer_upload, ID3D12Resource* buffer_gpu)
+void JojRenderer::DX12RendererOld::copy_verts_to_gpu(const void* vertices, u32 size_in_bytes, ID3D12Resource* buffer_upload, ID3D12Resource* buffer_gpu)
 {
     // Describe the data that will be copied
     D3D12_SUBRESOURCE_DATA vertex_sub_resource_data = {};

@@ -24,11 +24,11 @@ namespace JojRenderer
 
 	enum class AllocationType { GPU, UPLOAD };
 
-	class DX12Renderer
+	class DX12RendererOld
 	{
 	public:
-		DX12Renderer();
-		~DX12Renderer();
+		DX12RendererOld();
+		~DX12RendererOld();
 
 		b8 init(std::unique_ptr<JojPlatform::Window>& window, JojGraphics::DX12Graphics* graphics);	// Initialize renderer
 		void draw();																	// Draw
@@ -89,7 +89,7 @@ namespace JojRenderer
 	};
 
 	// Return graphics device
-	inline ID3D12Device* DX12Renderer::get_device()
+	inline ID3D12Device* DX12RendererOld::get_device()
 	{ return device; }
 }
 

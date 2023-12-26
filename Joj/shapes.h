@@ -1,7 +1,7 @@
 #pragma once
 
 #include "game.h"
-#include "dx12/renderer_dx12.h"
+#include "dx12/renderer_dx12old.h"
 #include "DirectXMath.h"
 #include "geometry.h"
 

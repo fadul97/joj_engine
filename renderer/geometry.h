@@ -5,7 +5,7 @@
 #include <DirectXMath.h>
 #include <vector>
 #include <DirectXColors.h>
-#include "dx12/renderer_dx12.h"
+#include "dx12/renderer_dx12old.h"
 
 namespace JojRenderer
 {
