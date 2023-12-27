@@ -184,7 +184,7 @@ b8 JojGraphics::GLContext::init(std::unique_ptr<JojPlatform::Window>& window)
 
     load_opengl_functions();
 
-    glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
+    glClearColor(0.6f, 0.3f, 0.7f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     SwapBuffers(window->get_device_context());

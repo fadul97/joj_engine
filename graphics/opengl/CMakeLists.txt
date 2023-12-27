@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(JojGraphicsGL)
 
-add_library(JojGraphicsGL context_gl.cpp "joj_gl.cpp" "gl/glcorearb.h" "gl/wglext.h" "KHR/khrplatform.h")
+add_library(JojGraphicsGL context_gl.cpp joj_gl.cpp)
 
 # Include graphics folder
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
