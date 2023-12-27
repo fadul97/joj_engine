@@ -16,7 +16,7 @@ I'll add more information.
 [ ] Think about a better place to put Geometry and an eventual Mesh class  
 [ ] Refactor hacky workaround to get OpenGL function pointers
 
-### Resources
+### References and Resources
 
 [Kohi Game Engine](https://github.com/travisvroman/kohi.git) from Travis Vroman.  
 [Tronche 's Manual](https://tronche.com/gui/x/xlib/) from Christophe Tronche.  
