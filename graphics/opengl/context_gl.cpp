@@ -37,17 +37,44 @@ JojGraphics::GLContext::GLContext()
     color_bits = 32;
     depth_bits = 24;
 
-    const u32 pxf_attrib_list[] =
-    {
-      WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
-      WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
-      WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
-      WGL_COLOR_BITS_ARB, color_bits,
-      WGL_DEPTH_BITS_ARB, depth_bits,
-      0
-    };
+    // Support for OpenGL rendering.
+    pixel_format_attrib_list[0] = WGL_SUPPORT_OPENGL_ARB;
+    pixel_format_attrib_list[1] = TRUE;
 
-    memcpy(pixel_format_attrib_list, pxf_attrib_list, sizeof(pxf_attrib_list));
+    // Support for rendering to a window.
+    pixel_format_attrib_list[2] = WGL_DRAW_TO_WINDOW_ARB;
+    pixel_format_attrib_list[3] = TRUE;
+
+    // Support for hardware acceleration.
+    pixel_format_attrib_list[4] = WGL_ACCELERATION_ARB;
+    pixel_format_attrib_list[5] = WGL_FULL_ACCELERATION_ARB;
+
+    // Support for 32bit color.
+    pixel_format_attrib_list[6] = WGL_COLOR_BITS_ARB;
+    pixel_format_attrib_list[7] = color_bits;
+
+    // Support for 24 bit depth buffer.
+    pixel_format_attrib_list[8] = WGL_DEPTH_BITS_ARB;
+    pixel_format_attrib_list[9] = depth_bits;
+
+    // Support for double buffer.
+    pixel_format_attrib_list[10] = WGL_DOUBLE_BUFFER_ARB;
+    pixel_format_attrib_list[11] = TRUE;
+
+    // Support for swapping front and back buffer.
+    pixel_format_attrib_list[12] = WGL_SWAP_METHOD_ARB;
+    pixel_format_attrib_list[13] = WGL_SWAP_EXCHANGE_ARB;
+
+    // Support for the RGBA pixel type.
+    pixel_format_attrib_list[14] = WGL_PIXEL_TYPE_ARB;
+    pixel_format_attrib_list[15] = WGL_TYPE_RGBA_ARB;
+
+    // Support for a 8 bit stencil buffer.
+    pixel_format_attrib_list[16] = WGL_STENCIL_BITS_ARB;
+    pixel_format_attrib_list[17] = 8;
+
+    // Null terminate the attribute list.
+    pixel_format_attrib_list[18] = 0;
 
     gl_version_major = 4;
     gl_version_minor = 6;
@@ -149,7 +176,25 @@ b8 JojGraphics::GLContext::init(std::unique_ptr<JojPlatform::Window>& window)
 
     int new_pixel_format;
     int num_pixel_formats = 0;
-    PIXELFORMATDESCRIPTOR new_pfd;
+    PIXELFORMATDESCRIPTOR new_pfd =
+    {
+        sizeof(PIXELFORMATDESCRIPTOR),  //  size of this pfd
+        1,
+        PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+        PFD_TYPE_RGBA,
+        (BYTE)depth_bits,
+        0, 0, 0, 0, 0, 0,
+        0,
+        0,
+        0,
+        0, 0, 0, 0,
+        (BYTE)color_bits,
+        0,
+        0,
+        PFD_MAIN_PLANE,
+        0,
+        0, 0, 0
+    };
 
     const int* pxf_attrib_list = (const int*)pixel_format_attrib_list;
     const int* context_attrib_list = (const int*)context_attribs;
@@ -161,7 +206,7 @@ b8 JojGraphics::GLContext::init(std::unique_ptr<JojPlatform::Window>& window)
         return false;
     }
 
-    if (!SetPixelFormat(window->get_device_context(), new_pixel_format, &new_pfd))
+    if (!SetPixelFormat(window->get_device_context(), new_pixel_format, &pfd))
     {
         FFATAL(ERR_CONTEXT, "Failed to SetPixelFormat.");
         return false;
@@ -184,7 +229,13 @@ b8 JojGraphics::GLContext::init(std::unique_ptr<JojPlatform::Window>& window)
 
     load_opengl_functions();
 
-    glClearColor(0.6f, 0.3f, 0.7f, 1.0f);
+    COLORREF c = window->get_color();
+
+    f32 r = GetRValue(window->get_color()) / 255.0f;
+    f32 g = GetGValue(window->get_color()) / 255.0f;
+    f32 b = GetBValue(window->get_color()) / 255.0f;
+
+    glClearColor(r, g, b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     SwapBuffers(window->get_device_context());

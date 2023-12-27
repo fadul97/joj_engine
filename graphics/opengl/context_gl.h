@@ -21,7 +21,7 @@ namespace JojGraphics
 		HGLRC rc;		// Rendering context for Win32 Window
 		u32 color_bits;
 		u32 depth_bits;
-		u32 pixel_format_attrib_list[16];
+		int pixel_format_attrib_list[19];
 		u32 context_attribs[16];
 
 		u32 gl_version_major;

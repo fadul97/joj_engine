@@ -1,6 +1,5 @@
 #include "gl_app.h"
 
-#define JOJ_GL_DEFINE_EXTERN
 #include "opengl/joj_gl.h"
 #include "engine.h"
 
