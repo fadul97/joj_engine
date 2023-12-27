@@ -1,6 +1,8 @@
 #include "context_gl.h"
 
+#define JOJ_GL_DEFINE_EXTERN
 #include "joj_gl.h"
+
 #include "logger.h"
 
 typedef BOOL(WINAPI* PFNWGLCHOOSEPIXELFORMATARBPROC) (HDC hdc, const int* piAttribIList, const FLOAT* pfAttribFList, UINT nMaxFormats, int* piFormats, UINT* nNumFormats);

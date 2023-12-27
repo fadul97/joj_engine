@@ -1,5 +1,6 @@
 #include "gl_app.h"
 
+#define JOJ_GL_DEFINE_EXTERN
 #include "opengl/joj_gl.h"
 #include "engine.h"
 
@@ -109,7 +110,7 @@ void GLApp::draw()
 {
     
     glClear(GL_COLOR_BUFFER_BIT);
-    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+    glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
 
     glUseProgram(shader_program);
     glBindVertexArray(vao);         // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
