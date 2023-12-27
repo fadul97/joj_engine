@@ -88,7 +88,11 @@ b8 JojRenderer::DX11Renderer::init(std::unique_ptr<JojPlatform::Window>& window)
 	bg_color[3] = 1.0f;							// Alpha (1 = solid)
 
 	// Initialize DX11 context
-	context->init(window);
+	if (!context->init(window))
+	{
+		FFATAL(ERR_CONTEXT, "Failed to initialize context.");
+		return false;
+	}
 
 	// Get pointers to D3D11 Device and D3D11 Device Context
 	device = context->get_device();

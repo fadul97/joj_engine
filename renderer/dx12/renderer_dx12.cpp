@@ -107,7 +107,11 @@ JojRenderer::DX12Renderer::~DX12Renderer()
 b8 JojRenderer::DX12Renderer::init(std::unique_ptr<JojPlatform::Window>& window)
 {
     // Initialize DX12 context
-    context->init(window);
+    if (!context->init(window))
+    {
+        FFATAL(ERR_CONTEXT, "Failed to initialize context.");
+        return false;
+    }
 
     // Get pointer to D3D11 Device
     device = context->get_device();
