@@ -1,43 +1,35 @@
 #include "context_gl.h"
 
+#include "joj_gl.h"
 #include "logger.h"
 
-PFNGLATTACHSHADERPROC JojGraphics::GLContext::glAttachShader = nullptr;
-PFNGLBINDBUFFERPROC JojGraphics::GLContext::glBindBuffer = nullptr;
-PFNGLBINDVERTEXARRAYPROC JojGraphics::GLContext::glBindVertexArray = nullptr;
-PFNGLBUFFERDATAPROC JojGraphics::GLContext::glBufferData = nullptr;
-PFNGLCOMPILESHADERPROC JojGraphics::GLContext::glCompileShader = nullptr;
-PFNGLCREATEPROGRAMPROC JojGraphics::GLContext::glCreateProgram = nullptr;
-PFNGLCREATESHADERPROC JojGraphics::GLContext::glCreateShader = nullptr;
-PFNGLDELETEBUFFERSPROC JojGraphics::GLContext::glDeleteBuffers = nullptr;
-PFNGLDELETEPROGRAMPROC JojGraphics::GLContext::glDeleteProgram = nullptr;
-PFNGLDELETESHADERPROC JojGraphics::GLContext::glDeleteShader = nullptr;
-PFNGLDELETEVERTEXARRAYSPROC JojGraphics::GLContext::glDeleteVertexArrays = nullptr;
-PFNGLDETACHSHADERPROC JojGraphics::GLContext::glDetachShader = nullptr;
-PFNGLENABLEVERTEXATTRIBARRAYPROC JojGraphics::GLContext::glEnableVertexAttribArray = nullptr;
-PFNGLGENBUFFERSPROC JojGraphics::GLContext::glGenBuffers = nullptr;
-PFNGLGENVERTEXARRAYSPROC JojGraphics::GLContext::glGenVertexArrays = nullptr;
-PFNGLGETATTRIBLOCATIONPROC JojGraphics::GLContext::glGetAttribLocation = nullptr;
-PFNGLGETPROGRAMINFOLOGPROC JojGraphics::GLContext::glGetProgramInfoLog = nullptr;
-PFNGLGETPROGRAMIVPROC JojGraphics::GLContext::glGetProgramiv = nullptr;
-PFNGLGETSHADERINFOLOGPROC JojGraphics::GLContext::glGetShaderInfoLog = nullptr;
-PFNGLGETSHADERIVPROC JojGraphics::GLContext::glGetShaderiv = nullptr;
-PFNGLLINKPROGRAMPROC JojGraphics::GLContext::glLinkProgram = nullptr;
-PFNGLSHADERSOURCEPROC JojGraphics::GLContext::glShaderSource = nullptr;
-PFNGLUSEPROGRAMPROC JojGraphics::GLContext::glUseProgram = nullptr;
-PFNGLVERTEXATTRIBPOINTERPROC JojGraphics::GLContext::glVertexAttribPointer = nullptr;
-PFNGLBINDATTRIBLOCATIONPROC JojGraphics::GLContext::glBindAttribLocation = nullptr;
-PFNGLGETUNIFORMLOCATIONPROC JojGraphics::GLContext::glGetUniformLocation = nullptr;
-PFNGLUNIFORMMATRIX4FVPROC JojGraphics::GLContext::glUniformMatrix4fv = nullptr;
-PFNGLACTIVETEXTUREPROC JojGraphics::GLContext::glActiveTexture = nullptr;
-PFNGLUNIFORM1IPROC JojGraphics::GLContext::glUniform1i = nullptr;
-PFNGLGENERATEMIPMAPPROC JojGraphics::GLContext::glGenerateMipmap = nullptr;
-PFNGLDISABLEVERTEXATTRIBARRAYPROC JojGraphics::GLContext::glDisableVertexAttribArray = nullptr;
-PFNGLUNIFORM3FVPROC JojGraphics::GLContext::glUniform3fv = nullptr;
-PFNGLUNIFORM4FVPROC JojGraphics::GLContext::glUniform4fv = nullptr;
-PFNGLCLEARCOLORPROC JojGraphics::GLContext::glClearColor = nullptr;
-PFNGLCLEARPROC JojGraphics::GLContext::glClear = nullptr;
-PFNGLDRAWARRAYSPROC JojGraphics::GLContext::glDrawArrays = nullptr;
+typedef BOOL(WINAPI* PFNWGLCHOOSEPIXELFORMATARBPROC) (HDC hdc, const int* piAttribIList, const FLOAT* pfAttribFList, UINT nMaxFormats, int* piFormats, UINT* nNumFormats);
+typedef HGLRC(WINAPI* PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC, HGLRC hShareContext, const int* attribList);
+typedef BOOL(WINAPI* PFNWGLSWAPINTERVALEXTPROC) (int interval);
+
+PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = nullptr;
+PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = nullptr;
+PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = nullptr;
+
+// Define the vertex shader source code
+const char* vertexShaderSource = "#version 330 core\n"
+"layout (location = 0) in vec3 position;\n"
+"void main()\n"
+"{\n"
+"gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
+"}\0";
+
+// Define the fragment shader source code
+const char* fragmentShaderSource = "#version 330 core\n"
+"out vec4 color;\n"
+"void main()\n"
+"{\n"
+"color = vec4(1.0f, 0.2f, 0.6f, 1.0f);\n"
+"}\n\0";
+
+u32 vbo = 0;
+u32 vao = 0;
+u32 shader_program = 0;
 
 JojGraphics::GLContext::GLContext()
 {
@@ -190,46 +182,9 @@ b8 JojGraphics::GLContext::init(std::unique_ptr<JojPlatform::Window>& window)
         return false;
     }
 
-    if (!load_extension_list())
-    {
-        FFATAL(ERR_CONTEXT, "Failed to load OpenGL extensions.");
-        return false;
-    }
+    load_opengl_functions();
 
-    // Get OpenGL function Pointers here
-    HMODULE opengl32Dll = GetModuleHandleA("OpenGL32.dll");
-    if (!opengl32Dll)
-    {
-        OutputDebugString("Failed to GetModuleHandleA of OpenGL32.dll.\n");
-        FFATAL(ERR_CONTEXT, "Failed to GetModuleHandleA of OpenGL32.dll.");
-        return false;
-    }
-
-    glClearColor = (PFNGLCLEARCOLORPROC)GetProcAddress(opengl32Dll, "glClearColor");
-    if (!glClearColor)
-    {
-        OutputDebugString("Failed to GetProcAddress of glClearColor.\n");
-        FFATAL(ERR_CONTEXT, "Failed to GetProcAddress of glClearColor function.");
-        return false;
-    }
-
-    glClear = (PFNGLCLEARPROC)GetProcAddress(opengl32Dll, "glClear");
-    if (!glClear)
-    {
-        OutputDebugString("Failed to GetProcAddress of glClear.\n");
-        FFATAL(ERR_CONTEXT, "Failed to GetProcAddress of glClear function.");
-        return false;
-    }
-
-    glDrawArrays = (PFNGLDRAWARRAYSPROC)GetProcAddress(opengl32Dll, "glDrawArrays");
-    if (!glDrawArrays)
-    {
-        OutputDebugString("Failed to GetProcAddress of glDrawArrays.\n");
-        FFATAL(ERR_CONTEXT, "Failed to GetProcAddress of glDrawArrays function.");
-        return false;
-    }
-
-    glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+    glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     SwapBuffers(window->get_device_context());
@@ -237,233 +192,12 @@ b8 JojGraphics::GLContext::init(std::unique_ptr<JojPlatform::Window>& window)
 #if _DEBUG
     log_hardware_info();
 #endif // _DEBUG
+
     return true;
 }
 void JojGraphics::GLContext::log_hardware_info()
 {
     FDEBUG("OpenGL Version: %s.", glGetString(GL_VERSION));
     FDEBUG("OpenGL Renderer: %s.", glGetString(GL_RENDERER));
-    //FDEBUG("OpenGL GLSL Version: %s.", glGetString(GL_SHADING_LANGUAGE_VERSION));
-}
-
-b8 JojGraphics::GLContext::load_extension_list()
-{
-    // Load the OpenGL extensions that this application will be using.
-    wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress("wglChoosePixelFormatARB");
-    if (!wglChoosePixelFormatARB)
-    {
-        return false;
-    }
-
-    wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
-    if (!wglCreateContextAttribsARB)
-    {
-        return false;
-    }
-
-    wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
-    if (!wglSwapIntervalEXT)
-    {
-        return false;
-    }
-
-    glAttachShader = (PFNGLATTACHSHADERPROC)wglGetProcAddress("glAttachShader");
-    if (!glAttachShader)
-    {
-        return false;
-    }
-
-    glBindBuffer = (PFNGLBINDBUFFERPROC)wglGetProcAddress("glBindBuffer");
-    if (!glBindBuffer)
-    {
-        return false;
-    }
-
-    glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)wglGetProcAddress("glBindVertexArray");
-    if (!glBindVertexArray)
-    {
-        return false;
-    }
-
-    glBufferData = (PFNGLBUFFERDATAPROC)wglGetProcAddress("glBufferData");
-    if (!glBufferData)
-    {
-        return false;
-    }
-
-    glCompileShader = (PFNGLCOMPILESHADERPROC)wglGetProcAddress("glCompileShader");
-    if (!glCompileShader)
-    {
-        return false;
-    }
-
-    glCreateProgram = (PFNGLCREATEPROGRAMPROC)wglGetProcAddress("glCreateProgram");
-    if (!glCreateProgram)
-    {
-        return false;
-    }
-
-    glCreateShader = (PFNGLCREATESHADERPROC)wglGetProcAddress("glCreateShader");
-    if (!glCreateShader)
-    {
-        return false;
-    }
-
-    glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)wglGetProcAddress("glDeleteBuffers");
-    if (!glDeleteBuffers)
-    {
-        return false;
-    }
-
-    glDeleteProgram = (PFNGLDELETEPROGRAMPROC)wglGetProcAddress("glDeleteProgram");
-    if (!glDeleteProgram)
-    {
-        return false;
-    }
-
-    glDeleteShader = (PFNGLDELETESHADERPROC)wglGetProcAddress("glDeleteShader");
-    if (!glDeleteShader)
-    {
-        return false;
-    }
-
-    glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)wglGetProcAddress("glDeleteVertexArrays");
-    if (!glDeleteVertexArrays)
-    {
-        return false;
-    }
-
-    glDetachShader = (PFNGLDETACHSHADERPROC)wglGetProcAddress("glDetachShader");
-    if (!glDetachShader)
-    {
-        return false;
-    }
-
-    glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC)wglGetProcAddress("glEnableVertexAttribArray");
-    if (!glEnableVertexAttribArray)
-    {
-        return false;
-    }
-
-    glGenBuffers = (PFNGLGENBUFFERSPROC)wglGetProcAddress("glGenBuffers");
-    if (!glGenBuffers)
-    {
-        return false;
-    }
-
-    glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)wglGetProcAddress("glGenVertexArrays");
-    if (!glGenVertexArrays)
-    {
-        return false;
-    }
-
-    glGetAttribLocation = (PFNGLGETATTRIBLOCATIONPROC)wglGetProcAddress("glGetAttribLocation");
-    if (!glGetAttribLocation)
-    {
-        return false;
-    }
-
-    glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)wglGetProcAddress("glGetProgramInfoLog");
-    if (!glGetProgramInfoLog)
-    {
-        return false;
-    }
-
-    glGetProgramiv = (PFNGLGETPROGRAMIVPROC)wglGetProcAddress("glGetProgramiv");
-    if (!glGetProgramiv)
-    {
-        return false;
-    }
-
-    glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC)wglGetProcAddress("glGetShaderInfoLog");
-    if (!glGetShaderInfoLog)
-    {
-        return false;
-    }
-
-    glGetShaderiv = (PFNGLGETSHADERIVPROC)wglGetProcAddress("glGetShaderiv");
-    if (!glGetShaderiv)
-    {
-        return false;
-    }
-
-    glLinkProgram = (PFNGLLINKPROGRAMPROC)wglGetProcAddress("glLinkProgram");
-    if (!glLinkProgram)
-    {
-        return false;
-    }
-
-    glShaderSource = (PFNGLSHADERSOURCEPROC)wglGetProcAddress("glShaderSource");
-    if (!glShaderSource)
-    {
-        return false;
-    }
-
-    glUseProgram = (PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram");
-    if (!glUseProgram)
-    {
-        return false;
-    }
-
-    glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC)wglGetProcAddress("glVertexAttribPointer");
-    if (!glVertexAttribPointer)
-    {
-        return false;
-    }
-
-    glBindAttribLocation = (PFNGLBINDATTRIBLOCATIONPROC)wglGetProcAddress("glBindAttribLocation");
-    if (!glBindAttribLocation)
-    {
-        return false;
-    }
-
-    glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation");
-    if (!glGetUniformLocation)
-    {
-        return false;
-    }
-
-    glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC)wglGetProcAddress("glUniformMatrix4fv");
-    if (!glUniformMatrix4fv)
-    {
-        return false;
-    }
-
-    glActiveTexture = (PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture");
-    if (!glActiveTexture)
-    {
-        return false;
-    }
-
-    glUniform1i = (PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i");
-    if (!glUniform1i)
-    {
-        return false;
-    }
-
-    glGenerateMipmap = (PFNGLGENERATEMIPMAPPROC)wglGetProcAddress("glGenerateMipmap");
-    if (!glGenerateMipmap)
-    {
-        return false;
-    }
-
-    glDisableVertexAttribArray = (PFNGLDISABLEVERTEXATTRIBARRAYPROC)wglGetProcAddress("glDisableVertexAttribArray");
-    if (!glDisableVertexAttribArray)
-    {
-        return false;
-    }
-
-    glUniform3fv = (PFNGLUNIFORM3FVPROC)wglGetProcAddress("glUniform3fv");
-    if (!glUniform3fv)
-    {
-        return false;
-    }
-
-    glUniform4fv = (PFNGLUNIFORM4FVPROC)wglGetProcAddress("glUniform4fv");
-    if (!glUniform4fv)
-    {
-        return false;
-    }
-
-    return true;
+    FDEBUG("OpenGL GLSL Version: %s.", glGetString(GL_SHADING_LANGUAGE_VERSION));
 }

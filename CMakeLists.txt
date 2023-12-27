@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.8)
 
 # Setting up variable names
 set(PROJECT_NAME "Joj")
-set(PROJECT_VERSION "0.0.0")
+set(PROJECT_VERSION 0.0.0)
 
 # Set C++ version required
 set(CMAKE_CXX_STANDARD 20)

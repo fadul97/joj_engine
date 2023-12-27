@@ -1,7 +1,6 @@
 #pragma once
 
 #include "game.h"
-#include "opengl/context_gl.h"
 
 class GLApp : public JojEngine::Game
 {

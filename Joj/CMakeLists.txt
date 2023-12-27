@@ -8,6 +8,9 @@ endif()
 # Add source to this project's executable.
 add_executable(${PROJECT_NAME} main.cpp Joj.h shapes.cpp app_d3d11.cpp gl_app.cpp)
 
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
+target_compile_definitions(${PROJECT_NAME} PRIVATE JOJ_ENGINE_IMPLEMENTATION)
+
 # If Windows platform, setup entry point
 if(WIN32)
 	target_link_options(${PROJECT_NAME} PRIVATE "/SUBSYSTEM:WINDOWS")
