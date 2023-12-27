@@ -23,13 +23,28 @@ typedef double f64;
 typedef char b8;
 typedef int b32;
 
-#if defined(__clang__) || defined(__GNUC__)
-#define STATIC_ASSERT _Static_assert
-#elif defined(__GNUG__)
+/* This code works on Linux*/
+#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+#error "defined(__clang__) || defined(__GNUC__)"
 #define STATIC_ASSERT static_assert
 #else
+#error "ELSE"
+#define STATIC_ASSERT _Static_assert
+#endif
+
+/* This code doesnt work on Linux:
+#if defined(__clang__) || defined(__GNUC__)
+#error "defined(__clang__) || defined(__GNUC__)"
+#define STATIC_ASSERT _Static_assert
+#elif defined(__GNUG__)
+#error "defined(__GNUG__)"
+#define STATIC_ASSERT static_assert
+#else
+#error "ELSE"
 #define STATIC_ASSERT static_assert
 #endif
+
+*/
 
 // Ensure all types are of the correct size.
 
