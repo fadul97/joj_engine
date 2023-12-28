@@ -24,28 +24,38 @@ typedef char b8;
 typedef int b32;
 
 /* This code works on Linux*/
+/*
 #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
-#error "defined(__clang__) || defined(__GNUC__)"
+#define STATIC_ASSERT static_assert
+#elif defined(_MSC_VER)
 #define STATIC_ASSERT static_assert
 #else
-#error "ELSE"
+#define STATIC_ASSERT _Static_assert
+#endif
+*/
+
+#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+#define STATIC_ASSERT static_assert
+#elif defined(_MSC_VER)
+#define STATIC_ASSERT static_assert
+#else
 #define STATIC_ASSERT _Static_assert
 #endif
 
-/* This code doesnt work on Linux:
+/* This code doesnt work on Linux: */
+/*
 #if defined(__clang__) || defined(__GNUC__)
-#error "defined(__clang__) || defined(__GNUC__)"
+#pragma message("defined(__clang__) || defined(__GNUC__)")
 #define STATIC_ASSERT _Static_assert
 #elif defined(__GNUG__)
+#pragma message("defined(__GNUG__)")
 #error "defined(__GNUG__)"
 #define STATIC_ASSERT static_assert
 #else
-#error "ELSE"
+#pragma message("ELSE")
 #define STATIC_ASSERT static_assert
 #endif
-
 */
-
 // Ensure all types are of the correct size.
 
 /** @brief Assert u8 to be 1 byte.*/
