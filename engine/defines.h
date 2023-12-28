@@ -25,6 +25,8 @@ typedef int b32;
 
 #if defined(__clang__) || defined(__GNUC__)
 #define STATIC_ASSERT _Static_assert
+#elif defined(__GNUG__)
+#define STATIC_ASSERT static_assert
 #else
 #define STATIC_ASSERT static_assert
 #endif
