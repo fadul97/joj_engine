@@ -27,5 +27,9 @@ if(WIN32)
 	add_subdirectory(dx12)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/dx12/)
 
-	target_link_libraries(JojGraphics INTERFACE JojRendererD3D11 JojRendererD3D12)
+	# Include opengl folder
+	add_subdirectory(opengl)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/opengl/)
+
+	target_link_libraries(JojGraphics INTERFACE JojRendererD3D11 JojRendererD3D12 JojRendererGL)
 endif()

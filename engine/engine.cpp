@@ -8,7 +8,7 @@ std::unique_ptr<JojPlatform::PlatformManager> JojEngine::Engine::pm = nullptr;		
 std::unique_ptr<JojRenderer::DX11Renderer> JojEngine::Engine::renderer = nullptr;		// D3D11 Renderer
 std::unique_ptr<JojRenderer::DX12Renderer> JojEngine::Engine::dx12_renderer = nullptr;	// D3D12 Renderer
 
-std::unique_ptr<JojGraphics::GLContext> JojEngine::Engine::gl_context = nullptr;		// Opengl context
+std::unique_ptr<JojRenderer::GLRenderer> JojEngine::Engine::gl_renderer = nullptr;		// Opengl context
 
 JojEngine::Game* JojEngine::Engine::game = nullptr;							// Pointer to game
 f32 JojEngine::Engine::frametime = 0.0f;									// Current frametime
@@ -61,8 +61,8 @@ i32 JojEngine::Engine::start(JojEngine::Game* game, RendererBackend renderer_bac
 	}
 	else
 	{
-		gl_context = std::make_unique<JojGraphics::GLContext>();
-		if (!gl_context->init(pm->get_window()))
+		gl_renderer = std::make_unique<JojRenderer::GLRenderer>();
+		if (!gl_renderer->init(pm->get_window()))
 		{
 			FFATAL(ERR_RENDERER, "Failed to initialize OpenGL renderer.");
 			OutputDebugString("-----> Failed to initialize OpenGL\n");
