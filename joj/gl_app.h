@@ -3,6 +3,7 @@
 #include "game.h"
 #include "geometry.h"
 #include "fmath.h"
+#include "opengl/shader.h"
 
 class GLApp : public JojEngine::Game
 {
@@ -40,7 +41,8 @@ private:
 	u32 vbo = 0;
 	u32 vao = 0;
 	u32 ebo = 0;
-	u32 shader_program = 0;
+	i32 shader_program = 0;
+	JojRenderer::Shader shader = JojRenderer::Shader{};
 
 	JojRenderer::Cube geo = {};
 	//JojRenderer::GeoSphere geo = {};
