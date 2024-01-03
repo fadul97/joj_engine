@@ -15,6 +15,7 @@ I'll add more information.
 [ ] Make it so when including window.h in file, type #include "platform/window.h"  
 [ ] Think about a better place to put Geometry and an eventual Mesh class  
 [ ] Refactor hacky workaround to get OpenGL function pointers
+[ ] Test Camera class
 
 ### References and Resources
 
