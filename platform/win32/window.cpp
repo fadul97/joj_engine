@@ -11,7 +11,7 @@ void (*JojPlatform::Window::lost_focus)() = nullptr;	// Do nothing when losing f
 JojPlatform::Window::Window()
 {
 	id = 0;									// Null ID because the window does not exist yet
-	hdc = { 0 };                            // Device context
+	hdc = { 0 };							// Device context
 	width = GetSystemMetrics(SM_CXSCREEN);  // Window occupies the entire screen (fullscreen)
 	height = GetSystemMetrics(SM_CYSCREEN); // Window occupies the entire screen (fullscreen)
 	title = std::string("Joj Window");		// Default window title
@@ -131,16 +131,16 @@ b8 JojPlatform::Window::create()
 
 	// Create a window basend on the "WindowApp" class
 	id = CreateWindowEx(
-		NULL,					// Extras styles
-		joj_window_class,		// Window class name
-		title.c_str(),			// Window title
-		style,					// Window style
-		xpos, ypos,				// Initial (x, y) position
-		width, height,			// Window width and height
-		NULL,					// Parent window ID
-		NULL,					// Menu ID
-		app_id,					// application ID
-		NULL);					// Creatin parameters
+		NULL,				// Extras styles
+		joj_window_class,	// Window class name
+		title.c_str(),		// Window title
+		style,				// Window style
+		xpos, ypos,			// Initial (x, y) position
+		width, height,		// Window width and height
+		NULL,				// Parent window ID
+		NULL,				// Menu ID
+		app_id,				// application ID
+		NULL);				// Creatin parameters
 
 	if (!id)
 	{
