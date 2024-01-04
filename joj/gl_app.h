@@ -1,7 +1,6 @@
 #pragma once
 
 #include "game.h"
-#include "opengl/geometry.h"
 #include "fmath.h"
 #include "opengl/shader.h"
 #include "opengl/quad.h"
@@ -35,13 +34,25 @@ private:
 		"color = vec4(1.0f, 0.4f, 0.6f, 1.0f);\n"
 		"}\n\0";
 
-	const char* geo_shader = "#version 330 core\n"
+	const char* geo_vertex = "#version 330 core\n"
 		"layout (location = 0) in vec3 pos;\n"
+		"layout (location = 1) in vec4 color_in;\n"
+		"out vec4 vertColor;\n"
 		"uniform mat4 transform;\n"
 		"void main()\n"
 		"{\n"
 		"	gl_Position = transform * vec4(pos, 1.0);\n"
+		"	vertColor = color_in;\n"
 		"}\0";
+
+	// Define the fragment shader source code
+	const char* geo_frag = "#version 330 core\n"
+		"out vec4 fragColor;\n"
+		"in vec4 vertColor;\n"
+		"void main()\n"
+		"{\n"
+		"	fragColor = vertColor;\n"
+		"}\n\0";
 
 	const char* r_vert = "#version 330 core\n"
 		"layout (location = 0) in vec3 pos;\n"
@@ -84,8 +95,6 @@ private:
 	//JojRenderer::GeoSphere geo = {};
 	//JojRenderer::Grid geo = {};
 	//JojRenderer::Quad geo = {};
-
-	MyQuad q = MyQuad{ 1.0f, 1.0f };
 
 	Mat4 perspective ={};
 	Mat4 ortho ={};

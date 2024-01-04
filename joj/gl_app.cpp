@@ -44,9 +44,15 @@ void GLApp::build_buffers()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, geo.get_index_count() * sizeof(u32), geo.get_index_data(), GL_STATIC_DRAW);
 
-    // Specify the layout of the vertex data
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, 7 * sizeof(f32), (GLvoid*)0);
+    // Specify the layout of the vertex(pos) data
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(f32), (GLvoid*)0);
+
+    // Specify the layout of the vertex(color) data
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(f32), (GLvoid*)(3 * sizeof(f32)));
+
+
 
     // Unbind the vbo and the vao
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -74,7 +80,7 @@ void GLApp::init()
     build_buffers();
 
     //shader = JojRenderer::Shader{ vshader_path , vfrag_path };
-    shader.compile_shaders(geo_shader, fragmentShaderSource);
+    shader.compile_shaders(geo_vertex, geo_frag);
     shader.use();
 
     std::ifstream file("../shaders/frag.glsl");
