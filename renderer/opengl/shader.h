@@ -8,6 +8,7 @@
 #define JOJ_GL_DEFINE_EXTERN
 #include "opengl/joj_gl.h"
 #include "fmath.h"
+#include <DirectXMath.h>
 
 namespace JojRenderer
 {
@@ -31,6 +32,7 @@ namespace JojRenderer
         void set_vec3(const std::string& name, f32 x, f32 y, f32 z) const;
         void set_vec4(const std::string& name, f32 x, f32 y, f32 z, f32 w) const;
         void set_mat4(const std::string& name, const Mat4 mat) const;
+        void set_dxmat4(const std::string& name, const DirectX::XMMATRIX mat) const;
 
     private:
         u32 id;
@@ -61,6 +63,14 @@ namespace JojRenderer
 
     inline void Shader::set_mat4(const std::string& name, const Mat4 mat) const
     { glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, mat.data); }
+
+    inline void Shader::set_dxmat4(const std::string& name, const DirectX::XMMATRIX mat) const
+    {
+        // Convert DirectX::XMMATRIX to a compatible format
+        float mat_array[16];
+        memcpy(mat_array, &mat, sizeof(float) * 16);
+        glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, mat_array);
+    }
 }
 
 #endif // PLATFORM_WINDOWS

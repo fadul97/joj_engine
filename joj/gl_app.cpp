@@ -12,6 +12,8 @@ Mat4 perspective;
 Mat4 ortho;
 u32 uniform;
 
+
+
 void GLApp::build_buffers()
 {
     DirectX::XMFLOAT3 vertices[] = {
@@ -49,22 +51,30 @@ void GLApp::build_buffers()
     // Unbind the vbo and the vao
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    // Ignore back faces
+    //glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+
+    // Wireframes
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void GLApp::init()
 {
     // Geometries
-    //geo = JojRenderer::Cube(1.0f, 1.0f, 1.0f);
-    //geo = JojRenderer::Cylinder(1.0f, 0.5f, 0.7f, 20, 10);
+    geo = JojRenderer::Cube(3.0f, 3.0f, 3.0f);
+    //geo = JojRenderer::Cylinder(1.0f, 0.5f, 10.0f, 20, 10);
     //geo = JojRenderer::Sphere(1.0f, 40, 40);
     //geo = JojRenderer::GeoSphere(1.0f, 3);
     //geo = JojRenderer::Grid(100.0f, 20.0f, 20, 20);
-    geo = JojRenderer::Quad(3.0f, 1.0f);
+    //geo = JojRenderer::Quad(3.0f, 1.0f);
 
     build_buffers();
 
     //shader = JojRenderer::Shader{ vshader_path , vfrag_path };
-    shader.compile_shaders(vertexShaderSource, fragmentShaderSource);
+    shader.compile_shaders(geo_shader, fragmentShaderSource);
     shader.use();
 
     std::ifstream file("../shaders/frag.glsl");
@@ -80,8 +90,59 @@ void GLApp::init()
 
     file.close();
 
-    perspective = mat4_perspective(90.0f, JojEngine::Engine::pm->get_window()->get_aspect_ratio(), 0.1f, 10.0f);
-    ortho = mat4_orthographic(-2.0f, 2.0f, -2.0f, 2.0f, 0.0f, 100.0f);
+    // controla rotação do cubo
+    theta = DirectX::XM_PIDIV4;
+    phi = DirectX::XM_PIDIV4;
+    radius = 10.0f;
+
+    // pega última posição do mouse
+    last_xmouse = (f32)input->get_xmouse();
+    last_ymouse = (f32)input->get_ymouse();
+
+    // inicializa as matrizes World e View para a identidade
+    World = View = {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f };
+
+    // inicializa a matriz de projeção
+    XMStoreFloat4x4(&Proj, DirectX::XMMatrixPerspectiveFovLH(
+        DirectX::XMConvertToRadians(45.0f),
+        JojEngine::Engine::pm->get_window()->get_aspect_ratio(),
+        1.0f, 100.0f));
+
+    // World Matrix
+    DirectX::XMMATRIX S = DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
+    DirectX::XMMATRIX Ry = DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(30));
+    DirectX::XMMATRIX Rx = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(-30));
+    DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(0, 0, 0);
+    DirectX::XMMATRIX W = S * Ry * Rx * T;
+
+    // View Matrix
+    DirectX::XMVECTOR pos = DirectX::XMVectorSet(0, 0, -6, 1);
+    DirectX::XMVECTOR target = DirectX::XMVectorZero();
+    DirectX::XMVECTOR up = DirectX::XMVectorSet(0, 1, 0, 0);
+    DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(pos, target, up);
+
+    // Projection Matrix
+    DirectX::XMMATRIX P = DirectX::XMMatrixPerspectiveFovLH(
+        DirectX::XMConvertToRadians(45),
+        JojEngine::Engine::pm->get_window()->get_aspect_ratio(),
+        1.0f, 100.0f);
+
+    // Word-View-Projection Matrix
+    DirectX::XMMATRIX WorldViewProj = W * V * P;
+
+    //shader.set_dxmat4("transform", WorldViewProj);
+    
+    DirectX::XMMATRIX mt {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f };
+
+    shader.set_dxmat4("transform", WorldViewProj);
 }
 
 
@@ -93,46 +154,57 @@ void GLApp::update()
 	if (JojEngine::Engine::pm->is_key_pressed(VK_ESCAPE))
 		JojEngine::Engine::close_engine();
 
-    b8 update = false;
-    if (JojEngine::Engine::pm->is_key_pressed('S'))
+    f32 xmouse = (f32)input->get_xmouse();
+    f32 ymouse = (f32)input->get_ymouse();
+
+    if (input->is_key_down(VK_LBUTTON))
     {
-        is_ortho = !is_ortho;
-        update = true;
+        // cada pixel corresponde a 1/4 de grau
+        f32 dx = DirectX::XMConvertToRadians(0.4f * (xmouse - last_xmouse));
+        f32 dy = DirectX::XMConvertToRadians(0.4f * (ymouse - last_ymouse));
+
+        // atualiza ângulos com base no deslocamento do mouse 
+        // para orbitar a câmera ao redor da caixa
+        theta += dx;
+        phi += dy;
+
+        // restringe o ângulo de phi ]0-180[ graus
+        phi = phi < 0.1f ? 0.1f : (phi > (DirectX::XM_PI - 0.1f) ? DirectX::XM_PI - 0.1f : phi);
+    }
+    else if (input->is_key_down(VK_RBUTTON))
+    {
+        // cada pixel corresponde a 0.05 unidades
+        f32 dx = 0.05f * (xmouse - last_xmouse);
+        f32 dy = 0.05f * (ymouse - last_ymouse);
+
+        // atualiza o raio da câmera com base no deslocamento do mouse 
+        radius += dx - dy;
+
+        // restringe o raio (3 a 15 unidades)
+        radius = radius < 3.0f ? 3.0f : (radius > 15.0f ? 15.0f : radius);
     }
 
-    if (JojEngine::Engine::pm->is_key_down('D'))
-    {
-        angle += 0.01f;
-        update = true;
-    }
-    if (JojEngine::Engine::pm->is_key_down('A'))
-    {
-        angle -= 0.01f;
-        update = true;
-    }
+    last_xmouse = xmouse;
+    last_ymouse = ymouse;
 
-    if (update)
-    {
-        f32* m = perspective.data;
+    // converte coordenadas esféricas para cartesianas
+    f32 x = radius * sinf(phi) * cosf(theta);
+    f32 z = radius * sinf(phi) * sinf(theta);
+    f32 y = radius * cosf(phi);
 
-        if (is_ortho)
-            m = ortho.data;
+    // constrói a matriz da câmera (view matrix)
+    DirectX::XMVECTOR pos = DirectX::XMVectorSet(x, y, z, 1.0f);
+    DirectX::XMVECTOR target = DirectX::XMVectorZero();
+    DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(pos, target, up);
+    XMStoreFloat4x4(&View, view);
 
-        Mat4 trans = mat4_euler_x(angle);
+    // constrói matriz combinada (world x view x proj)
+    DirectX::XMMATRIX world = XMLoadFloat4x4(&World);
+    DirectX::XMMATRIX proj = XMLoadFloat4x4(&Proj);
+    DirectX::XMMATRIX WorldViewProj = world * view * proj;
 
-        if (is_ortho)
-        {
-            Mat4 t = mat4_mul(ortho, trans);
-            shader.set_mat4("transform", t);
-            mat4_print(t);
-        }
-        else
-        {
-            Mat4 t = mat4_mul(trans, perspective);
-            shader.set_mat4("transform", t);
-            mat4_print(t);
-        }
-    }
+    shader.set_dxmat4("transform", WorldViewProj);
 }
 
 void GLApp::draw()

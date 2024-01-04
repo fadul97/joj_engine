@@ -78,15 +78,29 @@ private:
 	i32 shader_program = 0;
 	JojRenderer::Shader shader;
 
-	//JojRenderer::Cube geo = {};
+	JojRenderer::Cube geo = {};
 	//JojRenderer::Cylinder geo = {};
 	//JojRenderer::Sphere geo = {};
 	//JojRenderer::GeoSphere geo = {};
 	//JojRenderer::Grid geo = {};
-	JojRenderer::Quad geo = {};
+	//JojRenderer::Quad geo = {};
 
 	MyQuad q = MyQuad{ 1.0f, 1.0f };
 
 	Mat4 perspective ={};
 	Mat4 ortho ={};
+
+
+
+	// Camera settings
+	f32 theta = 0;
+	f32 phi = 0;
+	f32 radius = 0;
+
+	f32 last_xmouse = 0;
+	f32 last_ymouse = 0;
+
+	DirectX::XMFLOAT4X4 World = {};
+	DirectX::XMFLOAT4X4 View = {};
+	DirectX::XMFLOAT4X4 Proj = {};
 };

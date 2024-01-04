@@ -5,6 +5,7 @@
 #include "logger.h"
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 JojRenderer::Shader::Shader()
 {
@@ -138,7 +139,8 @@ void JojRenderer::Shader::check_compile_errors(u32 shader, ShaderType type)
         if (!success)
         {
             glGetShaderInfoLog(shader, 1024, NULL, info_log);
-            FERROR(ERR_RENDERER, "ERROR::SHADER_COMPILATION_ERROR of type : %s.\n%s\n", shadertype_name.c_str(), info_log);
+            std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << shadertype_name << "\n" << info_log << "\n -- --------------------------------------------------- -- " << std::endl;
+            //FERROR(ERR_RENDERER, "ERROR::SHADER_COMPILATION_ERROR of type : %s.\n%s\n", shadertype_name.c_str(), info_log);
         }
     }
     else
@@ -147,7 +149,8 @@ void JojRenderer::Shader::check_compile_errors(u32 shader, ShaderType type)
         if (!success)
         {
             glGetProgramInfoLog(shader, 1024, NULL, info_log);
-            FERROR(ERR_RENDERER, "ERROR::PROGRAM_LINKING_ERROR of type : %s.\n%s\n", shadertype_name.c_str(), info_log);
+            std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << shadertype_name << "\n" << info_log << "\n -- --------------------------------------------------- -- " << std::endl;
+            //FERROR(ERR_RENDERER, "ERROR::PROGRAM_LINKING_ERROR of type : %s.\n%s\n", shadertype_name.c_str(), info_log);
         }
     }
 }
