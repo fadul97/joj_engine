@@ -4,9 +4,9 @@
 
 #if PLATFORM_WINDOWS
 
-#include <DirectXMath.h>
+#include "fmath.h"
 
-namespace JojRenderer
+namespace JojRendererOld
 {
     enum class CameraMovement
     {
@@ -25,21 +25,21 @@ namespace JojRenderer
     class Camera
     {
     public:
-        Camera(DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3{ 0.0f, 0.0f, 0.0f }, DirectX::XMFLOAT3 up = DirectX::XMFLOAT3{ 0.0f, 1.0f, 0.0f }, f32 yaw = YAW, f32 pitch = PITCH);
+        Camera(Vec3 pos = vec3_create(0.0f, 0.0f, 0.0f), Vec3 up = vec3_create(0.0f, 1.0f, 0.0f), f32 yaw = YAW, f32 pitch = PITCH);
         Camera(f32 posX, f32 posY, f32 posZ, f32 upX, f32 upY, f32 upZ, f32 yaw, f32 pitch);
         ~Camera();
 
-        DirectX::XMMATRIX get_view_mat() const;
+        Mat4 get_view_mat() const;
 
         void process_keyboard(CameraMovement direction, f32 delta_time);
         void process_mouse_movement(f32 xoffset, f32 yoffset, b8 constrain_pitch = true);
         void process_mouse_scroll(f32 yoffset);
-
-        DirectX::XMFLOAT3 position;
-        DirectX::XMFLOAT3 front;
-        DirectX::XMFLOAT3 up;
-        DirectX::XMFLOAT3 right;
-        DirectX::XMFLOAT3 world_up;
+        
+        Vec3 position;
+        Vec3 front;
+        Vec3 up;
+        Vec3 right;
+        Vec3 world_up;
 
         f32 yaw;
         f32 pitch;
@@ -48,19 +48,14 @@ namespace JojRenderer
         f32 mouse_sensitivity;
         f32 zoom;
     private:
-
+    
         void update_camera_vectors();
     };
 
-    inline DirectX::XMMATRIX Camera::get_view_mat() const
-    {
-        DirectX::XMFLOAT3 r = DirectX::XMFLOAT3{ position.x + front.x, position.y + front.y, position.z + front.z };
-        return DirectX::XMMatrixLookAtLH(
-            DirectX::XMLoadFloat3(&position),
-            DirectX::XMLoadFloat3(&r),
-            DirectX::XMLoadFloat3(&up)
-        );
-    }
+    inline Mat4 Camera::get_view_mat() const
+    { return look_at_lh(position, front, up); }
+    //{ return look_at_lh(position, vec3_add(position, front), up); }
+
 }
 
 #endif // PLATFORM_WINDOWS

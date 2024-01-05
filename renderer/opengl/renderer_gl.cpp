@@ -20,6 +20,8 @@ b8 JojRenderer::GLRenderer::init(std::unique_ptr<JojPlatform::Window>& window)
         FFATAL(ERR_CONTEXT, "Failed to initialize context.");
         return false;
     }
+
+    return true;
 }
 
 void JojRenderer::GLRenderer::render()
