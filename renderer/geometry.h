@@ -81,6 +81,7 @@ namespace JojRenderer
 	public:
 		Cube();
 		Cube(f32 width, f32 height, f32 depth);
+		Cube(f32 width, f32 height, f32 depth, DirectX::XMFLOAT4 color);
 	};
 
 	// -------------------------------------------------------------------------------
