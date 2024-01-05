@@ -60,13 +60,13 @@ void JojPlatform::Window::set_size(i32 width, i32 height)
 	this->width = width;
 	this->height = height;
 
-	// Calculates window center position
-	xcenter = width / 2;
-	ycenter = height / 2;
-
 	// Adjusts window position to the center of the screen
 	xpos = (GetSystemMetrics(SM_CXSCREEN) / 2) - (width / 2);
 	ypos = (GetSystemMetrics(SM_CYSCREEN) / 2) - (height / 2);
+	
+	// Calculates window center position
+	xcenter = xpos + (width / 2);
+	ycenter = ypos + (height / 2);
 }
 
 /*
