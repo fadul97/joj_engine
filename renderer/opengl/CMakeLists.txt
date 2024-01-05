@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(JojRendererGL)
 
-add_library(JojRendererGL renderer_gl.cpp shader.cpp)
+add_library(JojRendererGL renderer_gl.cpp shader.cpp "oldcamera.cpp" geometry.cpp "quad.h" "camera.h" "camera.cpp")
 
 # Include renderer folder
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)

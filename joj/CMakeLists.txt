@@ -87,3 +87,8 @@ set(DESTINATION_DIR ${CMAKE_CURRENT_BINARY_DIR})
 foreach(D3D11_SHADER_FILES ${SHADER_FILES})
     configure_file(${SHADER_FILE} ${DESTINATION_DIR} COPYONLY)
 endforeach()
+
+
+# Copy GLSL shaders (shaders folder)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ 
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/shaders/)

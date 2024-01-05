@@ -124,9 +124,10 @@ void JojRenderer::Camera::process_mouse_scroll(f32 yoffset)
 
 void JojRenderer::Camera::update_camera_vectors()
 {
+    // TODO: Check why f.x needs to be negated, X-axis movement works correctly
     // Create f vector
     DirectX::XMFLOAT3 f = DirectX::XMFLOAT3{ 1.0f, 1.0f, 1.0f };
-    f.z = cos(DirectX::XMConvertToRadians(yaw)) * cos(DirectX::XMConvertToRadians(pitch));
+    f.x = cos(DirectX::XMConvertToRadians(yaw)) * cos(DirectX::XMConvertToRadians(pitch)) * -1;
     f.y = sin(DirectX::XMConvertToRadians(pitch));
     f.z = sin(DirectX::XMConvertToRadians(yaw)) * cos(DirectX::XMConvertToRadians(pitch));
 
