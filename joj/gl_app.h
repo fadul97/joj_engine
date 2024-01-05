@@ -61,6 +61,14 @@ private:
 		"	fragColor = light * vertColor;\n"
 		"}\n\0";
 
+	const char* light_vertex = "#version 330 core\n"
+		"layout (location = 0) in vec3 pos;\n"
+		"uniform mat4 transform;\n"
+		"void main()\n"
+		"{\n"
+		"	gl_Position = transform * vec4(pos, 1.0);\n"
+		"}\0";
+
 	// Define the fragment shader source code
 	const char* light_frag = "#version 330 core\n"
 		"out vec4 color;\n"
@@ -108,9 +116,11 @@ private:
 
 
 	// Light settings
-	//JojRenderer::Cube light_cube = JojRenderer::Cube{ 1.0f, 1.0f, 1.0f, DirectX::XMFLOAT4{1.0f, 1.0f, 1.0f, 1.0f} };
-	//JojRenderer::Shader light_shader;
-	//u32 light_vao;
+	JojRenderer::Cube light_cube = JojRenderer::Cube{ 1.0f, 1.0f, 1.0f, DirectX::XMFLOAT4{1.0f, 1.0f, 1.0f, 1.0f} };
+	JojRenderer::Shader light_shader;
+	u32 light_vao;
+	u32 lvbo = 0;
+	u32 lebo = 0;
 
 
 

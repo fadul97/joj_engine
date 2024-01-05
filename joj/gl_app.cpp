@@ -4,9 +4,11 @@
 #include "opengl/joj_gl.h"
 #include "engine.h"
 #include "logger.h"
-#include <iostream>
 #include "opengl/shader.h"
 #include <fstream>
+
+#include <iostream>
+using namespace std;
 
 void GLApp::build_buffers()
 {
@@ -46,6 +48,11 @@ void GLApp::build_buffers()
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(f32), (GLvoid*)(3 * sizeof(f32)));
 
+    // second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
+    //glGenVertexArrays(1, &light_vao);
+    //glBindVertexArray(light_vao);
+    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
     // Unbind the vbo and the vao
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -53,24 +60,34 @@ void GLApp::build_buffers()
     // -----------------------------------------------------------------------------------------------------------------------------------
     // second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
     // Setup Light
-    //glGenVertexArrays(1, &light_vao);
-    //glBindVertexArray(light_vao);
-    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    //
-    //// Fill the vbo with the vertex data
-    //glBufferData(GL_ARRAY_BUFFER, (light_cube.get_vertex_count() * sizeof(JojRenderer::Vertex)), light_cube.get_vertex_data(), GL_STATIC_DRAW);
-    //
-    //// Fill the ebo with the vertex data
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, light_cube.get_index_count() * sizeof(u32), light_cube.get_index_data(), GL_STATIC_DRAW);
-    //
-    //// Specify the layout of the vertex(pos) data
-    //glEnableVertexAttribArray(0);
-    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(f32), (GLvoid*)0);
-    //
-    //// Specify the layout of the vertex(color) data
-    //glEnableVertexAttribArray(1);
-    //glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(f32), (GLvoid*)(3 * sizeof(f32)));
+    
+    // Create a lvbo and a light_vao
+    glGenBuffers(1, &lvbo);
+    glGenBuffers(1, &lebo);
+    glGenVertexArrays(1, &light_vao);
+
+    // Bind the lvbo and the vao
+    glBindVertexArray(light_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, lvbo);
+
+    // Fill the lvbo with the vertex data
+    glBufferData(GL_ARRAY_BUFFER, (geo.get_vertex_count() * sizeof(JojRenderer::Vertex)), geo.get_vertex_data(), GL_STATIC_DRAW);
+
+    // Fill the lebo with the vertex data
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, geo.get_index_count() * sizeof(u32), geo.get_index_data(), GL_STATIC_DRAW);
+
+    // Specify the layout of the vertex(pos) data
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(f32), (GLvoid*)0);
+
+    // Specify the layout of the vertex(color) data
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(f32), (GLvoid*)(3 * sizeof(f32)));
+
+    // Unbind the lvbo and the vao
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
     // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -78,8 +95,8 @@ void GLApp::build_buffers()
 
     // Ignore back faces
     //glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_FRONT);
 
     // Wireframes
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -89,16 +106,19 @@ f32 x = 0;
 f32 y = 0;
 f32 z = 20;
 f32 velocity = 10.0f;
+
+// lighting
+DirectX::XMFLOAT3 lightPos{ 1.2f, 10.0f, 10.0f };
 void GLApp::init()
 {
     // Geometries
     geo = JojRenderer::Cube{ 3.0f, 3.0f, 3.0f, DirectX::XMFLOAT4{1.0f, 0.0f, 0.0f, 1.0f} };
+    //light_cube.move_to(lightPos.x, lightPos.y, lightPos.z);
 
     build_buffers();
 
-    //shader = JojRenderer::Shader{ vshader_path , vfrag_path };
     shader.compile_shaders(geo_vertex, geo_frag);
-    shader.use();
+    light_shader.compile_shaders(light_vertex, light_frag);
 
     // inicializa as matrizes World e View para a identidade
     World = View = {
@@ -117,6 +137,7 @@ void GLApp::init()
     DirectX::XMMATRIX W = DirectX::XMMatrixIdentity();
 
     // View Matrix
+    camera.position = DirectX::XMFLOAT3{ 0.64f, -0.56f, camera.position.z -3 };
     DirectX::XMMATRIX V = camera.get_view_mat();
 
     // Projection Matrix
@@ -128,13 +149,13 @@ void GLApp::init()
     // Word-View-Projection Matrix
     DirectX::XMMATRIX WorldViewProj = W * V * P;
 
+    shader.use();
     shader.set_dxmat4("transform", WorldViewProj);
 
-    //RECT rect;
-    //GetClientRect(JojEngine::Engine::pm->get_window()->get_id(), &rect);
-    //ClientToScreen(JojEngine::Engine::pm->get_window()->get_id(), (LPPOINT)&rect.left);
-    //ClientToScreen(JojEngine::Engine::pm->get_window()->get_id(), (LPPOINT)&rect.right);
-    //ClipCursor(&rect);
+
+    WorldViewProj = W * V * P;
+    light_shader.use();
+    light_shader.set_dxmat4("transform", WorldViewProj);
 
     mouse_callback(JojEngine::Engine::pm->get_xmouse(), JojEngine::Engine::pm->get_ymouse());
 
@@ -189,20 +210,28 @@ void GLApp::update()
     DirectX::XMMATRIX world = XMLoadFloat4x4(&World);
 
     // constrói a matriz da câmera (view matrix)
-    DirectX::XMVECTOR pos = DirectX::XMVectorSet(x, y, z, 1.0f);
-    DirectX::XMVECTOR target = DirectX::XMVectorZero();
-    DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-    DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(pos, target, up);
-    DirectX::XMMATRIX cam_view = camera.get_view_mat();
-    XMStoreFloat4x4(&View, cam_view);
+    DirectX::XMMATRIX view = camera.get_view_mat();
+    XMStoreFloat4x4(&View, view);
 
     // Projection Matrix
     DirectX::XMMATRIX proj = XMLoadFloat4x4(&Proj);
 
     // Word-View-Projection Matrix
-    DirectX::XMMATRIX WorldViewProj = world * cam_view * proj;
+    DirectX::XMMATRIX WorldViewProj = world * view * proj;
 
+    shader.use();
     shader.set_dxmat4("transform", WorldViewProj);
+
+    
+    world = DirectX::XMMatrixIdentity();
+    world = DirectX::XMMatrixTranslation(lightPos.x, lightPos.y, lightPos.z);
+    DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(0.2f, 0.2f, 0.2f);
+    world = DirectX::XMMatrixMultiply(world, scale);
+    // Word-View-Projection Matrix
+    WorldViewProj = world * view * proj;
+    
+    light_shader.use();
+    light_shader.set_dxmat4("transform", WorldViewProj);
 }
 
 void GLApp::draw()
@@ -211,9 +240,9 @@ void GLApp::draw()
     glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
 
     // be sure to activate shader when setting uniforms/drawing objects
-    //light_shader.use();
-    //glBindVertexArray(light_vao);
-    //glDrawElements(GL_TRIANGLES, light_cube.get_index_count(), GL_UNSIGNED_INT, 0);
+    light_shader.use();
+    glBindVertexArray(light_vao);
+    glDrawElements(GL_TRIANGLES, light_cube.get_index_count(), GL_UNSIGNED_INT, 0);
 
     shader.use();
     glBindVertexArray(vao);         // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
