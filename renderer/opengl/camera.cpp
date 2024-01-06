@@ -44,9 +44,6 @@ void JojRenderer::Camera::process_keyboard(CameraMovement direction, f32 delta_t
         
         // Store the result back in the XMFLOAT3
         DirectX::XMStoreFloat3(&position, r);
-
-        cout << "Position: " << position.x << position.y << position.z << endl;
-
     }
     if (direction == CameraMovement::BACKWARD)
     {
@@ -59,9 +56,6 @@ void JojRenderer::Camera::process_keyboard(CameraMovement direction, f32 delta_t
 
         // Store the result back in the XMFLOAT3
         DirectX::XMStoreFloat3(&position, r);
-
-        cout << "Position: " << position.x << position.y << position.z << endl;
-
     }
     if (direction == CameraMovement::LEFT)
     {
@@ -74,8 +68,6 @@ void JojRenderer::Camera::process_keyboard(CameraMovement direction, f32 delta_t
 
         // Store the result back in the XMFLOAT3
         DirectX::XMStoreFloat3(&position, r);
-
-        cout << "Position: " << position.x << " " << position.y << " " << position.z << endl;
     }
     if (direction == CameraMovement::RIGHT)
     {
@@ -88,9 +80,6 @@ void JojRenderer::Camera::process_keyboard(CameraMovement direction, f32 delta_t
 
         // Store the result back in the XMFLOAT3
         DirectX::XMStoreFloat3(&position, r);
-
-        cout << "Position: " << position.x << position.y << position.z << endl;
-
     }
 }
 
