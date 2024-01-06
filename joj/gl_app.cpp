@@ -28,6 +28,7 @@ void GLApp::build_buffers()
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ebo);
     glGenVertexArrays(1, &vao);
+    glGenVertexArrays(1, &light_vao);
 
     // Bind the vbo and the vao
     glBindVertexArray(vao);
@@ -36,7 +37,7 @@ void GLApp::build_buffers()
     // Fill the vbo with the vertex data
     glBufferData(GL_ARRAY_BUFFER, (geo.get_vertex_count() * sizeof(JojRenderer::Vertex)), geo.get_vertex_data(), GL_STATIC_DRAW);
 
-    // Fill the ebo with the vertex data
+    // Bind ebo and fill the ebo with the index data
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, geo.get_index_count() * sizeof(u32), geo.get_index_data(), GL_STATIC_DRAW);
 
@@ -49,49 +50,25 @@ void GLApp::build_buffers()
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(f32), (GLvoid*)(3 * sizeof(f32)));
 
     // second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
-    //glGenVertexArrays(1, &light_vao);
-    //glBindVertexArray(light_vao);
+    glBindVertexArray(light_vao);
+
+    // we only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
     //glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    
+    // Need to bind the ebo
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
+    // Specify the layout of the vertex(pos) data
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(f32), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+
+    // Specify the layout of the vertex(color) data
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(f32), (GLvoid*)(3 * sizeof(f32)));
+    glEnableVertexAttribArray(1);
 
     // Unbind the vbo and the vao
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
-    // -----------------------------------------------------------------------------------------------------------------------------------
-    // second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
-    // Setup Light
-    
-    // Create a lvbo and a light_vao
-    glGenBuffers(1, &lvbo);
-    glGenBuffers(1, &lebo);
-    glGenVertexArrays(1, &light_vao);
-
-    // Bind the lvbo and the vao
-    glBindVertexArray(light_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, lvbo);
-
-    // Fill the lvbo with the vertex data
-    glBufferData(GL_ARRAY_BUFFER, (geo.get_vertex_count() * sizeof(JojRenderer::Vertex)), geo.get_vertex_data(), GL_STATIC_DRAW);
-
-    // Fill the lebo with the vertex data
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, geo.get_index_count() * sizeof(u32), geo.get_index_data(), GL_STATIC_DRAW);
-
-    // Specify the layout of the vertex(pos) data
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(f32), (GLvoid*)0);
-
-    // Specify the layout of the vertex(color) data
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(f32), (GLvoid*)(3 * sizeof(f32)));
-
-    // Unbind the lvbo and the vao
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    // -----------------------------------------------------------------------------------------------------------------------------------
-
-
 
     // Ignore back faces
     //glEnable(GL_DEPTH_TEST);
@@ -108,7 +85,7 @@ f32 z = 20;
 f32 velocity = 10.0f;
 
 // lighting
-DirectX::XMFLOAT3 lightPos{ 1.2f, 10.0f, 10.0f };
+DirectX::XMFLOAT3 lightPos{ 30.0f, 10.0f, 10.0f };
 void GLApp::init()
 {
     // Geometries
