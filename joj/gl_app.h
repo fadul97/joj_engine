@@ -113,7 +113,7 @@ private:
 	JojRenderer::Shader shader;
 
 	JojRenderer::Cube geo;
-
+	DirectX::XMFLOAT4 cube_color;
 
 	// Light settings
 	JojRenderer::Cube light_cube = JojRenderer::Cube{ 1.0f, 1.0f, 1.0f, DirectX::XMFLOAT4{1.0f, 1.0f, 1.0f, 1.0f} };

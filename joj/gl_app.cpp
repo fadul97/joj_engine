@@ -69,14 +69,6 @@ void GLApp::build_buffers()
     // Unbind the vbo and the vao
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
-    // Ignore back faces
-    //glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_FRONT);
-
-    // Wireframes
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 f32 x = 0;
@@ -89,7 +81,8 @@ DirectX::XMFLOAT3 lightPos{ 30.0f, 10.0f, 10.0f };
 void GLApp::init()
 {
     // Geometries
-    geo = JojRenderer::Cube{ 3.0f, 3.0f, 3.0f, DirectX::XMFLOAT4{1.0f, 0.0f, 0.0f, 1.0f} };
+    cube_color = DirectX::XMFLOAT4{ 1.0f, 0.5f, 0.31f, 1.0f };
+    geo = JojRenderer::Cube{ 3.0f, 3.0f, 3.0f, cube_color };
     //light_cube.move_to(lightPos.x, lightPos.y, lightPos.z);
 
     build_buffers();
@@ -145,6 +138,14 @@ void GLApp::init()
     cmouseY = JojEngine::Engine::pm->get_ymouse();
 
     FDEBUG("%dx%d", centerX, centerY);
+
+    // Ignore back faces
+    //glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+
+    // Wireframes
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 
@@ -223,7 +224,7 @@ void GLApp::draw()
 
     shader.use();
     glBindVertexArray(vao);         // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-    shader.set_vec3("objectColor", 1.0f, 0.5f, 0.31f);
+    shader.set_vec3("objectColor", cube_color.x, cube_color.y, cube_color.z);
     shader.set_vec3("lightColor", 1.0f, 1.0f, 1.0f);
     glDrawElements(GL_TRIANGLES, geo.get_index_count(), GL_UNSIGNED_INT, 0);
     
