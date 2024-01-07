@@ -31,8 +31,8 @@ namespace JojPlatform
 
 		void set_icon(const u32 icon);              // Set window icon
 		void set_cursor(const u32 cursor);          // Set window cursor
-		void set_title(const std::string title);	// Set window title
-		void set_size(i32 width, i32 height);		// Set window width and height
+		void set_title(const std::string title);    // Set window title
+		void set_size(i32 width, i32 height);       // Set window width and height
 		void set_mode(WindowMode mode);             // Set window mode (Full-screen, windowed or borderless mode)
 		void set_color(u32 r, u32 g, u32 b);        // Set window background color
 
@@ -55,24 +55,24 @@ namespace JojPlatform
 		static LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 	private:
-		HWND id;			// Window ID
-		HDC hdc;			// Device context
-		i32 width;			// Window width
-		i32 height;			// Window heigh
-		std::string	title;	// Window title
-		RECT rect;			// Window client area
-		HICON icon;			// Window icon
-		HCURSOR cursor;		// Window cursor
-		COLORREF color;		// Window background color
-		DWORD style;		// Window style 
-		WindowMode mode;	// Full-screen, windowed or borderless mode
-		i32 xpos;			// Initial window position on the x-axis
-		i32 ypos;			// Initial window position on the y-axis
-		i32 xcenter;		// Window center on the x-axis
-		i32 ycenter;		// Window center on the y-axis
+		HWND id;            // Window ID
+		HDC hdc;            // Device context
+		i32 width;          // Window width
+		i32 height;         // Window heigh
+		std::string	title;  // Window title
+		RECT rect;          // Window client area
+		HICON icon;         // Window icon
+		HCURSOR cursor;     // Window cursor
+		COLORREF color;     // Window background color
+		DWORD style;        // Window style 
+		WindowMode mode;    // Full-screen, windowed or borderless mode
+		i32 xpos;           // Initial window position on the x-axis
+		i32 ypos;           // Initial window position on the y-axis
+		i32 xcenter;        // Window center on the x-axis
+		i32 ycenter;        // Window center on the y-axis
 
-		static void (*on_focus)();		// Run when window regains focus
-		static void (*lost_focus)();	// Run when window loses focus
+		static void (*on_focus)();      // Run when window regains focus
+		static void (*lost_focus)();    // Run when window loses focus
 	};
 
 	// Return window ID
@@ -151,6 +151,6 @@ namespace JojPlatform
 	inline void Window::set_lost_focus(void(*func)())
 	{ lost_focus = func; }
 
-}	// namespace JojPlatform
+} // namespace JojPlatform
 
 #endif // PLATFORM_WINDOWS
