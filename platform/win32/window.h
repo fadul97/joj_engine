@@ -59,7 +59,7 @@ namespace JojPlatform
 		HDC hdc;            // Device context
 		i32 width;          // Window width
 		i32 height;         // Window heigh
-		std::string	title;  // Window title
+		std::string title;  // Window title
 		RECT rect;          // Window client area
 		HICON icon;         // Window icon
 		HCURSOR cursor;     // Window cursor
