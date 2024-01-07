@@ -18,25 +18,25 @@ namespace JojPlatform
 		Window();
 		~Window();
 
-		HWND get_id() const;			// Return window ID
+		HWND get_id() const;            // Return window ID
 		HDC get_device_context() const;	// Return device context
-		i32 get_width() const;			// Return window width
-		i32 get_height() const;			// Return window height
+		i32 get_width() const;          // Return window width
+		i32 get_height() const;         // Return window height
 		WindowMode get_mode() const;	// Return window mode (Fullscreen, windowed or borderless mode)
-		i32 get_xcenter() const;		// Return center position in x
-		i32 get_ycenter() const;		// Return center position in y
-		std::string get_title() const;	// Return window title
-		COLORREF get_color() const;		// Return window background color
-		f32 get_aspect_ratio() const;	// Return window aspect ratio
+		i32 get_xcenter() const;        // Return center position in x
+		i32 get_ycenter() const;        // Return center position in y
+		std::string get_title() const;  // Return window title
+		COLORREF get_color() const;     // Return window background color
+		f32 get_aspect_ratio() const;   // Return window aspect ratio
 
-		void set_icon(const u32 icon);				// Set window icon
-		void set_cursor(const u32 cursor);			// Set window cursor
+		void set_icon(const u32 icon);              // Set window icon
+		void set_cursor(const u32 cursor);          // Set window cursor
 		void set_title(const std::string title);	// Set window title
 		void set_size(i32 width, i32 height);		// Set window width and height
-		void set_mode(WindowMode mode);				// Set window mode (Full-screen, windowed or borderless mode)
-		void set_color(u32 r, u32 g, u32 b);		// Set window background color
+		void set_mode(WindowMode mode);             // Set window mode (Full-screen, windowed or borderless mode)
+		void set_color(u32 r, u32 g, u32 b);        // Set window background color
 
-		void hide_cursor(b8 hide);					// Enable or disable cursor display
+		void hide_cursor(b8 hide);                  // Enable or disable cursor display
 		
 		/*
 		 *	@brief Displays the text at the (x,y) position on the screen using the specified color,
