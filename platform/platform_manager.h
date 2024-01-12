@@ -29,7 +29,7 @@ namespace JojPlatform
 		std::unique_ptr<Input>& get_input();	// Pass refence of Input but keep ownership after function
 
 		b8 is_key_down(u32 key_code);		// Check if key is pressed
-		b8 is_key_up(u32 key_code);		// Check if key is released
+		b8 is_key_up(u32 key_code);	        // Check if key is released
 		b8 is_key_pressed(u32 key_code);	// Register press only after release
 
 		i32 get_xmouse();	// Return X-axis mouse position
