@@ -14,12 +14,12 @@ namespace JojPlatform
 		Input();
 		~Input();
 
-		b8 is_key_down(u32 vkcode);		// Checks if key/button is pressed
-		b8 is_key_up(u32 vkcode);		// Checks if key/button is released
+		b8 is_key_down(u32 vkcode);	// Checks if key/button is pressed
+		b8 is_key_up(u32 vkcode);	// Checks if key/button is released
 		b8 is_key_pressed(u32 vkcode);	// Register press only after release
 
-		i32 get_xmouse();				// Returns X-axis mouse position
-		i32 get_ymouse();				// Returns Y-axis mouse position
+		i32 get_xmouse();			// Returns X-axis mouse position
+		i32 get_ymouse();			// Returns Y-axis mouse position
 		i16 get_mouse_wheel();			// Returns mouse wheel rotation
 
 		// Handle Window events
